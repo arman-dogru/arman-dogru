@@ -4,8 +4,8 @@
 <a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=1000&color=B92FF7&center=true&vCenter=true&width=600&height=60&lines=Hey+There!+%F0%9F%91%8B;I+am+Arman+Dogru;Master's+Student+%F0%9F%91%A8%E2%80%8D%F0%9F%8E%93;Co-founder+%F0%9F%9A%80;Software+Developer+%F0%9F%91%A8%E2%80%8D%F0%9F%92%BB;Machine+Learning+and+AI+Specialist+%F0%9F%A4%93" alt="Typing SVG" /></a></h1>
 
 <h4 align="center">
-  <code><a href="https://www.linkedin.com/in/arman-dogru/" title="LinkedIn Profile"><img height="50" src="https://img.icons8.com/?size=100&id=60ZV_wYC0BM2&format=png&color=000000"> LinkedIn</a></code>
-  <code><a href="mailto:arman.dogru@gmail.com" title="Email Me"><img height="50" src="https://img.icons8.com/?size=100&id=td499GRWwrWC&format=png&color=000000"> Gmail</a></code>
+  <code><a href="https://www.linkedin.com/in/arman-dogru/" title="LinkedIn Profile"><img height="50" src="https://img.icons8.com/?size=100&id=60ZV_wYC0BM2&format=png&color=000000"> </a></code>
+  <code><a href="mailto:arman.dogru@gmail.com" title="Email Me"><img height="50" src="https://img.icons8.com/?size=100&id=td499GRWwrWC&format=png&color=000000"></a></code>
 </h4>
 
 <br/>
