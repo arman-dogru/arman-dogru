@@ -19,7 +19,7 @@
   <strong>Seeking</strong> a full-time software developer role in a dynamic environment (100+ employees).
   <br/><br/>
   <em>
-    🔭 My current research focuses on <strong>NLP, ML, and advanced AI methodologies</strong> to solve real-world problems.<br/>
+    🔭 My current projects focus on <strong>NLP, ML, and advanced AI methodologies</strong> to solve real-world problems.<br/>
     🌱 I’m always learning, from building <strong>E-Commerce apps</strong> to <strong>LLM-driven systems</strong>.<br/>
     💬 Ask me anything <a href="https://github.com/arman-dogru/arman-dogru/issues" title="Issues">here</a>!
   </em>
