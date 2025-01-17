@@ -8,9 +8,8 @@
 </h1>
 
 <h4 align="center">
-  <code><a href="https://www.linkedin.com/in/arman-dogru/" title="LinkedIn Profile"><img width="22" src="assets/social-icons/linkedin.svg"> LinkedIn</a></code>
-  <code><a href="https://github.com/arman-dogru" title="GitHub Profile"><img width="22" src="assets/cloud/github.svg"> GitHub</a></code>
-  <code><a href="mailto:arman.dogru@gmail.com" title="Email Me"><img width="22" src="assets/social-icons/gmail.svg"> Gmail</a></code>
+  <code><a href="https://www.linkedin.com/in/arman-dogru/" title="LinkedIn Profile"><img height="50" src="https://img.icons8.com/?size=100&id=60ZV_wYC0BM2&format=png&color=000000"> LinkedIn</a></code>
+  <code><a href="mailto:arman.dogru@gmail.com" title="Email Me"><img height="50" src="https://img.icons8.com/?size=100&id=td499GRWwrWC&format=png&color=000000"> Gmail</a></code>
 </h4>
 
 <br/>
@@ -64,7 +63,7 @@
   <code><img title="React" height="50" src="assets/frameworks/react.svg"></code>
   <code><img title="Redux" height="50" src="assets/frameworks/redux.svg"></code>
   <!-- Express, TensorFlow, PyTorch, Keras, scikit-learn, etc. do not exist locally -->
-  <code><img title="Express" height="50" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/express/express-original.svg"></code>
+  <code><img title="Express" height="50" src="https://img.icons8.com/?size=100&id=2ZOaTclOqD4q&format=png&color=000000"></code>
   <code><img title="TensorFlow" height="50" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/tensorflow/tensorflow-original.svg"></code>
   <code><img title="PyTorch" height="50" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/pytorch/pytorch-original.svg"></code>
   <code><img title="Keras" height="50" src="https://raw.githubusercontent.com/valohai/ml-logos/master/keras.svg"></code>
@@ -77,7 +76,7 @@
   <!-- Hugging Face not in assets -->
   <code><img title="Hugging Face" height="50" src="https://huggingface.co/datasets/huggingface/brand-assets/resolve/main/hf-logo.svg"></code>
   <code><img title="Kaggle" height="50" src="assets/social-icons/kaggle.svg"></code>
-  <code><img title="SAS" height="50" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/SAS_logo_horiz.svg/5060px-SAS_logo_horiz.svg.png"></code>
+  <code><img title="SAS" height="50" src="https://www.sas.com/en/news/media-gallery/all-images/sas-logo-blue.transform/width319/image.1685459921715.png"></code>
 </p>
 
 <!-- Cloud & DevOps -->
@@ -92,7 +91,7 @@
   <!-- No local Apache Spark icons -->
   <code><img title="Apache" height="50" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/apache/apache-original.svg"></code>
   <code><img title="Spark" height="50" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/apachespark/apachespark-original.svg"></code>
-  <code><img title="AWS" height="50" src="assets/cloud/amazon.svg"></code>
+  <code><img title="AWS" height="50" src="https://img.icons8.com/?size=100&id=wU62u24brJ44&format=png&color=000000"></code>
   <code><img title="GitLab" height="50" src="assets/cloud/gitlab.svg"></code>
 </p>
 
@@ -100,7 +99,7 @@
 <h3 align="center">Databases</h3>
 <p align="center">
   <code><img title="MySQL" height="50" src="assets/databases/mysql.svg"></code>
-  <code><img title="MongoDB" height="50" src="assets/databases/mongodb.svg"></code>
+  <code><img title="MongoDB" height="50" src="https://img.icons8.com/?size=100&id=o6OvAxG0nzTH&format=png&color=000000"></code>
   <code><img title="Redis" height="50" src="assets/databases/redis.svg"></code>
   <!-- Add more if you like (PostgreSQL, Oracle, etc.) -->
 </p>
@@ -108,18 +107,18 @@
 <!-- Other Tools -->
 <h3 align="center">Other Tools</h3>
 <p align="center">
-  <code><img title="Git" height="50" src="assets/others/git.svg"></code>
+  <code><img title="Git" height="50" src="https://img.icons8.com/?size=100&id=xBKl2pdJg5kk&format=png&color=000000"></code>
   <code><img title="Visual Studio Code" height="50" src="assets/text editors/vscode.svg"></code>
   <!-- No local Selenium -->
   <code><img title="Selenium" height="50" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/selenium/selenium-original.svg"></code>
   <!-- No local Stripe -->
-  <code><img title="Stripe" height="50" src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/stripe.svg"></code>
+  <code><img title="Stripe" height="50" src="https://img.icons8.com/?size=100&id=50917&format=png&color=000000"></code>
   <!-- No local Postman, Dask, Plotly icons -->
   <code><img title="Postman" height="50" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postman/postman-original.svg"></code>
   <code><img title="Dask" height="50" src="https://raw.githubusercontent.com/dask/dask/master/docs/source/images/dask_horizontal.svg"></code>
   <code><img title="Plotly" height="50" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/plotly/plotly-original.svg"></code>
   <!-- Using GitHub from the cloud folder -->
-  <code><img title="GitHub" height="50" src="assets/cloud/github.svg"></code>
+  <code><img title="GitHub" height="50" src="https://img.icons8.com/?size=100&id=52539&format=png&color=000000"></code>
 </p>
 
 <hr/>
