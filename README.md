@@ -123,7 +123,7 @@
 <br/>
 
 <p align="center">
-  <strong>Below are some of my coolest repositories:</strong>
+  <strong>Below are some of my most interesting repositories:</strong>
 </p>
 
 <div align="center" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
@@ -195,10 +195,10 @@
     <li><strong>Experience</strong>: 
       <ul>
         <li>Software Developer @ <em>Casa (San Francisco)</em> | Integrated Kotlin & Python for backend and LLM-based APIs</li>
-        <li>Intern @ <em>SAS</em> (Ontario) | Created data solutions using SAS, SQL, Azure; built ML models with TensorFlow, 85-95% accuracy</li>
-        <li>Intern @ <em>Shell</em> (Ontario) | Built REST APIs, used Java & Node.js, analyzed sales data with Spark & scikit-learn (92% accuracy)</li>
+        <li>Intern @ <em>SAS</em> (Ontario) | Created data solutions using SAS, SQL, Azure; built ML models with TensorFlow</li>
+        <li>Intern @ <em>Shell</em> (Ontario) | Built REST APIs, used Java & Node.js, analyzed sales data with Spark & scikit-learn</li>
         <li>Research Student @ <em>uOttawa</em> | Reverse engineered audio with deep learning (PyTorch), improved accuracy by 15%</li>
-        <li>Intern @ <em>SNG Studios</em> (Istanbul) | ML model for game analytics (87% accuracy)</li>
+        <li>Intern @ <em>SNG Studios</em> (Istanbul) | ML model for game analytics</li>
       </ul>
     </li>
     <li><strong>Projects</strong>:
