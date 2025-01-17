@@ -95,50 +95,51 @@
 <br/>
 
 <p align="center">
-  <strong>Below are some of my coolest and most impactful repositories:</strong>
+  <strong>Below are some of my coolest repositories:</strong>
 </p>
 
-<div width="100%" align="center">
+<div align="center" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
 
-  <a align="left" href="https://github.com/arman-dogru/ai-powered-developer-productivity-dashboard" title="AI Developer Productivity Dashboard">
-    <img align="left" height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=LLM-Devops-Tool&theme=react&border_color=61dafb&border_radius=10">
+  <a href="https://github.com/arman-dogru/ai-powered-developer-productivity-dashboard" title="AI Developer Productivity Dashboard">
+    <img height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=LLM-Devops-Tool&theme=react&border_color=61dafb&border_radius=10">
   </a>
 
-  <a align="right" href="https://github.com/arman-dogru/bohnanza-card-game" title="Bohnanza C++ Card Game">
-    <img align="right" height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=bohnanza-card-game&theme=react&border_color=61dafb&border_radius=10">
-  </a>
-
-</div>
-
-<br/><br/><br/><br/><br/><br/>
-
-<div width="100%" align="center">
-
-  <a align="left" href="https://github.com/arman-dogru/car-rental-android-app" title="Car Rental Android App">
-    <img align="left" height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=car-rental-android-app&theme=react&border_color=61dafb&border_radius=10">
-  </a>
-
-  <a align="right" href="https://github.com/arman-dogru/fake-news-detection-mistral7B" title="Fake News Detection with Mistral7B">
-    <img align="right" height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=fake-news-detection-mistral7B&theme=react&border_color=61dafb&border_radius=10">
+  <a href="https://github.com/arman-dogru/bohnanza-card-game" title="Bohnanza C++ Card Game">
+    <img height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=bohnanza-card-game&theme=react&border_color=61dafb&border_radius=10">
   </a>
 
 </div>
 
-<br/><br/><br/><br/><br/><br/>
+<br/>
 
-<div width="100%" align="center">
+<div align="center" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
 
-  <a align="left" href="https://github.com/arman-dogru/stock-predictions-LSTM" title="Stock Predictions LSTM">
-    <img align="left" height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=stock-predictions-LSTM&theme=react&border_color=61dafb&border_radius=10">
+  <a href="https://github.com/arman-dogru/car-rental-android-app" title="Car Rental Android App">
+    <img height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=car-rental-android-app&theme=react&border_color=61dafb&border_radius=10">
   </a>
 
-  <a align="right" href="https://github.com/arman-dogru/ai-learns-flappy-bird" title="Flappy Bird AI (NEAT)">
-    <img align="right" height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=ai-learns-flappy-bird&theme=react&border_color=61dafb&border_radius=10">
+  <a href="https://github.com/arman-dogru/fake-news-detection-mistral7B" title="Fake News Detection with Mistral7B">
+    <img height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=fake-news-detection-mistral7B&theme=react&border_color=61dafb&border_radius=10">
   </a>
 
 </div>
 
-<br/><br/><br/><br/><br/><br/>
+<br/>
+
+<div align="center" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+
+  <a href="https://github.com/arman-dogru/stock-predictions-LSTM" title="Stock Predictions LSTM">
+    <img height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=stock-predictions-LSTM&theme=react&border_color=61dafb&border_radius=10">
+  </a>
+
+  <a href="https://github.com/arman-dogru/ai-learns-flappy-bird" title="Flappy Bird AI (NEAT)">
+    <img height="115" src="https://github-readme-stats.vercel.app/api/pin/?username=arman-dogru&repo=ai-learns-flappy-bird&theme=react&border_color=61dafb&border_radius=10">
+  </a>
+
+</div>
+
+
+<br/><br/>
 <h4 align="center">
   <a href="https://github.com/arman-dogru?tab=repositories" title="Show Repositories">🔎 Show More 🔍</a>
 </h4>
@@ -149,24 +150,11 @@
 <br/>
 
 <p align="center">
-  <a href="https://github.com/arman-dogru/github-readme-streak-stats" title="Streak Status">
-    <img align="left" width="396" src="https://streak-stats.demolab.com?user=arman-dogru&theme=react&border=61dafb&hide_border=true" alt="arman-dogru" />
-  </a>
-  <a href="https://github.com/anuraghazra/github-readme-stats" title="GitHub Stats">
-    <img align="right" width="396" src="https://github-readme-stats.vercel.app/api?username=arman-dogru&show_icons=true&theme=react&border_color=61dafb&hide_border=true" />
-  </a>
-</p>
-
-<br/><br/><br/><br/><br/><br/><br/>
-
-<p align="center">
   <a href="https://github.com/anuraghazra/github-readme-stats">
-    <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=arman-dogru&layout=compact&langs_count=8&theme=react&border_color=61dafb&hide_border=true"/>
+    <img src="https://github-readme-activity-graph.vercel.app/graph?username=arman-dogru&theme=react-dark&bg_color=20232a&hide_border=true" width="64%"/>
+    <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=arman-dogru&layout=compact&langs_count=8&theme=react&border_color=61dafb&hide_border=true" width="35%"/>
   </a>
 </p>
-
-<br/>
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=arman-dogru&theme=react-dark&bg_color=20232a&hide_border=true" width="100%"/>
 
 <hr/>
 
