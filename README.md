@@ -191,7 +191,7 @@
     </li>
     <li><strong>Projects</strong>:
       <ul>
-        <li>Fake News Detection (98% accuracy) using LLMs (Mistral7B)</li>
+        <li>Fake News Detection using LLMs (Mistral7B)</li>
         <li>Unsupervised Video Object Segmentation with Deformable CNNs</li>
         <li>Car Rental Android App (Kotlin & Firebase)</li>
         <li>Bohnanza Card Game in C++ with OOP & CMake</li>
