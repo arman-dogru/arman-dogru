@@ -16,7 +16,7 @@
   I'm a <strong>Master’s student in Computer Science</strong> at the University of Ottawa (<em>specialising in Artificial Intelligence</em>),
   with <strong>3+ years of experience</strong> in software development, machine learning, and data science.
   <br/><br/>
-  <strong>Seeking</strong> a full-time software developer role in a dynamic environment (100+ employees).
+  <strong>Seeking</strong> a full-time software developer role in a high growth eniroment.
   <br/><br/>
   <em>
     🔭 My current projects focus on <strong>NLP, ML, and advanced AI methodologies</strong> to solve real-world problems.<br/>
@@ -215,8 +215,8 @@
 </p>
 
 <p>
-  Outside of work, I’m a <strong>Technical Founder at PropT Platforms</strong>, building an AI-driven marketplace with 
-  <strong>React, GPT, and advanced ML</strong>. Selected for 
+  Outside of work, I’m a <strong>Technical Founder at PropT Platforms</strong>, building an AI-driven DevOps Solutions with 
+  <strong>React, GPT, and Machine Learning</strong>. Selected for 
   <strong>Invest Ottawa’s Startup Accelerator Program</strong>. 
 </p>
 
