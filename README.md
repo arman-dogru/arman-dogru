@@ -11,7 +11,7 @@
 <br/>
 
 <p align="center">
-  <strong>Ottawa, Ontario, Canada • 613-869-5958 • arman.dogru@gmail.com</strong> <br/>
+  <strong>Ottawa, Ontario, Canada •  arman.dogru@gmail.com</strong> <br/>
   <br/>
   I'm a <strong>Master’s student in Computer Science</strong> at the University of Ottawa (<em>specialising in Artificial Intelligence</em>),
   with <strong>3+ years of experience</strong> in software development, machine learning, and data science.
