@@ -2,67 +2,63 @@
 
 The portfolio race is a 10-car top-down race at Istanbul Park. The player starts from the back and races nine AI drivers drawn from a 22-driver roster.
 
-## Car model
+## v5 driver architecture
 
-The road is fixed at 3.5 car widths. The browser runs a fixed 120 Hz update with separate throttle, braking and reverse, speed-sensitive steering, lateral grip, controllable slip, handbrake rotation, runoff drag, recoverable barrier contact and oriented-body car-to-car collision.
+The earlier build used a traffic-aware NEAT residual controller over a low-level track follower. It also contained an AI-only asphalt correction: when an AI car crossed an edge threshold, the runtime moved it back toward the road and removed outward velocity. That made validation look cleaner than the actual controller behavior and could produce exactly the sticky, unnatural driving the UI was showing.
 
-Istanbul Park is the only circuit. The AI is trained and validated on the same pinned circuit geometry used by the browser.
+v5 removes that AI-only correction completely.
 
-## NEAT training
+All cars now use the same vehicle physics. The AI stack is:
 
-The controller receives 16 inputs: car motion and track state plus traffic features for the nearest car ahead, relative lateral position, closing speed and nearby left/right pressure. NEAT produces residual steering and pace adjustments over a low-level track follower.
+1. a progress-aware trajectory planner that targets one of three racing corridors and compresses the lateral offset through corners;
+2. adaptive cruise / body-corridor safety that controls closing speed before cars overlap;
+3. a trained NEAT residual policy for steering trim and pace adjustment; and
+4. normal grass drag, runoff and physical boundary response shared with the player.
 
-The current roster was produced by continuing the previous traffic-aware population for 20 more generations. Each generation is evaluated in randomized nine-car packs twice. Once the generation champion can complete three laps in the 120-second solo check, that generation is saved as a checkpoint instead of throwing the history away.
+There is no AI position teleport, asphalt clamp, hidden grass force-field, or scripted reverse recovery in the v5 controller.
 
-Every one of the 20 continuation generations cleared the three-lap checkpoint. Their 120-second solo progress ranged from about 3.23 to 3.55 laps.
+## Track and car model
 
-Higher-rated drivers are assigned later saved generations. The browser also applies a small rating-based pace difference so the grid is not nine copies of the same champion.
+The browser runs a fixed 120 Hz update with separate throttle, braking and reverse, speed-sensitive steering, lateral grip, controllable slip, handbrake rotation, grass drag, runoff, recoverable outer-boundary contact and oriented-body car-to-car collision.
 
-The full roster is:
+The road was widened from 3.5 to **5.4 car widths**. That is deliberate: ten vehicles need enough physical room for multiple viable trajectories instead of being forced into repeated contact by geometry that is narrower than the traffic problem requires.
 
-```text
-98  Max Vectorstappen
-95  LaMDA Norris
-94  Charles LeClaude
-93  Opus Piastri
-92  Gemini Russell
-91  Fernando Algonso
-90  Lewis Hamiltoken
-89  Carlos Cosainz
-87  Kimi Anthropelli
-86  Alexa Albon
-85  Pierre Grokly
-84  Isack Hadjarvis
-83  Oliver BERTman
-82  Estebot Ocon
-81  Nico Hulkenbyte
-80  Gabriel Botoleto
-79  Sergio Perplexez
-78  Valtteri Chatbottas
-76  Llama Lawson
-75  Franco Copilinto
-73  Arvid Lindbard
-72  Lance StroLLM
+Istanbul Park remains the only circuit. The AI is trained and validated on the same pinned circuit geometry used by the browser.
+
+## Training
+
+`scripts/train_neat_v5.py` trains a 20-input residual policy in traffic packs. The deterministic planner is responsible for basic road following and safe longitudinal behavior; NEAT is asked to improve the trajectory rather than rediscover the entire driving task from scratch.
+
+The exported roster in `neat-champions-v5.json` records:
+
+- population: **24**
+- generations: **24**
+- traffic pack size: **6**
+- inputs: **20**
+- outputs: residual steering + pace
+- driver architecture: trajectory planner + adaptive cruise + NEAT residual
+
+The named 22-driver roster is sampled across ratings for each race.
+
+## Validation
+
+The final exported v5 roster includes a reproducible validation summary from two 60-second traffic runs under the no-force-field dynamics:
+
+- mean progress: **1.200 laps per car**
+- slowest progress: **1.088 laps**
+- grass time: **0.0 seconds**
+- outer-wall hits: **0**
+- car-contact events: **0**
+- AI force-field assists: **0**
+
+This validation is a stability/clean-driving check, not a claim that the agents are globally optimal racing policies. The important change is that clean driving now comes from trajectory planning, headway control and the trained residual policy rather than an invisible correction that moves cars back onto asphalt.
+
+## Reproducing
+
+Run:
+
+```bash
+python3 scripts/train_neat_v5.py
 ```
 
-A race samples nine drivers across the rating range, so restarting the game changes parts of the grid while keeping a mixture of strong and weaker opponents.
-
-## Pack validation
-
-The browser-equivalent validation uses the same steering constants, traffic avoidance, lane targets and 30-unit staggered starting grid as the game.
-
-In a 120-second fixed-grid validation of the default sampled field:
-
-- mean progress: **3.13 laps per car**;
-- slowest driver: **2.95 laps**;
-- fastest driver: **3.34 laps**;
-- distinct car-contact events: **20**;
-- grass time: **0.0 seconds**;
-- outer-wall hits: **0**;
-- stuck recoveries: **0**.
-
-The track-discipline guard keeps AI bodies on the asphalt when a controller would otherwise cross the edge. Training still penalizes edge pressure and use of that correction, so the networks are rewarded for staying clean without relying on it.
-
-## Reproducing the continuation run
-
-`training-seed-v32.json` contains the previous traffic-trained checkpoint. `scripts/train_neat_v4.py` continues that population, saves generation checkpoints after three-lap completion, and exports the named roster in `neat-champions.json`.
+The trainer reads `race-track-istanbul.json` and exports `neat-champions-v5.json`. The browser runtime is `race-engine-v5.js` + `terminal-race-v5.js`.
