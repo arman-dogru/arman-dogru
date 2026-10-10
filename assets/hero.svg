@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-label="Arman Dogru — Applied AI Researcher">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#02060c"/><stop offset=".55" stop-color="#071322"/><stop offset="1" stop-color="#090515"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#47ffdf" stop-opacity=".2"/><stop offset="1" stop-color="#47ffdf" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0V36" fill="none" stroke="#47ffdf" stroke-opacity=".07" stroke-width="1"/></pattern>
+    <style>
+      .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.scan{animation:scan 5s linear infinite}.blink{animation:blink 1.25s steps(2,end) infinite}.orb{transform-origin:936px 210px;animation:spin 16s linear infinite}.dash{stroke-dasharray:10 13;animation:dash 8s linear infinite}.t1,.t2,.t3,.t4{opacity:0}.t1{animation:topic 12s 0s infinite}.t2{animation:topic 12s 3s infinite}.t3{animation:topic 12s 6s infinite}.t4{animation:topic 12s 9s infinite}@keyframes scan{from{transform:translateY(-30px)}to{transform:translateY(470px)}}@keyframes blink{50%{opacity:.15}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes dash{to{stroke-dashoffset:-184}}@keyframes topic{0%,4%{opacity:0;transform:translateY(5px)}8%,21%{opacity:1;transform:translateY(0)}25%,100%{opacity:0;transform:translateY(-5px)}}
+    </style>
+  </defs>
+  <rect width="1200" height="420" rx="24" fill="url(#bg)"/>
+  <rect width="1200" height="420" rx="24" fill="url(#grid)"/>
+  <circle cx="965" cy="204" r="270" fill="url(#glow)"/>
+  <path class="scan" d="M0 0H1200" stroke="#47ffdf" stroke-opacity=".28"/>
+  <g class="mono">
+    <text x="62" y="78" fill="#8093ac" font-size="15" letter-spacing="4">// RESEARCH SYSTEM ONLINE</text>
+    <circle cx="38" cy="72" r="5" fill="#47ffdf" class="blink"/>
+    <text x="58" y="177" fill="#f1f7ff" font-size="62" font-weight="700" letter-spacing="3">ARMAN DOĞRU</text>
+    <text x="62" y="220" fill="#47ffdf" font-size="21" letter-spacing="3">APPLIED AI RESEARCHER @ NOKIA BELL LABS</text>
+    <text x="62" y="263" fill="#9fb2c9" font-size="16">I build systems where AI has to survive contact with the physical world.</text>
+    <g font-size="18" font-weight="600" letter-spacing="2">
+      <text class="t1" x="62" y="318" fill="#b286ff">DIGITAL TWINS // EDGE INTELLIGENCE</text>
+      <text class="t2" x="62" y="318" fill="#b286ff">MULTI-AGENT RL // MAPF</text>
+      <text class="t3" x="62" y="318" fill="#b286ff">COMPUTER VISION // GUIDED ATTENTION</text>
+      <text class="t4" x="62" y="318" fill="#b286ff">AGENTIC LLMs // RELIABILITY</text>
+    </g>
+    <text x="62" y="372" fill="#64748b" font-size="13" letter-spacing="2">OTTAWA, CANADA  •  GLOBECOM '25 + '26  •  U.S. PATENT PENDING</text>
+  </g>
+  <g fill="none" stroke="#47ffdf" stroke-opacity=".34">
+    <circle cx="960" cy="210" r="120" stroke-width="1.2"/>
+    <circle cx="960" cy="210" r="82" stroke-opacity=".2"/>
+    <circle cx="960" cy="210" r="42" stroke-opacity=".55"/>
+    <path class="orb dash" d="M840 210a120 120 0 1 0 240 0a120 120 0 1 0-240 0" stroke-width="2"/>
+    <path d="M830 210h260M960 80v260" stroke-opacity=".12"/>
+    <path d="M872 128l176 164M1048 128L872 292" stroke-opacity=".08"/>
+  </g>
+  <g fill="#47ffdf"><circle cx="918" cy="166" r="4"/><circle cx="1004" cy="238" r="3"/><circle cx="938" cy="272" r="2"/><circle cx="1017" cy="154" r="2"/></g>
+  <rect x="1092" y="46" width="62" height="22" rx="11" fill="#47ffdf" fill-opacity=".08" stroke="#47ffdf" stroke-opacity=".35"/>
+  <text class="mono" x="1108" y="61" fill="#47ffdf" font-size="10" letter-spacing="1">LIVE</text>
+</svg>
