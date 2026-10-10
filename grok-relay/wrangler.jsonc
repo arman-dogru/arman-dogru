@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "arman-dogru-chat",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-09",
+  "vars": {
+    "XAI_MODEL": "grok-4.3",
+    "ALLOWED_ORIGIN": "https://arman-dogru.arman-dogru.workers.dev"
+  }
+}
