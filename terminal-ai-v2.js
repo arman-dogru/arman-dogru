@@ -1,4 +1,5 @@
 import {renderMarkdown,publicLink} from './chat-markdown.js';
+import {MORPHEUS_VERSION} from './chat-version.js';
 export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatInput,contextProvider,onSources}){
   const endpoint=()=>window.ARMAN_CHAT_ENDPOINT||localStorage.getItem('arman.chatEndpoint')||'';
   const interrupted='The connection slipped. Your question is still here. Try again.';
@@ -13,7 +14,7 @@ export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatIn
   function saveHistory(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(history.slice(-12)))}catch{/* Chat still works when storage is unavailable. */}}
   function setBusy(value){busy=value;chatWindow?.setAttribute('aria-busy',String(value));const button=chatForm?.querySelector('button[type="submit"]');if(button)button.disabled=value}
   function renderMessage(m,store=true){
-    if(store){history.push({role:m.role,content:m.content});history=history.slice(-12);saveHistory()}
+    if(store){history.push({role:m.role,content:m.content,...(m.role==='assistant'&&m.persona_version===MORPHEUS_VERSION?{persona_version:MORPHEUS_VERSION}:{})});history=history.slice(-12);saveHistory()}
     if(!chatWindow)return;
     const div=document.createElement('div');
     div.className=`chat-msg ${m.role==='user'?'user':'ai'}`;
@@ -51,7 +52,7 @@ export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatIn
       pending?.remove();let reply=data.reply.trim();
       const citations=(Array.isArray(data.citations)?data.citations:[]).map(c=>publicLink(c?.url)).filter((url,i,all)=>url&&!reply.includes(url)&&all.indexOf(url)===i).slice(0,4);
       if(citations.length)reply+='\n\n'+citations.map((url,i)=>`[${i+1}](${url})`).join(' · ');
-      renderMessage({role:'assistant',content:reply});onSources?.(data.sources||[]);
+      renderMessage({role:'assistant',content:reply,persona_version:data.persona_version});onSources?.(data.sources||[]);
       if(fromTerminal)addBlock(`<b>MORPHEUS</b><div class="chat-body">${renderMarkdown(reply)}</div>`);
     }catch{
       if(turn!==generation)return;

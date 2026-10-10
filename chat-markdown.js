@@ -9,7 +9,7 @@ function inline(source,depth=0){
     if(rest[0]==='\\'&&/^[!"#$%&'()*+,\-./:;<=>?@[\]\\^_`{|}~]$/.test(rest[1]||'')){out+=escapeHTML(rest[1]);i+=2;continue}
     const code=rest.match(/^(`+)([\s\S]*?)\1(?!`)/);
     if(code){out+=`<code>${escapeHTML(code[2].replace(/\n/g,' '))}</code>`;i+=code[0].length;continue}
-    const link=rest.match(/^\[([^\]\n]+)\]\((https?:\/\/[^\s<>]+)\)/);
+    const link=rest.match(/^\[([^\]\n]+)\]\((https?:\/\/[^\s<>)]+)\)/);
     if(link){const url=publicLink(link[2]);out+=url?`<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">${inline(link[1],depth+1)}</a>`:escapeHTML(link[0]);i+=link[0].length;continue}
     let matched=false;
     for(const [mark,tag] of [['**','strong'],['__','strong'],['~~','del'],['*','em'],['_','em']]){
@@ -24,7 +24,7 @@ function inline(source,depth=0){
 }
 export function renderMarkdown(value){
   // xAI citations use [[1]](url); display discreet numbered links.
-  const lines=String(value||'').replace(/\r\n?/g,'\n').replace(/\[\[(\d+)\]\]\((https?:\/\/[^\s]+)\)/g,'[$1]($2)').split('\n'),out=[];
+  const lines=String(value||'').replace(/\r\n?/g,'\n').replace(/\[\[(\d+)\]\]\((https?:\/\/[^\s)]+)\)/g,'[$1]($2)').split('\n'),out=[];
   const special=line=>/^\s*(```|~~~|#{1,6}\s|>\s?|[-*+]\s|\d+[.)]\s)/.test(line);
   for(let i=0;i<lines.length;){
     if(!lines[i].trim()){i++;continue}

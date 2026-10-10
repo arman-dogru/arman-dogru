@@ -15,7 +15,11 @@ invented credentials or claims of having visited a page that was not retrieved.
 The active entrypoint is `grok-relay/agent-worker.js` (see `wrangler.jsonc`). It
 provides the public profile, recent conversation, bounded public GitHub excerpts,
 selected page state and public race board. Reference material is separate from
-the trusted character instructions. `worker.js` supplies the existing leaderboard
+the trusted character instructions. Old assistant replies remain in the visible
+transcript and reach the model as an archived reference, not assistant-style
+demonstrations. New replies carry `chat-version.js`'s persona version; changing it
+does not delete saved conversations. The old source-contract/behavior metadata
+is excluded from biographical evidence. `worker.js` supplies the existing leaderboard
 and moderation routes; do not deploy it as the chat entrypoint.
 
 `grok-relay/morpheus-model.js` runs the character through xAI's Responses API with
@@ -59,6 +63,11 @@ set the key yourself in ignored `grok-relay/.dev.vars`; never commit or copy a
 production secret out of the dashboard. Local leaderboard storage remains separate.
 
 Run the `tests/chat-*.test.js`, `tests/morpheus-*.test.js` and leaderboard tests.
+`node scripts/evaluate-morpheus.mjs` is an opt-in live check against the deployed
+relay (seven model requests). It writes an ignored public-test report to
+`work/morpheus-live-eval.json`. Read the actual answers: automated checks cannot
+fully judge character voice, factual accuracy or quality of fit. Test questions
+are evaluation fixtures, not a production FAQ or list of allowed questions.
 `npm run build:relay` bundles the active entrypoint to ignored `work/relay-deploy.js`.
 Deploy with authenticated Wrangler or the authorized Cloudflare code editor,
 preserving existing secrets, origins and the `LEADERBOARD` binding. Frontend files

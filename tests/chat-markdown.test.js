@@ -13,6 +13,10 @@ test('citations are readable safe links, never executable or credential URLs',()
   for(const url of ['javascript:alert(1)','data:text/html,test','//evil.test','https://user:pass@example.com'])assert.equal(publicLink(url),'');
   for(const text of ['[click](javascript:alert(1))','[click](data:text/html,test)','[click](https://user:pass@example.com)','[click](https://example.com/" onmouseover="x)'])assert.doesNotMatch(renderMarkdown(text),/<a /);
 });
+test('adjacent citations remain two links rather than one corrupted URL',()=>{
+  const html=renderMarkdown('Fit.[[1]](https://one.test/job)[[2]](https://two.test/team)');
+  assert.equal((html.match(/<a /g)||[]).length,2);assert.match(html,/href="https:\/\/one.test\/job"/);assert.match(html,/href="https:\/\/two.test\/team"/);
+});
 test('identifiers, headings, quotations, ordered lists and hard breaks remain readable',()=>{
   assert.equal(renderMarkdown('## Choice\n\n> See the system.\n\n3. Look\n4. Build\n\nfoo_bar_baz  \nnext'),'<h2>Choice</h2><blockquote>See the system.</blockquote><ol start="3"><li>Look</li><li>Build</li></ol><p>foo_bar_baz<br>next</p>');
 });

@@ -6,6 +6,7 @@ const MAX_HISTORY=10;
 let githubCache={value:null,at:0};
 
 import {answerMorpheus,CONNECTION_REPLY} from './morpheus-model.js';
+import {MORPHEUS_VERSION} from '../chat-version.js';
 
 function configuredOrigins(env){return String(env.ALLOWED_ORIGINS||env.ALLOWED_ORIGIN||'').split(',').map(v=>v.trim().replace(/\/$/,'')).filter(Boolean)}
 function isAllowedOrigin(origin,env){if(!origin)return true;const allowed=configuredOrigins(env);return allowed.length>0&&allowed.includes(origin.replace(/\/$/,''))}
@@ -39,11 +40,14 @@ async function chat(request,env,origin){
   let body;try{body=await requestBody(request);if(body===null)return json({error:'request too large'},413,origin||'*')}catch{return json({error:'invalid JSON'},400,origin||'*')}
   if(typeof body?.message==='string'&&body.message.length>MAX_MESSAGE)return json({error:`message must be <= ${MAX_MESSAGE} characters`},400,origin||'*');
   const message=cleanText(body?.message);if(!message)return json({error:'message is required'},400,origin||'*');
-  const history=Array.isArray(body?.history)?body.history.slice(-MAX_HISTORY).filter(m=>m&&['user','assistant'].includes(m.role)).map(m=>({role:m.role,content:cleanText(m.content,1800)})).filter(m=>m.content):[];
+  const history=Array.isArray(body?.history)?body.history.slice(-MAX_HISTORY).filter(m=>m&&['user','assistant'].includes(m.role)).map(m=>({role:m.role,content:cleanText(m.content,1800),...(m.persona_version===MORPHEUS_VERSION?{persona_version:MORPHEUS_VERSION}:{})})).filter(m=>m.content):[];
   try{if(!await chatAllowance(request,env))return json({reply:'A moment. Let the signal settle, then ask again.',degraded:true},429,origin||'*')}catch{return json({reply:CONNECTION_REPLY,degraded:true},503,origin||'*')}
-  const [gh,board]=await Promise.all([githubContext(message),boardContext(env)]),client=cleanClientContext(body?.context),blocks=[`PORTFOLIO PROFILE\n${JSON.stringify(profile)}`,`PUBLIC GITHUB\n${gh.text}`];if(client)blocks.push(`CURRENT PORTFOLIO STATE\n${client}`);if(board.length)blocks.push(`ISTANBUL PADDOCK\n${JSON.stringify(board)}`);
+  // Source-contract metadata is implementation documentation, not biography.
+  // Sending old behavioral rules as "facts" primed the previous RAG/HR voice.
+  const publicWork={profile:profile.profile,education:profile.education,experience:profile.experience,research:profile.research,projects:profile.projects};
+  const [gh,board]=await Promise.all([githubContext(message),boardContext(env)]),client=cleanClientContext(body?.context),blocks=[`PUBLIC PROFESSIONAL WORK\n${JSON.stringify(publicWork)}`,`PUBLIC GITHUB\n${gh.text}`];if(client)blocks.push(`CURRENT PORTFOLIO STATE\n${client}`);if(board.length)blocks.push(`ISTANBUL PADDOCK\n${JSON.stringify(board)}`);
   const result=await answerMorpheus({message,history,evidence:blocks},env),sources=['portfolio-profile',...gh.sources];if(client)sources.push('page-state');if(board.length)sources.push('paddock-board');if(result.researched)sources.push('public-web');
-  return json({...result,sources:[...new Set(sources)]},200,origin||'*');
+  return json({...result,persona_version:MORPHEUS_VERSION,sources:[...new Set(sources)]},200,origin||'*');
 }
 
 // Best-effort cost protection using existing KV. Counters are not transactional;
@@ -57,4 +61,4 @@ async function chatAllowance(request,env){
   await env.LEADERBOARD.put(key,String(count+1),{expirationTtl:7200});return true;
 }
 
-export default{async fetch(request,env,ctx){const url=new URL(request.url),origin=request.headers.get('origin')||'';if(origin&&!isAllowedOrigin(origin,env))return json({error:'origin not allowed'},403,origin);if(request.method==='OPTIONS')return new Response(null,{status:204,headers:corsHeaders(origin||'*')});if(request.method==='POST'&&(url.pathname==='/'||url.pathname==='/chat'))return chat(request,env,origin);if(request.method==='GET'&&url.pathname==='/health')return json({ok:true,service:'arman-dogru-chat',model:env.XAI_MODEL||'grok-4.3',key_configured:Boolean(env.XAI_API_KEY),leaderboard_configured:Boolean(env.LEADERBOARD),chat_version:'morpheus-character-v2',web_search:env.MORPHEUS_WEB_SEARCH!=='off'},200,origin||'*');return baseWorker.fetch(request,env,ctx)}};
+export default{async fetch(request,env,ctx){const url=new URL(request.url),origin=request.headers.get('origin')||'';if(origin&&!isAllowedOrigin(origin,env))return json({error:'origin not allowed'},403,origin);if(request.method==='OPTIONS')return new Response(null,{status:204,headers:corsHeaders(origin||'*')});if(request.method==='POST'&&(url.pathname==='/'||url.pathname==='/chat'))return chat(request,env,origin);if(request.method==='GET'&&url.pathname==='/health')return json({ok:true,service:'arman-dogru-chat',model:env.XAI_MODEL||'grok-4.3',key_configured:Boolean(env.XAI_API_KEY),leaderboard_configured:Boolean(env.LEADERBOARD),chat_version:MORPHEUS_VERSION,web_search:env.MORPHEUS_WEB_SEARCH!=='off'},200,origin||'*');return baseWorker.fetch(request,env,ctx)}};

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createAI} from '../terminal-ai-v2.js';
 import {escapeHTML} from '../chat-markdown.js';
+import {MORPHEUS_VERSION} from '../chat-version.js';
 class Element{
   constructor(){this.children=[];this.listeners={};this.attrs={};this.classList={add:()=>{}}}
   set innerHTML(value){this.html=value;this.children=[]}get innerHTML(){return this.html||''}
@@ -40,4 +41,9 @@ test('overlapping sends are blocked without deleting the draft; clear cancels st
 test('unavailable storage and transport errors do not break the interface',async t=>{
   const {ai,chatForm}=setup(t,async()=>{throw new Error('private backend exception')});
   localStorage.setItem=()=>{throw new Error('blocked storage')};await ai.chat('Hello');assert.equal(ai.history().length,1);assert.equal(chatForm.submit.disabled,false);
+});
+test('successful current replies retain their persona version without erasing older history',async t=>{
+  const old=[{role:'assistant',content:'An old answer.'}],{ai,store}=setup(t,async()=>Response.json({reply:'Yes. He sees beyond the surface.',persona_version:MORPHEUS_VERSION}),old);
+  await ai.chat('Do you believe in him?');assert.equal(ai.history()[0].content,old[0].content);assert.equal(ai.history().at(-1).persona_version,MORPHEUS_VERSION);
+  assert.equal(JSON.parse(store.get('arman.chat.history.v3')).at(-1).persona_version,MORPHEUS_VERSION);
 });
