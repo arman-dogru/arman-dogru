@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://arman-dogru.arman-dogru.workers.dev">
-    <img src="./assets/hero.svg" width="100%" alt="Arman Doğru — Applied AI Researcher at Nokia Bell Labs" />
+    <img src="./assets/hero.svg" width="100%" alt="Arman Doğru - Applied AI Researcher at Nokia Bell Labs" />
   </a>
 </p>
 
@@ -23,7 +23,7 @@ The companion site is a terminal-style portfolio with four main pieces:
 
 - a command-line shell for navigating my work;
 - a career map with event notes for each stop;
-- a scoped Grok Q&A panel about my public work; and
+- a Grok Q&A panel about my public work; and
 - a 10-car race at Istanbul Park against NEAT drivers.
 
 ```text
@@ -56,13 +56,13 @@ Player handling focuses on braking into corners, controllable slip, and recovery
 
 ## `cat research.md`
 
-### Nokia Bell Labs — Applied AI Researcher `2026 → present`
-Semantic edge-to-cloud digital twins for urban mobility, computer vision localization, guided attention, real-time scene reconstruction, and an accepted **IEEE GLOBECOM 2026** paper.
+### Nokia Bell Labs - Applied AI Researcher `2026 → present`
+Semantic edge-to-cloud digital twins for urban mobility, computer vision localization, guided attention, and real-time scene reconstruction. Work from this research was accepted at **IEEE GLOBECOM 2026**.
 
-### Smart Connected Vehicles Innovation Centre / NEXTCONLAB — Applied AI Researcher `2026`
+### Smart Connected Vehicles Innovation Centre / NEXTCONLAB - Applied AI Researcher `2026`
 Autonomous multi-agent systems using drones/UGVs, computer vision localization, **MARL/MAPF**, and RF geolocation from phase-difference-of-arrival measurements.
 
-### Huawei Canada — Applied AI Researcher `2025`
+### Huawei Canada - Applied AI Researcher `2025`
 Developed **PANAMA**, a network-aware MARL framework for multi-agent path finding in digital-twin environments. Also developed a multi-agent LLM reliability approach for hallucination detection/mitigation that resulted in a **U.S. patent filing (pending)**. First-author work accepted at **IEEE GLOBECOM 2025**.
 
 ---
@@ -72,7 +72,7 @@ Developed **PANAMA**, a network-aware MARL framework for multi-agent path findin
 | Project | What it is |
 |---|---|
 | **[Ottawa Sionna RT Cellular Digital Twin](https://github.com/arman-dogru/Sionna_Canada_Testbed)** | Outdoor cellular-propagation digital twin built from public Ottawa geometry, terrain, spectrum-site data, NVIDIA Sionna RT, and a browser engineering UI. |
-| **[Skate 3 Rust — macOS Apple Silicon](https://github.com/arman-dogru/skate3-rust-MacOS)** | Native ARM64 macOS port/continuation of the open-source Skate 3 Rust Engine using Rust, Bevy, SDL3, Metal, and Apple Silicon CI. |
+| **[Skate 3 Rust - macOS Apple Silicon](https://github.com/arman-dogru/skate3-rust-MacOS)** | Native ARM64 macOS port/continuation of the open-source Skate 3 Rust Engine using Rust, Bevy, SDL3, Metal, and Apple Silicon CI. |
 | **[GSANet-DCNN](https://github.com/arman-dogru/GSANet-DCNN)** | Guided slot-attention architecture for unsupervised video object segmentation using spatial, temporal, and optical-flow information. |
 | **[Developer Performance Tracker](https://github.com/arman-dogru/ai-powered-developer-productivity-dashboard)** | LLM-assisted GitHub engineering analytics for pull-request review, developer analysis, and productivity dashboards. |
 | **[One-Pixel Adversarial Attack](https://github.com/arman-dogru/one-pixel-attack-2025)** | Black-box adversarial attacks against image classifiers using differential evolution. |
@@ -82,9 +82,9 @@ Developed **PANAMA**, a network-aware MARL framework for multi-agent path findin
 
 ## `cat publications.txt`
 
-- **Semantic Edge-Cloud Communication for Real-Time Urban Traffic Digital Twins** — Nokia Bell Labs — **IEEE GLOBECOM 2026**, accepted.
-- **PANAMA: A Network-Aware MARL Framework for Multi-Agent Path Finding in Digital Twin Ecosystems** — Huawei Canada — **IEEE GLOBECOM 2025**.
-- **Methods and Apparatus For Detecting and Mitigating Hallucinations in Autonomous Multi-Agent Systems** — Huawei Canada — **U.S. patent pending**.
+- **Semantic Edge-Cloud Communication for Real-Time Urban Traffic Digital Twins** - Nokia Bell Labs - **IEEE GLOBECOM 2026**, accepted.
+- **PANAMA: A Network-Aware MARL Framework for Multi-Agent Path Finding in Digital Twin Ecosystems** - Huawei Canada - **IEEE GLOBECOM 2025**.
+- **Methods and Apparatus For Detecting and Mitigating Hallucinations in Autonomous Multi-Agent Systems** - Huawei Canada - **U.S. patent pending**.
 
 ---
 
