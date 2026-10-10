@@ -2,98 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#080b16" />
-  <meta name="description" content="Arman Doğru — Applied AI researcher. Interactive terminal portfolio and public career trace." />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f17" />
+  <meta name="description" content="Arman Doğru — applied AI researcher. Interactive terminal portfolio and NEAT racing challenge." />
   <title>arman@dogru:~$</title>
   <link rel="stylesheet" href="./terminal.css" />
 </head>
-<body data-theme="tokyo">
-  <div class="noise" aria-hidden="true"></div>
-  <div class="scanline" aria-hidden="true"></div>
-
+<body data-theme="catppuccin">
+  <div class="crt-noise" aria-hidden="true"></div>
   <header class="windowbar">
     <div class="traffic" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="window-title">arman@dogru: ~ — zsh</div>
-    <div class="window-state"><span class="status-dot"></span><span id="netState">PUBLIC INTEL // ONLINE</span></div>
+    <div class="window-state"><span class="status-dot"></span><span>PUBLIC PORTFOLIO // ONLINE</span></div>
   </header>
 
   <nav class="themebar" aria-label="Theme selector">
-    <button data-set-theme="catppuccin">Catppuccin</button>
-    <button data-set-theme="dracula">Dracula</button>
-    <button data-set-theme="gruvbox">Gruvbox</button>
-    <button data-set-theme="nord">Nord</button>
-    <button data-set-theme="solarized">Solarized</button>
-    <button data-set-theme="tokyo" class="active">Tokyo</button>
-    <button data-set-theme="onedark">One Dark</button>
-    <button data-set-theme="matrix">Matrix</button>
+    <button data-set-theme="catppuccin" class="active">Catppuccin</button><button data-set-theme="dracula">Dracula</button><button data-set-theme="gruvbox">Gruvbox</button><button data-set-theme="nord">Nord</button><button data-set-theme="solarized">Solarized</button><button data-set-theme="tokyo">Tokyo</button><button data-set-theme="onedark">One Dark</button><button data-set-theme="matrix">Matrix</button>
   </nav>
 
   <main class="workspace">
-    <section class="pane terminal-pane" aria-label="Interactive terminal">
-      <div class="pane-title"><span>0: zsh</span><span class="pane-meta">interactive shell</span></div>
+    <section class="pane shell-pane">
+      <div class="pane-title"><span>0: zsh</span><span class="pane-meta">arman@dogru</span></div>
+      <div id="identityCard" class="identity-card"></div>
       <div id="terminal" class="terminal" role="log" aria-live="polite"></div>
       <form id="commandForm" class="commandline" autocomplete="off">
-        <span class="prompt"><b>[arman@dogru</b>:<em>~</em>]$</span>
-        <input id="commandInput" type="text" spellcheck="false" autocomplete="off" aria-label="Terminal command" autofocus />
+        <span class="prompt"><b>[arman@dogru</b>:<em>~</em>]$</span><input id="commandInput" type="text" spellcheck="false" autocomplete="off" aria-label="Terminal command" autofocus />
       </form>
     </section>
 
-    <section class="pane intel-pane" aria-label="Intelligence visualization">
-      <div class="pane-title tabs" id="tabs">
-        <button data-tab="journey" class="active">1 journey.map</button>
-        <button data-tab="dossier">2 dossier.md</button>
-        <button data-tab="projects">3 projects.sh</button>
-        <button data-tab="research">4 research.md</button>
-        <button data-tab="wasm">5 edge_twin.wasm</button>
+    <section class="pane main-pane">
+      <div class="pane-title tabs">
+        <button data-tab="experience" class="active">1 experience.md</button>
+        <button data-tab="projects">2 projects.md</button>
+        <button data-tab="journey">3 journey.map</button>
+        <button data-tab="race">4 neat_race.exe</button>
+        <button data-tab="research">5 research.md</button>
       </div>
-
-      <div class="intel-view active" data-view="journey">
-        <canvas id="mapCanvas" aria-label="Animated public career journey map"></canvas>
-        <div class="map-hud top-left">
-          <span>PUBLIC CAREER TRACE</span>
-          <b>SUBJECT // ARMAN DOĞRU</b>
-        </div>
-        <div class="map-hud top-right"><span id="traceClock">SYNC 00:00:00</span><b id="traceStatus">TRACK READY</b></div>
-        <div class="map-card" id="mapCard"></div>
-        <div class="map-legend">ISTANBUL → OTTAWA → SAN FRANCISCO → KANATA // <span>PUBLIC CV DATA ONLY</span></div>
+      <div class="main-view scroll-view active" data-view="experience" id="experienceView"></div>
+      <div class="main-view scroll-view" data-view="projects" id="projectsView"></div>
+      <div class="main-view journey-view" data-view="journey"><canvas id="mapCanvas"></canvas><div id="mapCard" class="map-card"></div><div class="map-caption">PUBLIC CAREER TRACE // CV LOCATIONS ONLY</div></div>
+      <div class="main-view race-view" data-view="race">
+        <canvas id="raceCanvas" tabindex="0" aria-label="Top-down NEAT racing game"></canvas>
+        <div class="race-hud race-top"><span id="raceMode">NEAT GP // READY</span><span id="raceClock">00:00.000</span></div>
+        <div class="race-hud race-left"><b>RACE</b><span>WASD / arrows</span><span>R restart · P pause</span><span id="raceLap">LAP 0/3</span><span id="racePos">P1 / 4</span></div>
+        <div class="race-hud race-right" id="raceStandings"></div>
+        <div id="raceOverlay" class="race-overlay"></div>
       </div>
-
-      <div class="intel-view scroll-view" data-view="dossier" id="dossierView"></div>
-      <div class="intel-view scroll-view" data-view="projects" id="projectsView"></div>
-      <div class="intel-view scroll-view" data-view="research" id="researchView"></div>
-      <div class="intel-view" data-view="wasm">
-        <canvas id="wasmCanvas" aria-label="WebAssembly edge twin simulation"></canvas>
-        <div class="wasm-overlay">
-          <span>WASM32 // EDGE-TWIN KERNEL</span>
-          <b id="wasmState">STANDBY</b>
-          <small><span id="wasmAgents">—</span> agents · <span id="wasmStep">—</span> step · pointer perturbs field</small>
-        </div>
-      </div>
+      <div class="main-view scroll-view" data-view="research" id="researchView"></div>
     </section>
 
-    <section class="pane monitor-pane" aria-label="Synthetic process monitor">
-      <div class="pane-title"><span>1: htop — now</span><span class="pane-meta">simulated</span></div>
-      <div class="meters">
-        <div><label>cpu focus <span id="cpuVal">43%</span></label><div class="meter"><i id="cpuBar"></i></div></div>
-        <div><label>mem context <span id="memVal">69%</span></label><div class="meter alt"><i id="memBar"></i></div></div>
-      </div>
-      <div class="proc-head"><span>pid</span><span>program</span><span>mem</span><span>cpu%</span></div>
-      <div id="processList" class="process-list"></div>
+    <section class="pane monitor-pane">
+      <div class="pane-title"><span>1: htop — now</span><span class="pane-meta">portfolio processes</span></div>
+      <div class="meters"><div><label>cpu focus <span id="cpuVal">43%</span></label><div class="meter"><i id="cpuBar"></i></div></div><div><label>mem context <span id="memVal">69%</span></label><div class="meter alt"><i id="memBar"></i></div></div></div>
+      <div class="proc-head"><span>pid</span><span>program</span><span>mem</span><span>cpu%</span></div><div id="processList" class="process-list"></div>
     </section>
 
-    <section class="pane feed-pane" aria-label="Timeline event feed">
-      <div class="pane-title"><span>2: intel-feed</span><span class="pane-meta">career timeline</span></div>
-      <div id="eventFeed" class="event-feed"></div>
+    <section class="pane side-pane">
+      <div class="pane-title"><span>2: leaderboard</span><span class="pane-meta">NEAT circuit</span></div>
+      <div id="leaderboard" class="leaderboard"></div>
     </section>
   </main>
 
-  <footer class="statusbar">
-    <span>[arman]</span><b>0:zsh*</b><span>1:htop</span><span>2:intel</span>
-    <span class="status-spacer"></span>
-    <span id="footerMode">NORMAL</span><span>github.com/arman-dogru</span><span id="localClock">--:-- --</span>
-  </footer>
-
+  <footer class="statusbar"><span>[arman]</span><b>0:zsh*</b><span>1:htop</span><span>2:nvim</span><span class="status-spacer"></span><span id="footerMode">EXPERIENCE</span><span>github.com/arman-dogru</span><span id="localClock">--:-- --</span></footer>
   <script type="module" src="./terminal.js"></script>
 </body>
 </html>
