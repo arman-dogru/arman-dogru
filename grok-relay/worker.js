@@ -20,20 +20,126 @@ At Nokia Bell Labs in 2026 he works on semantic edge-to-cloud urban mobility dig
 Public projects include the Ottawa Sionna RT Cellular Digital Twin; Skate 3 Rust — macOS Apple Silicon, which is a platform port/continuation of upstream open-source work; GSANet-DCNN for guided slot-attention video object segmentation; an AI-powered developer productivity dashboard; one-pixel adversarial-attack experiments; and LLM-bias-reduction experiments.
 Earlier experience includes Casa / Neo Accelerator, SAS Institute, Shell, Getir, SFS Software & Consultancy, undergraduate AI research, a B.Sc. Computer Science degree from the University of Ottawa, and Saint-Joseph French High School in Istanbul.`;
 
-const MODEL='grok-4.3';
-const MAX_MESSAGE=600;
-function json(body,status=200,origin='*'){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','access-control-allow-origin':origin,'access-control-allow-methods':'POST,OPTIONS','access-control-allow-headers':'content-type','cache-control':'no-store','x-content-type-options':'nosniff'}})}
-function cleanMessage(v){if(typeof v!=='string')return'';return v.normalize('NFKC').replace(/[\u0000-\u001F\u007F]/g,' ').replace(/\s+/g,' ').trim()}
-export default {async fetch(request,env){
-  const origin=request.headers.get('origin')||'';const allowed=(env.ALLOWED_ORIGIN||'').trim();const cors=allowed||origin||'*';
-  if(allowed&&origin&&origin!==allowed)return json({error:'origin not allowed'},403,allowed);
-  if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{'access-control-allow-origin':cors,'access-control-allow-methods':'POST,OPTIONS','access-control-allow-headers':'content-type','access-control-max-age':'86400'}});
-  if(request.method!=='POST')return json({error:'method not allowed'},405,cors);
-  if(!env.XAI_API_KEY)return json({error:'server is missing XAI_API_KEY'},503,cors);
-  const len=Number(request.headers.get('content-length')||0);if(len>4096)return json({error:'request too large'},413,cors);
-  let body;try{body=await request.json()}catch{return json({error:'invalid JSON'},400,cors)}
-  const message=cleanMessage(body?.message);if(!message)return json({error:'message is required'},400,cors);if(message.length>MAX_MESSAGE)return json({error:`message must be <= ${MAX_MESSAGE} characters`},400,cors);
-  const upstream=await fetch('https://api.x.ai/v1/chat/completions',{method:'POST',headers:{'authorization':`Bearer ${env.XAI_API_KEY}`,'content-type':'application/json'},body:JSON.stringify({model:env.XAI_MODEL||MODEL,messages:[{role:'system',content:SYSTEM_PROMPT},{role:'user',content:message}],temperature:0.15,max_tokens:180,reasoning_effort:'none'})});
-  if(!upstream.ok){const text=await upstream.text();console.error('xAI error',upstream.status,text.slice(0,500));return json({error:'model service unavailable'},502,cors)}
-  const data=await upstream.json();const reply=data?.choices?.[0]?.message?.content?.trim();if(!reply)return json({error:'empty model response'},502,cors);return json({reply},200,cors)
-}};
+const MODEL = 'grok-4.3';
+const MAX_MESSAGE = 600;
+const SERVICE = 'arman-dogru-chat';
+
+function configuredOrigins(env) {
+  return String(env.ALLOWED_ORIGINS || env.ALLOWED_ORIGIN || '')
+    .split(',')
+    .map(v => v.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+}
+
+function isAllowedOrigin(origin, env) {
+  if (!origin) return true;
+  const allowed = configuredOrigins(env);
+  return allowed.length > 0 && allowed.includes(origin.replace(/\/$/, ''));
+}
+
+function corsHeaders(origin) {
+  return {
+    'access-control-allow-origin': origin || '*',
+    'access-control-allow-methods': 'GET,POST,OPTIONS',
+    'access-control-allow-headers': 'content-type',
+    'access-control-max-age': '86400',
+    'vary': 'Origin'
+  };
+}
+
+function json(body, status = 200, origin = '*') {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      ...corsHeaders(origin),
+      'cache-control': 'no-store',
+      'x-content-type-options': 'nosniff'
+    }
+  });
+}
+
+function cleanMessage(v) {
+  if (typeof v !== 'string') return '';
+  return v.normalize('NFKC')
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const origin = request.headers.get('origin') || '';
+    const allowed = isAllowedOrigin(origin, env);
+
+    // Let the browser read the denial itself instead of collapsing it into
+    // an opaque "Failed to fetch" CORS error. No model call is made here.
+    if (origin && !allowed) {
+      return json({ error: 'origin not allowed by chat relay' }, 403, origin);
+    }
+
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: corsHeaders(origin || '*') });
+    }
+
+    // Health endpoint is intentionally public and does not expose secrets.
+    if (request.method === 'GET' && (url.pathname === '/' || url.pathname === '/health')) {
+      return json({
+        ok: true,
+        service: SERVICE,
+        model: env.XAI_MODEL || MODEL,
+        key_configured: Boolean(env.XAI_API_KEY)
+      }, 200, origin || '*');
+    }
+
+    if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405, origin || '*');
+    if (!env.XAI_API_KEY) return json({ error: 'server is missing XAI_API_KEY' }, 503, origin || '*');
+
+    const len = Number(request.headers.get('content-length') || 0);
+    if (len > 4096) return json({ error: 'request too large' }, 413, origin || '*');
+
+    let body;
+    try { body = await request.json(); }
+    catch { return json({ error: 'invalid JSON' }, 400, origin || '*'); }
+
+    const message = cleanMessage(body?.message);
+    if (!message) return json({ error: 'message is required' }, 400, origin || '*');
+    if (message.length > MAX_MESSAGE) return json({ error: `message must be <= ${MAX_MESSAGE} characters` }, 400, origin || '*');
+
+    let upstream;
+    try {
+      upstream = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'authorization': `Bearer ${env.XAI_API_KEY}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: env.XAI_MODEL || MODEL,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: message }
+          ],
+          temperature: 0.15,
+          max_tokens: 180,
+          reasoning_effort: 'none'
+        })
+      });
+    } catch (err) {
+      console.error('xAI network error', err?.message || err);
+      return json({ error: 'model service unreachable' }, 502, origin || '*');
+    }
+
+    if (!upstream.ok) {
+      const text = await upstream.text();
+      console.error('xAI error', upstream.status, text.slice(0, 500));
+      return json({ error: 'model service unavailable' }, 502, origin || '*');
+    }
+
+    const data = await upstream.json();
+    const reply = data?.choices?.[0]?.message?.content?.trim();
+    if (!reply) return json({ error: 'empty model response' }, 502, origin || '*');
+    return json({ reply }, 200, origin || '*');
+  }
+};
