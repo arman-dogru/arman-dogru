@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#03070d" />
+  <title>Arman Doğru // WASM Edge-Twin Lab</title>
+  <style>
+    :root{--bg:#03070d;--panel:rgba(8,18,30,.78);--line:rgba(71,255,223,.18);--cyan:#47ffdf;--violet:#b286ff;--text:#e8f1ff;--muted:#8093ac}
+    *{box-sizing:border-box} html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;overflow:hidden}
+    canvas{position:fixed;inset:0;width:100%;height:100%}
+    .grid{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(circle at 50% 50%,#000 15%,transparent 78%);opacity:.32}
+    .hud{position:fixed;inset:0;padding:24px;display:grid;grid-template-columns:minmax(280px,390px) 1fr minmax(250px,340px);grid-template-rows:auto 1fr auto;gap:16px;pointer-events:none}
+    .panel{background:var(--panel);border:1px solid rgba(71,255,223,.22);box-shadow:0 0 45px rgba(71,255,223,.06),inset 0 0 26px rgba(71,255,223,.025);backdrop-filter:blur(12px);padding:16px;pointer-events:auto}
+    .brand{grid-column:1/3;align-self:start;max-width:720px}.brand h1{margin:0;font-size:clamp(21px,3vw,39px);letter-spacing:.07em}.brand p{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.6}.accent{color:var(--cyan)}
+    .metrics{grid-column:3;grid-row:1/3;align-self:start}.metric{display:flex;justify-content:space-between;gap:20px;padding:10px 0;border-bottom:1px solid rgba(128,147,172,.14)}.metric b{font-weight:600;color:var(--cyan)}.metric span:first-child{color:var(--muted);font-size:11px}.metric span:last-child{font-size:12px;text-align:right}
+    .controls{grid-column:1;grid-row:2;align-self:end}.control{margin:12px 0}.control label{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-bottom:7px}.control input{width:100%;accent-color:var(--cyan)}
+    .footer{grid-column:1/4;grid-row:3;display:flex;justify-content:space-between;align-items:end;color:var(--muted);font-size:10px;letter-spacing:.08em}.footer a{color:var(--cyan);text-decoration:none}.status{display:inline-flex;gap:8px;align-items:center}.dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan);animation:pulse 1.3s infinite}@keyframes pulse{50%{opacity:.35;transform:scale(.7)}}
+    .reticle{position:fixed;width:62px;height:62px;border:1px solid rgba(71,255,223,.4);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 22px rgba(71,255,223,.12)}.reticle:before,.reticle:after{content:"";position:absolute;background:rgba(71,255,223,.55)}.reticle:before{width:82px;height:1px;left:-11px;top:30px}.reticle:after{height:82px;width:1px;top:-11px;left:30px}
+    @media(max-width:900px){.hud{grid-template-columns:1fr;grid-template-rows:auto 1fr auto auto}.brand{grid-column:1}.metrics{grid-column:1;grid-row:3;display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.controls{grid-column:1;grid-row:2;max-width:340px}.footer{grid-column:1;grid-row:4}.metric{padding:6px 0}.reticle{display:none}}
+  </style>
+</head>
+<body>
+  <canvas id="world"></canvas><div class="grid"></div><div class="reticle" id="reticle"></div>
+  <main class="hud">
+    <section class="panel brand"><h1>EDGE-TWIN <span class="accent">// WASM LAB</span></h1><p>2,048 synthetic agents evolved inside a 1.6 KB WebAssembly kernel. Rendering stays on your device. Move the pointer to perturb the field.</p></section>
+    <section class="panel controls">
+      <div class="status"><i class="dot"></i><span id="status">BOOTING WASM</span></div>
+      <div class="control"><label><span>ATTRACTION</span><span id="attractLabel">0.72</span></label><input id="attract" type="range" min="0" max="1.6" value="0.72" step="0.01"></div>
+      <div class="control"><label><span>CHAOS</span><span id="chaosLabel">0.18</span></label><input id="chaos" type="range" min="0" max="1" value="0.18" step="0.01"></div>
+      <div class="control"><label><span>TRAIL PERSISTENCE</span><span id="trailLabel">0.11</span></label><input id="trail" type="range" min="0.03" max="0.35" value="0.11" step="0.01"></div>
+    </section>
+    <section class="panel metrics">
+      <div class="metric"><span>RUNTIME</span><span><b>WebAssembly</b> / wasm32</span></div><div class="metric"><span>AGENTS</span><span id="agents">—</span></div><div class="metric"><span>SIM STEP</span><span id="stepMs">—</span></div><div class="metric"><span>FRAME</span><span id="fps">—</span></div><div class="metric"><span>RAW TELEMETRY*</span><span id="rawRate">—</span></div><div class="metric"><span>SEMANTIC STREAM*</span><span id="semanticRate">—</span></div><div class="metric"><span>ILLUSTRATIVE REDUCTION*</span><span id="reduction">—</span></div><div class="metric"><span>BACKEND</span><span><b>NONE</b></span></div>
+      <p style="color:var(--muted);font-size:9px;line-height:1.6;margin:14px 0 0">*Synthetic visualization metrics, not measurements from the Bell Labs research system.</p>
+    </section>
+    <footer class="footer"><span>ARMAN DOĞRU // CLIENT-SIDE SYSTEMS EXPERIMENT</span><a href="https://github.com/arman-dogru/arman-dogru/tree/main/wasm-lab">VIEW SOURCE ↗</a></footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
