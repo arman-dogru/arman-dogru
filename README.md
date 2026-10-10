@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/index.html"><img src="https://img.shields.io/badge/OPEN-INTERACTIVE_TERMINAL-7dcfff?style=for-the-badge&logo=gnometerminal&logoColor=05070d" alt="Open interactive terminal"></a>
+  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/index.html"><img src="https://img.shields.io/badge/OPEN-INTERACTIVE_TERMINAL-89dceb?style=for-the-badge&logo=gnometerminal&logoColor=11111b" alt="Open interactive terminal"></a>
   <a href="https://www.linkedin.com/in/arman-dogru/"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"></a>
   <a href="https://scholar.google.com/citations?user=BUeifBIAAAAJ"><img alt="Google Scholar" src="https://img.shields.io/badge/Scholar-4285F4?style=for-the-badge&logo=googlescholar&logoColor=white"></a>
 </p>
@@ -19,26 +19,44 @@
 
 ## `./portfolio`
 
-This repository is the source for my interactive terminal portfolio. It is built as a working interface rather than a decorative README: a tmux-inspired personal shell, a timeline of my work, project launchers, public GitHub telemetry, a browser-local LLM mode, and a playable **NEAT racing challenge** against neuroevolved AI drivers.
+The companion site is a working terminal-style portfolio rather than a decorative landing page. It contains:
+
+- a tmux / neovim-inspired shell for navigating my work;
+- an **OpenStreetMap-based career journey** with satellite mode and event dossiers describing what I built, achieved, and learned at each stop;
+- public project launchers and research notes;
+- a tightly scoped **Grok portfolio Q&A** relay that never exposes the API key in the browser;
+- **NEAT Grand Prix v2** — an 8-car browser race against seven retrained neuroevolved drivers.
 
 ```text
 help
 journey
+trace huawei
 projects
 research
 race
 leaderboard
-local-ai
-chat what did Arman work on at Huawei?
+chat what did Arman work on at Bell Labs?
 ```
-
-The race is a deterministic browser game. AI opponents are exported NEAT genomes trained offline and evaluated in the same track dynamics used by the game. Personal bests are saved locally. Global leaderboard submissions are routed through GitHub and reflected back into the profile leaderboard artifact after validation.
 
 <p align="center">
   <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/index.html">
-    <img src="https://img.shields.io/badge/LAUNCH-NEAT_RACE_%2B_TERMINAL-bb9af7?style=for-the-badge&logo=github&logoColor=white" alt="Launch terminal and NEAT race" />
+    <img src="https://img.shields.io/badge/LAUNCH-TERMINAL_%2B_NEAT_GP-cba6f7?style=for-the-badge&logo=github&logoColor=11111b" alt="Launch terminal and NEAT Grand Prix" />
   </a>
 </p>
+
+---
+
+## `./neat_gp --track istanbul`
+
+The default race is **Intercity Istanbul Park**. The selectable circuit layouts are sourced from the MIT-licensed `bacinger/f1-circuits` GeoJSON dataset: Istanbul Park, Monza, Spa-Francorchamps, and Monaco.
+
+The road is deliberately fixed at **3.5 car widths**. The physics model runs at 120 Hz and includes speed-dependent lateral grip / drift, track-edge collision, and full car-to-car oriented-box collision using SAT plus linear and angular collision impulses.
+
+Seven new NEAT champions were retrained for the v2 physics. The training code and exported networks are committed in this repository; the exported champions completed roughly 7–8 laps each in the extended post-training verification run.
+
+Global leaderboard competition is intentionally limited to Istanbul Park so scores remain comparable. Display names are validated server-side with Unicode normalization, a character allowlist, length/repetition checks, private content filtering, reserved-name checks, and HTML escaping before they reach the profile SVG. The moderation vocabulary is supplied only through the `PROFANITY_BLOCKLIST_GZ_B64` GitHub Actions secret and is not stored in this public repository.
+
+[Read the race / training notes →](./NEAT_RACE.md)
 
 ---
 
@@ -78,11 +96,7 @@ Developed **PANAMA**, a network-aware MARL framework for multi-agent path findin
 
 ## `cat race-leaderboard.svg`
 
-<p align="center">
-  <img src="./assets/race-leaderboard.svg" width="100%" alt="NEAT race leaderboard" />
-</p>
-
-The leaderboard is generated from `leaderboard.json`. New global scores are submitted through GitHub, validated by an Actions workflow, and then committed back into this repository. The game also keeps a local personal best immediately in the browser.
+<p align="center"><img src="./assets/race-leaderboard.svg" width="100%" alt="Istanbul Park NEAT Grand Prix leaderboard" /></p>
 
 ---
 
