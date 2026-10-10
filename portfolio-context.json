@@ -1,0 +1,202 @@
+{
+  "schema": "arman-public-portfolio-context-v1",
+  "updated": "2026-10-10",
+  "scope": "Public professional information supplied by Arman Doğru and reflected in the portfolio. Do not infer private facts from this file.",
+  "profile": {
+    "name": "Arman Doğru",
+    "headline": "Applied AI Researcher @ Nokia Bell Labs; previously Huawei; M.Sc. Computer Science (AI), University of Ottawa",
+    "location": "Ottawa / Kanata, Ontario, Canada (city-level public professional location only)",
+    "github": "https://github.com/arman-dogru",
+    "linkedin": "https://www.linkedin.com/in/arman-dogru/",
+    "scholar": "https://scholar.google.com/citations?user=BUeifBIAAAAJ",
+    "email": "arman.dogru@gmail.com",
+    "focus": [
+      "semantic edge-to-cloud digital twins",
+      "computer vision",
+      "wireless simulation",
+      "multi-agent reinforcement learning",
+      "multi-agent path finding",
+      "reliable multi-agent LLM systems"
+    ]
+  },
+  "education": [
+    {
+      "period": "2024-09 to 2026-12 expected",
+      "institution": "University of Ottawa",
+      "degree": "M.Sc. Computer Science, Artificial Intelligence"
+    },
+    {
+      "period": "2020-09 to 2024-05",
+      "institution": "University of Ottawa",
+      "degree": "B.Sc. Honours Computer Science, Co-op, Cum Laude"
+    },
+    {
+      "period": "2015-2019",
+      "institution": "Saint-Joseph French High School",
+      "location": "Istanbul, Türkiye"
+    }
+  ],
+  "experience": [
+    {
+      "period": "2026-05 to present",
+      "organization": "Nokia Bell Labs",
+      "role": "Applied AI Researcher",
+      "facts": [
+        "Building semantic edge-to-cloud digital twins from camera footage for urban mobility.",
+        "Research pipeline uses guided attention, YOLOv26, planar homography and Kalman filtering for scene understanding/localization.",
+        "Publicly reported prototype figures include roughly 1 ms latency, greater than 99.9% data reduction, and about 0.12 m mean coordinate error.",
+        "Related work accepted at IEEE GLOBECOM 2026."
+      ]
+    },
+    {
+      "period": "2026-01 to 2026-04",
+      "organization": "NEXTCONLAB / Smart Connected Vehicles Innovation Centre",
+      "role": "Applied AI Researcher",
+      "facts": [
+        "Worked on drones and UGVs, computer-vision localization, MARL/MAPF, and RF geolocation.",
+        "Used phase-difference-of-arrival measurements with ML/RL for rogue base-station localization; public resume figure is about 30 m error."
+      ]
+    },
+    {
+      "period": "2025-05 to 2025-12",
+      "organization": "Huawei Canada",
+      "role": "Applied AI Researcher",
+      "facts": [
+        "Developed PANAMA, a network-aware MARL framework for multi-agent path finding in digital-twin environments.",
+        "Public resume figures: experiments with 256 agents, greater than 90% success, solution length reduced from roughly 450 to roughly 100, training time around 10% of a cited state-of-the-art baseline, and generalization to about 64x the training-time agent count.",
+        "First-author PANAMA work accepted at IEEE GLOBECOM 2025.",
+        "Contributed to a U.S. patent-pending method titled Methods and Apparatus For Detecting and Mitigating Hallucinations in Autonomous Multi-Agent Systems.",
+        "Public resume reports a multi-agent LLM system improving task accuracy by roughly 50-80% in the evaluated setup."
+      ]
+    },
+    {
+      "period": "2024-07 to 2024-09",
+      "organization": "Casa / Neo Accelerator",
+      "role": "Software / AI Engineering",
+      "facts": [
+        "Built Kotlin, Python and Java backend systems, REST APIs and Supabase-backed services.",
+        "Worked on RAG/agent tooling and MCP-style tool integration in a fast startup environment."
+      ]
+    },
+    {
+      "period": "2023",
+      "organization": "SAS Institute",
+      "role": "Software / Applied ML",
+      "facts": [
+        "Worked with production software, APIs, data systems, fraud modeling, Azure, TensorFlow and applied machine learning."
+      ]
+    },
+    {
+      "period": "2023",
+      "organization": "Shell",
+      "role": "Software Engineering",
+      "facts": [
+        "Worked in an industry software environment before SAS; portfolio only claims public professional experience, not confidential project details."
+      ]
+    },
+    {
+      "period": "2022",
+      "organization": "University of Ottawa research",
+      "role": "Undergraduate AI Research",
+      "facts": [
+        "Worked on audio AI including synthesizer-parameter reconstruction, source separation and signal reconstruction problems."
+      ]
+    },
+    {
+      "period": "2021",
+      "organization": "Getir",
+      "role": "Software Developer Intern",
+      "facts": [
+        "Built a Twitter sentiment application and CRM-related backend work using Java, Spring Boot, Redis and AWS."
+      ]
+    },
+    {
+      "period": "2019",
+      "organization": "SFS Software & Consultancy",
+      "role": "Software Developer",
+      "facts": [
+        "Worked on insurance databases, dashboards, prototypes and production bug fixes."
+      ]
+    }
+  ],
+  "research": [
+    {
+      "venue": "IEEE GLOBECOM 2026",
+      "title": "Semantic Edge-Cloud Communication for Real-Time Urban Traffic Digital Twins",
+      "status": "accepted",
+      "organization": "Nokia Bell Labs"
+    },
+    {
+      "venue": "IEEE GLOBECOM 2025",
+      "title": "PANAMA: A Network-Aware MARL Framework for Multi-Agent Path Finding in Digital Twin Ecosystems",
+      "status": "accepted / first-author public portfolio claim",
+      "organization": "Huawei Canada"
+    },
+    {
+      "venue": "U.S. patent pending",
+      "title": "Methods and Apparatus For Detecting and Mitigating Hallucinations in Autonomous Multi-Agent Systems",
+      "organization": "Huawei Canada"
+    }
+  ],
+  "projects": [
+    {
+      "repo": "Sionna_Canada_Testbed",
+      "name": "Ottawa Sionna RT Cellular Digital Twin",
+      "facts": [
+        "Outdoor cellular propagation twin using public Ottawa geometry, terrain and spectrum-site data.",
+        "Uses Sionna RT / GPU ray tracing, FastAPI and a React/MapLibre/deck.gl browser UI.",
+        "Repository documents 14,321 buildings, 2,198,554 triangles, 812 sector-frequency records, a 4x4 km 5 m demo, 64 tiles, nine bands from 635 to 3820 MHz, and 576/576 dual-GPU jobs completed in 553 s on two RTX 3070 GPUs."
+      ]
+    },
+    {
+      "repo": "skate3-rust-MacOS",
+      "name": "Skate 3 Rust — macOS Apple Silicon",
+      "facts": [
+        "Native ARM64 macOS port/continuation of upstream open-source SK8-ENGINE work.",
+        "Uses Rust, Bevy, SDL3 and Metal.",
+        "Do not describe this as Arman creating the original upstream engine."
+      ]
+    },
+    {
+      "repo": "GSANet-DCNN",
+      "name": "GSANet-DCNN",
+      "facts": [
+        "Guided slot-attention architecture for unsupervised video object segmentation across spatial, temporal and optical-flow features.",
+        "Uses PyTorch, RAFT, Slot Attention and Transformers."
+      ]
+    },
+    {
+      "repo": "ai-powered-developer-productivity-dashboard",
+      "name": "AI-powered developer productivity dashboard",
+      "facts": [
+        "LLM-assisted GitHub analytics, automated PR review, developer analysis and productivity dashboards."
+      ]
+    },
+    {
+      "repo": "one-pixel-attack-2025",
+      "name": "One-Pixel Adversarial Attack",
+      "facts": [
+        "Black-box adversarial attack experiments using differential evolution against image classifiers."
+      ]
+    },
+    {
+      "repo": "LLM-Bias-Reduction",
+      "name": "LLM Bias Reduction",
+      "facts": [
+        "Fairness evaluation and bias-reduction experiments across LLM and traditional classifiers."
+      ]
+    }
+  ],
+  "agent_source_contract": {
+    "canonical": "This JSON is the canonical bundled public professional context until Arman replaces or expands it from a master resume.",
+    "github": "The deployed relay may retrieve live public GitHub profile/repository metadata and a targeted public README when relevant.",
+    "page_state": "The browser may send the active portfolio tab, race state, theme, current timeline selection and top paddock entries as untrusted display state.",
+    "linkedin": "LinkedIn is a navigation link only; the agent does not scrape or authenticate to LinkedIn.",
+    "environment": "The agent has no arbitrary shell, filesystem, browser, private environment variables or DOM access. It only receives the curated public state explicitly sent by the page/relay.",
+    "scoreboard": "The relay can read the public race leaderboard from its KV binding when configured."
+  },
+  "privacy_rules": [
+    "Do not infer or reveal exact current location, home address, private contact data, health, religion, politics, relationships, employer-confidential information or unpublished research details.",
+    "If a detail is absent from the available public sources, say it is not available rather than guessing."
+  ]
+}
