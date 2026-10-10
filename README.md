@@ -19,13 +19,13 @@
 
 ## `./portfolio`
 
-The companion site is a working terminal-style portfolio rather than a decorative landing page. It contains:
+The companion site is a working terminal-style portfolio with:
 
 - a tmux / neovim-inspired shell for navigating my work;
-- an **OpenStreetMap-based career journey** with satellite mode and event dossiers describing what I built, achieved, and learned at each stop;
+- an **OpenStreetMap-based career journey** with satellite mode and event dossiers;
 - public project launchers and research notes;
 - a tightly scoped **Grok portfolio Q&A** relay that never exposes the API key in the browser;
-- **NEAT Grand Prix v3** — a 10-car browser race against nine retrained neuroevolved drivers, with slower raceable handling, braking/reverse, recoverable collisions, grass/runoff, controllable slip, and steering calibrated by a fixed-budget evolutionary sweep.
+- **NEAT Grand Prix v3.2** — a 10-car Istanbul Park race with traffic-trained neuroevolved opponents, physical contact, braking/reverse, recoverable slip, player-follow camera and a minimap.
 
 ```text
 help
@@ -48,16 +48,13 @@ chat what did Arman work on at Bell Labs?
 
 ## `./neat_gp --track istanbul`
 
-The default race is **Intercity Istanbul Park**. The selectable circuit layouts are sourced from the MIT-licensed `bacinger/f1-circuits` GeoJSON dataset: Istanbul Park, Monza, Spa-Francorchamps, and Monaco. Istanbul Park is pinned locally so the browser game and the training harness use the same centerline geometry.
+The default race is **Intercity Istanbul Park**. The road remains exactly **3.5 car widths** wide. The browser uses a 120 Hz longitudinal/lateral vehicle model with distinct throttle, braking and reverse behavior, speed-sensitive steering, controllable slip, grass/runoff and oriented-body car-to-car collision.
 
-The paved road remains deliberately fixed at **3.5 car widths**, but v3 uses a larger simulation world and separates asphalt from grass/runoff and the outer collision boundary. The 120 Hz vehicle model works in longitudinal/lateral velocity coordinates: throttle, braking and reverse are distinct, steering authority decreases with speed, lateral velocity is damped rather than snapped to the body heading, sliding/steering scrub speed, grass slows the car aggressively, and outer-barrier collisions preserve enough inward motion to recover instead of gluing the car to the wall. Car-to-car contact still uses oriented-body collision resolution with linear and angular impulses.
+v3.2 makes steering slightly more responsive and trains the AI differently. The nine opponents now use a **16-input NEAT controller** that sees both track state and nearby traffic. Training uses a population of 36 over 24 generations, with controllers evaluated in moving **nine-car packs** rather than only in isolation.
 
-Steering was calibrated by training the same 24-controller × 10-generation residual population across ten physics configurations. The selected setup (`responsive-fine-b`) materially increased low/high-speed steering authority while staying stable in pack racing. The final full-NEAT retrain produced nine champions that each covered roughly **2.20–2.23 laps in 70 seconds with zero wall contacts**. In the 100-second nine-agent pack simulation they covered **2.327–2.632 laps**, averaged **2.452 laps**, recorded **one total wall contact**, and **0/9** ended stuck in recovery.
+The AI also has a narrow asphalt-safety invariant that keeps its whole car body on the paved surface; training penalizes use of that intervention. In three committed 120-second pack regressions, the shipped grid recorded **0 grass time, 0 outer-wall hits, and 0 stuck recoveries**, while every agent covered at least 2.85 laps. The browser now follows the player at a modest zoom with a full-track minimap.
 
-[Steering sweep and benchmark table →](./STEERING_SWEEP.md)  
-[Race / training notes →](./NEAT_RACE.md)
-
-Global leaderboard competition is intentionally limited to Istanbul Park so scores remain comparable. v3 resets the board because the physics, grid size, track identifier, and score formula are incompatible with v2 results. Display names are validated server-side with Unicode normalization, a character allowlist, length/repetition checks, private content filtering, reserved-name checks, and HTML escaping before they reach the profile SVG. The moderation vocabulary is supplied only through the `PROFANITY_BLOCKLIST_GZ_B64` GitHub Actions secret and is not stored in this public repository.
+[Read the race, training and validation notes →](./NEAT_RACE.md)
 
 ---
 
