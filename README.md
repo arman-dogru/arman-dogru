@@ -1,11 +1,11 @@
 <p align="center">
-  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/index.html">
+  <a href="https://arman-dogru.arman-dogru.workers.dev">
     <img src="./assets/hero.svg" width="100%" alt="Arman Doğru — Applied AI Researcher at Nokia Bell Labs" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/index.html"><img src="https://img.shields.io/badge/OPEN-INTERACTIVE_TERMINAL-89dceb?style=for-the-badge&logo=gnometerminal&logoColor=11111b" alt="Open interactive terminal"></a>
+  <a href="https://arman-dogru.arman-dogru.workers.dev"><img src="https://img.shields.io/badge/OPEN-INTERACTIVE_TERMINAL-89dceb?style=for-the-badge&logo=gnometerminal&logoColor=11111b" alt="Open interactive terminal"></a>
   <a href="https://www.linkedin.com/in/arman-dogru/"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"></a>
   <a href="https://scholar.google.com/citations?user=BUeifBIAAAAJ"><img alt="Google Scholar" src="https://img.shields.io/badge/Scholar-4285F4?style=for-the-badge&logo=googlescholar&logoColor=white"></a>
 </p>
@@ -39,7 +39,7 @@ chat what did Arman work on at Bell Labs?
 ```
 
 <p align="center">
-  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/index.html">
+  <a href="https://arman-dogru.arman-dogru.workers.dev">
     <img src="https://img.shields.io/badge/LAUNCH-TERMINAL_%2B_NEAT_GP-cba6f7?style=for-the-badge&logo=github&logoColor=11111b" alt="Launch terminal and NEAT Grand Prix" />
   </a>
 </p>
