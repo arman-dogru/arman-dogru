@@ -1,0 +1,51 @@
+name: race-leaderboard
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: race-leaderboard
+  cancel-in-progress: false
+
+jobs:
+  score:
+    if: startsWith(github.event.issue.title, '[RACE SCORE]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate and update board
+        id: verify
+        run: |
+          set -e
+          python scripts/update_race_leaderboard.py "$GITHUB_EVENT_PATH" | tee /tmp/result.json
+      - name: Commit accepted score
+        run: |
+          git config user.name "race-leaderboard[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add leaderboard.json assets/race-leaderboard.svg
+          if git diff --cached --quiet; then
+            echo "No leaderboard change"
+          else
+            git commit -m "score: update NEAT race leaderboard"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Confirm score
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          SCORE=$(python -c 'import json; print(json.load(open("/tmp/result.json"))["score"])')
+          RANK=$(python -c 'import json; print(json.load(open("/tmp/result.json"))["rank"])')
+          gh issue comment "$ISSUE" --body "Score accepted: **${SCORE}** · current rank **#${RANK}**. The profile leaderboard has been regenerated."
+          gh issue close "$ISSUE" --reason completed
