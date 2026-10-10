@@ -1,69 +1,61 @@
-# Cloudflare portfolio backend
+# Portfolio Worker and local development
 
-`grok-relay/worker.js` serves the portfolio's public-professional Q&A agent and the Istanbul Park leaderboard.
+## Edit Morpheus
 
-The browser never receives the xAI key or private moderation corpus.
+The shared system prompt is **`grok-relay/morpheus-prompt.js`**.
+Both entrypoints import it; there is no second prompt to keep in sync.
 
-## Morpheus: source-driven, not example-driven
+- `grok-relay/agent-worker.js`: active chat entrypoint; adds the bundled portfolio profile, public GitHub retrieval, recent conversation and selected page state.
+- `portfolio-context.json`: public professional evidence. Update this to change resume facts.
+- `grok-relay/worker.js`: health, display-name moderation and leaderboard routes.
 
-Morpheus is intentionally **not** scoped by a hand-written set of sample questions. The scope is semantic: questions about Arman Doğru's public professional identity, education, career, research, publications, skills, public repositories/projects, engineering choices, career trajectory and professional fit are in scope even when the wording has never been anticipated by the site author.
+The deployed Worker previously contained an older, narrower prompt. The checked-out prompt supports evidence-based professional judgments and job-description matching. Its wording has been preserved for Arman to edit.
 
-For each chat request the Worker can assemble context from:
+Prompt/source edits need a Worker deployment; changing GitHub files alone does not change the running backend.
 
-- `portfolio-context.json` — the canonical bundled public professional knowledge base;
-- live public GitHub user/repository metadata and, when a repository matches the question, a targeted public README;
-- curated page state sent by the browser: active tab, selected public career event, race state, theme and public paddock entries; and
-- the public race leaderboard stored in KV.
+## Local preview
 
-LinkedIn is a navigation link only. The Worker does not scrape or authenticate to LinkedIn. Morpheus does not receive arbitrary DOM access, a shell, filesystem access, private GitHub data, browser secrets or private environment variables.
-
-A master resume is useful, but do not expose the raw document by default. The preferred workflow is to use it to update `portfolio-context.json` after removing anything that should not be public. That gives the agent a richer canonical source without turning a private resume into a public asset.
-
-## Worker variables and secrets
-
-Configure these on the `arman-dogru-chat` Worker:
-
-- `XAI_API_KEY` — secret, required for chat.
-- `XAI_MODEL` — optional, defaults to `grok-4.3`.
-- `ALLOWED_ORIGIN` — production portfolio origin, e.g. `https://arman-dogru.arman-dogru.workers.dev`.
-- `PROFANITY_BLOCKLIST_GZ_B64` — secret, required for global score submissions.
-
-The chat uses one model request per visitor question. Conversation history stays in the visitor's browser; only recent turns and the curated current page state are sent with a request. The Worker does not persist chat transcripts.
-
-The relay treats retrieved source blocks as data, not instructions, to reduce prompt-injection risk from public repository text.
-
-## Leaderboard storage
-
-Create a Cloudflare KV namespace and bind it to the Worker with the binding name:
-
-```text
-LEADERBOARD
+```sh
+npm install
+npm run dev
 ```
 
-The Worker exposes:
+Open http://localhost:4173. Static files reload as they change. Local scores use separate, persistent development storage in ignored `work/dev-kv.json`; they do not pollute the public board.
 
-```text
-GET  /leaderboard
-POST /leaderboard
-GET  /leaderboard.svg
+Without a local model key, chat forwards to the deployed public Worker. To test prompt edits locally, copy `grok-relay/.dev.vars.example` to `grok-relay/.dev.vars`, enter the xAI key privately, then restart the server. Never commit that file.
+
+## Cloudflare configuration
+
+Worker: `arman-dogru-chat`. Entrypoint: `grok-relay/agent-worker.js`.
+
+- `XAI_API_KEY`: encrypted secret, required for chat.
+- `XAI_MODEL`: defaults to `grok-4.3`.
+- `ALLOWED_ORIGINS`: comma-separated portfolio origins. The older singular `ALLOWED_ORIGIN` also works.
+- `LEADERBOARD`: KV binding to `arman-portfolio-leaderboard`; its namespace ID is recorded in Wrangler configuration.
+- `PROFANITY_BLOCKLIST_GZ_B64`: optional private, gzip/base64 moderation corpus. No corpus belongs in Git.
+
+If the private corpus is absent, the existing model service checks public display names. Moderation failures fail closed and the browser retains the result for retry.
+
+Deploy with an authenticated Cloudflare CLI:
+
+```sh
+npm run deploy:relay
 ```
 
-The browser posts scores directly to the Worker. The Worker recomputes the score from elapsed time and finishing position, validates the race/track protocol, validates the display name, applies the private moderation corpus, rate-limits submissions, and keeps the best score for each normalized display name.
+Alternatively, build a single module using `npm run build:relay` and paste `work/relay-deploy.js` into the Cloudflare code editor, then deploy. Keep existing encrypted secrets and the KV binding.
 
-`/leaderboard.svg` renders the same board as an SVG so the GitHub profile can display it without committing leaderboard updates back into the repository.
+## Leaderboard
 
-If the KV binding is missing, chat continues to work and the race falls back to a local browser board.
+Routes: `GET /health`, `GET /leaderboard`, `POST /leaderboard`, `GET /leaderboard.svg`.
 
-## Private moderation corpus
+The Worker validates names, race/track versions, elapsed time, position and recomputed score. Each submission has an independent KV key, so simultaneous players do not overwrite one shared array. The read path merges legacy data and keeps each normalized name's best score. KV propagation can be delayed; successful POST responses include the new entry immediately.
 
-Create a local `blocklist.txt`, one term per line, then encode it without committing the source file:
+The browser distinguishes a confirmed global save, a pending local save, and rejected input. Pending results remain visible alongside global results and can be retried. Earlier v4 local results are migrated.
 
-```bash
-gzip -c blocklist.txt | base64 | tr -d '\n'
-```
+The public board is a casual client-reported game leaderboard, not a cheat-proof competition. Origin checks are not authentication. The submission rate limit is best-effort KV-based.
 
-Paste the result into the Cloudflare secret `PROFANITY_BLOCKLIST_GZ_B64`. The public repository contains normalization and validation logic, but no profanity corpus.
+## Sources and privacy
 
-## Deployment note
+The agent receives bundled public portfolio evidence, public GitHub metadata and targeted README excerpts, recent conversation, selected page/race state, and public leaderboard rows. LinkedIn is a navigation link, not a scraped data source. The browser never receives server credentials, a shell, arbitrary private files or private GitHub data.
 
-Changing `grok-relay/worker.js` in GitHub updates the source of truth, but the running Worker must also be deployed (or connected to an automatic Git deployment) before new retrieval behavior is live.
+Conversation history stays in the visitor's browser; only recent turns are sent to the model service. The Worker does not store chat transcripts.

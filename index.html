@@ -30,6 +30,6 @@
   </main>
   <footer class="statusbar"><span>[arman]</span><b>0:zsh*</b><span>1:htop</span><span>2:nvim</span><span class="status-spacer"></span><span id="footerMode">EXPERIENCE</span><span>github.com/arman-dogru</span><span id="localClock">--:-- --</span></footer>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>window.ARMAN_CHAT_ENDPOINT='https://arman-dogru-chat.arman-dogru.workers.dev/';</script>
+  <script>window.ARMAN_CHAT_ENDPOINT=['localhost','127.0.0.1'].includes(location.hostname)?'/api/chat':'https://arman-dogru-chat.arman-dogru.workers.dev/';window.ARMAN_BOARD_ENDPOINT=['localhost','127.0.0.1'].includes(location.hostname)?'/api/leaderboard':'https://arman-dogru-chat.arman-dogru.workers.dev/leaderboard';</script>
   <script type="module" src="./terminal-v2.js"></script>
 </body></html>

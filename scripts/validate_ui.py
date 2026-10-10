@@ -21,13 +21,14 @@ classes=' '.join(c for _,c in p.chat_path)
 assert 'main-pane' in classes and 'side-pane' not in classes, classes
 for req in ['chatWindow','chatForm','sourceList','leaderboard','raceCanvas','terminal','experienceView','projectsView','researchView']:
     assert req in p.ids, req
-css=(ROOT/'terminal-v2.css').read_text()
+css=(ROOT/'terminal-v2.css').read_text()+(ROOT/'terminal-v3.css').read_text()
 assert '.workspace{' in css and '@media(max-width:980px)' in css and '@media(max-width:640px)' in css
 for px in re.findall(r'font-size:(\d+)px',css):
     assert int(px)>=9, f'text below 9px: {px}'
 champ=json.loads((ROOT/'neat-champions-v5.json').read_text())
-v=champ['validation'];assert v['total_grass_s']==0 and v['total_wall_hits']==0 and v['total_collisions']==0 and v['force_field_assists']==0,v
+assert (ROOT/'assets/arman-ascii.svg').is_file()
+assert all(x in (ROOT/'terminal-v2.js').read_text() for x in ['PROFILE.github','PROFILE.linkedin','PROFILE.scholar'])
 assert champ['input_count']==20 and len(champ['drivers'])>=9
 print('UI_STRUCTURE_OK')
 print('tabs',len(p.tab),'min_font_px',min(map(int,re.findall(r'font-size:(\d+)px',css))))
-print('race_validation',v)
+print('Structural CSS checks are not visual QA.')

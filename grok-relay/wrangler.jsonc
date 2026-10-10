@@ -3,8 +3,9 @@
   "name": "arman-dogru-chat",
   "main": "agent-worker.js",
   "compatibility_date": "2026-10-09",
+  "kv_namespaces": [{"binding": "LEADERBOARD", "id": "ca7c688eb04446be99fa2e171d95ef70"}],
   "vars": {
     "XAI_MODEL": "grok-4.3",
-    "ALLOWED_ORIGIN": "https://arman-dogru.arman-dogru.workers.dev"
+    "ALLOWED_ORIGINS": "https://arman-dogru.arman-dogru.workers.dev,https://arman-dogru.github.io"
   }
 }

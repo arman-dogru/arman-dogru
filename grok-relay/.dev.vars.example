@@ -1,0 +1,5 @@
+# Copy to .dev.vars (ignored by Git) to test the local prompt.
+XAI_API_KEY=
+XAI_MODEL=grok-4.3
+# Optional compressed moderation list; otherwise the model checks display names.
+PROFANITY_BLOCKLIST_GZ_B64=
