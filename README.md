@@ -25,7 +25,7 @@ The companion site is a working terminal-style portfolio rather than a decorativ
 - an **OpenStreetMap-based career journey** with satellite mode and event dossiers describing what I built, achieved, and learned at each stop;
 - public project launchers and research notes;
 - a tightly scoped **Grok portfolio Q&A** relay that never exposes the API key in the browser;
-- **NEAT Grand Prix v3** — a 10-car browser race against nine retrained neuroevolved drivers, with slower raceable handling, braking/reverse, recoverable collisions, grass/runoff, and controllable slip.
+- **NEAT Grand Prix v3** — a 10-car browser race against nine retrained neuroevolved drivers, with slower raceable handling, braking/reverse, recoverable collisions, grass/runoff, controllable slip, and steering calibrated by a fixed-budget evolutionary sweep.
 
 ```text
 help
@@ -52,11 +52,12 @@ The default race is **Intercity Istanbul Park**. The selectable circuit layouts 
 
 The paved road remains deliberately fixed at **3.5 car widths**, but v3 uses a larger simulation world and separates asphalt from grass/runoff and the outer collision boundary. The 120 Hz vehicle model works in longitudinal/lateral velocity coordinates: throttle, braking and reverse are distinct, steering authority decreases with speed, lateral velocity is damped rather than snapped to the body heading, sliding/steering scrub speed, grass slows the car aggressively, and outer-barrier collisions preserve enough inward motion to recover instead of gluing the car to the wall. Car-to-car contact still uses oriented-body collision resolution with linear and angular impulses.
 
-Nine v3 NEAT opponents were retrained for the new Istanbul physics. A deterministic path follower supplies a safe racing baseline while each evolved network learns a residual steering correction and pace bias. The committed headless pack validator then raced all nine together for 100 simulated seconds with traffic avoidance, collisions, grass/runoff, and recovery enabled: every agent progressed beyond roughly **2.08 laps**, the fastest reached about **2.24 laps**, and none ended stuck in recovery.
+Steering was calibrated by training the same 24-controller × 10-generation residual population across ten physics configurations. The selected setup (`responsive-fine-b`) materially increased low/high-speed steering authority while staying stable in pack racing. The final full-NEAT retrain produced nine champions that each covered roughly **2.20–2.23 laps in 70 seconds with zero wall contacts**. In the 100-second nine-agent pack simulation they covered **2.327–2.632 laps**, averaged **2.452 laps**, recorded **one total wall contact**, and **0/9** ended stuck in recovery.
+
+[Steering sweep and benchmark table →](./STEERING_SWEEP.md)  
+[Race / training notes →](./NEAT_RACE.md)
 
 Global leaderboard competition is intentionally limited to Istanbul Park so scores remain comparable. v3 resets the board because the physics, grid size, track identifier, and score formula are incompatible with v2 results. Display names are validated server-side with Unicode normalization, a character allowlist, length/repetition checks, private content filtering, reserved-name checks, and HTML escaping before they reach the profile SVG. The moderation vocabulary is supplied only through the `PROFANITY_BLOCKLIST_GZ_B64` GitHub Actions secret and is not stored in this public repository.
-
-[Read the race / training notes →](./NEAT_RACE.md)
 
 ---
 
