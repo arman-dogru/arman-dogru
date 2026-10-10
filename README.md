@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/wasm-lab/index.html">
+  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/index.html">
     <img src="./assets/hero.svg" width="100%" alt="Arman Doğru — Applied AI Researcher at Nokia Bell Labs" />
   </a>
 </p>
@@ -33,21 +33,38 @@ The recurring theme is simple: **make intelligent systems operate under real con
 
 ---
 
-## `launch --wasm`
+## `launch --terminal`
 
 <p align="center">
-  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/wasm-lab/index.html">
-    <img src="https://img.shields.io/badge/LAUNCH-WASM_EDGE--TWIN_LAB-47ffdf?style=for-the-badge&logo=webassembly&logoColor=05070d" alt="Launch WebAssembly Edge-Twin Lab" />
+  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/index.html">
+    <img src="https://img.shields.io/badge/LAUNCH-CINEMATIC_RESEARCH_TERMINAL-7dcfff?style=for-the-badge&logo=gnometerminal&logoColor=05070d" alt="Launch cinematic research terminal" />
   </a>
   &nbsp;
-  <a href="https://github.com/arman-dogru/arman-dogru/tree/main/wasm-lab">
-    <img src="https://img.shields.io/badge/VIEW-SOURCE-b286ff?style=for-the-badge&logo=github&logoColor=white" alt="View source" />
+  <a href="https://github.com/arman-dogru/arman-dogru">
+    <img src="https://img.shields.io/badge/VIEW-SOURCE-bb9af7?style=for-the-badge&logo=github&logoColor=white" alt="View source" />
   </a>
 </p>
 
-**A zero-backend browser experiment built specifically for this profile:** a C kernel compiled to WebAssembly evolves **2,048 synthetic agents** while the browser renders the field in real time. Move the pointer to perturb the simulation and watch the measured WASM step time update live. The module is about **1.6 KB** and all simulation compute happens client-side.
+The profile has an executable companion site styled as a cinematic research/intelligence terminal. It is not a screenshot: the shell accepts commands, reconstructs a **public career journey** across Istanbul, Ottawa, San Francisco, and Kanata, launches projects, queries live public GitHub metadata, switches terminal themes, and embeds the original WebAssembly edge-twin kernel as a subsystem.
 
-> The telemetry-reduction numbers inside the demo are explicitly synthetic/illustrative; they are not measurements from Bell Labs research.
+Try:
+
+```text
+help
+journey
+trace 2025
+projects
+open sionna
+research
+scan
+wasm
+local-ai
+chat what did Arman work on at Huawei?
+```
+
+`local-ai` optionally boots **WebLLM + WebGPU** and runs a small Qwen model entirely in the visitor's browser. No portfolio API key is exposed. The first local-model launch requires a substantial model download/cache and compatible WebGPU hardware.
+
+> The process monitor is intentionally cinematic/simulated. Career events, research claims, and project links are based on the public profile data; the map is a visualization of that public timeline, not live location tracking.
 
 ---
 
