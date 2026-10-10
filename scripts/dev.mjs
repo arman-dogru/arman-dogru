@@ -30,7 +30,7 @@ const server=createServer(async(req,res)=>{
       // The public relay is only a fallback when local model credentials are absent.
       // Local score submissions always exercise the checked-out Worker with separate storage.
       let response;
-      if(path==='/chat'&&!env.XAI_API_KEY){response=await fetch('https://arman-dogru-chat.arman-dogru.workers.dev/',{method:'POST',headers:{'content-type':'application/json'},body,signal:AbortSignal.timeout(45000)})}
+      if(path==='/chat'&&!env.XAI_API_KEY){response=await fetch('https://arman-dogru-chat.arman-dogru.workers.dev/',{method:'POST',headers:{'content-type':'application/json'},body,signal:AbortSignal.timeout(70000)})}
       else response=await worker.fetch(new Request(`http://localhost:${port}${path}`,{method:req.method,headers:{'content-type':'application/json',origin:`http://localhost:${port}`},...(body.length?{body}: {})}),env,{});
       // fetch() has already decompressed the upstream body. Forwarding its encoding/length
       // headers made the browser attempt to decode the JSON a second time.

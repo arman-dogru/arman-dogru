@@ -1,4 +1,4 @@
-import {renderMarkdown} from './chat-markdown.js';
+import {renderMarkdown,publicLink} from './chat-markdown.js';
 export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatInput,contextProvider,onSources}){
   const endpoint=()=>window.ARMAN_CHAT_ENDPOINT||localStorage.getItem('arman.chatEndpoint')||'';
   const interrupted='The connection slipped. Your question is still here. Try again.';
@@ -46,9 +46,11 @@ export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatIn
       if(!url)throw new Error('unconfigured');
       const res=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:text,history:prior,context:clientContext()}),signal:activeController.signal});
       const data=await res.json();
-      if(!res.ok||typeof data.reply!=='string'||!data.reply.trim())throw new Error('unavailable');
+      if(!res.ok||data.degraded||typeof data.reply!=='string'||!data.reply.trim())throw new Error('unavailable');
       if(turn!==generation)return;
-      pending?.remove();const reply=data.reply.trim();
+      pending?.remove();let reply=data.reply.trim();
+      const citations=(Array.isArray(data.citations)?data.citations:[]).map(c=>publicLink(c?.url)).filter((url,i,all)=>url&&!reply.includes(url)&&all.indexOf(url)===i).slice(0,4);
+      if(citations.length)reply+='\n\n'+citations.map((url,i)=>`[${i+1}](${url})`).join(' · ');
       renderMessage({role:'assistant',content:reply});onSources?.(data.sources||[]);
       if(fromTerminal)addBlock(`<b>MORPHEUS</b><div class="chat-body">${renderMarkdown(reply)}</div>`);
     }catch{
