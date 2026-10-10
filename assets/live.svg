@@ -1,6 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="190" viewBox="0 0 1200 190" role="img" aria-label="Live GitHub profile telemetry">
 <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#06111d"/><stop offset="1" stop-color="#090515"/></linearGradient><style>.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.v{fill:#47ffdf;font-size:26px;font-weight:700}.k{fill:#70859f;font-size:11px;letter-spacing:2px}.s{fill:#b286ff;font-size:14px}</style></defs>
 <rect width="1200" height="190" rx="18" fill="url(#g)" stroke="#47ffdf" stroke-opacity=".18"/>
-<text class="m" x="34" y="35" fill="#dce9f8" font-size="14" letter-spacing="3">PROFILE TELEMETRY // AUTO-SYNC INITIALIZING</text><circle cx="18" cy="30" r="4" fill="#47ffdf"/>
-<g class="m"><text class="k" x="34" y="82">PUBLIC REPOS</text><text class="v" x="34" y="117">41</text><text class="k" x="220" y="82">CURRENT ROLE</text><text class="s" x="220" y="114">NOKIA BELL LABS</text><text class="k" x="590" y="82">SYNC</text><text class="s" x="590" y="114">FIRST ACTION RUN WILL REPLACE THIS CARD</text></g>
+<text class="m" x="34" y="35" fill="#dce9f8" font-size="14" letter-spacing="3">PROFILE TELEMETRY // AUTO-SYNCED BY GITHUB ACTIONS</text>
+<circle cx="18" cy="30" r="4" fill="#47ffdf"/>
+<g class="m"><text class="k" x="34" y="82">PUBLIC REPOS</text><text class="v" x="34" y="117">41</text>
+<text class="k" x="220" y="82">ACTIVE / 90D</text><text class="v" x="220" y="117">6</text>
+<text class="k" x="405" y="82">FOLLOWERS</text><text class="v" x="405" y="117">3</text>
+<text class="k" x="590" y="82">PRIMARY LANGUAGES</text><text class="s" x="590" y="113">JavaScript · Python · Java</text>
+<text class="k" x="34" y="158">LATEST ORIGINAL REPO PUSH</text><text class="s" x="265" y="158">arman-dogru  //  2026-10-10</text></g>
 </svg>
