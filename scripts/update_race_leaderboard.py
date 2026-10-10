@@ -3,7 +3,7 @@ import base64,gzip,html,json,os,re,sys,unicodedata
 from datetime import datetime,timezone
 from pathlib import Path
 
-VERSION='neat-race-v2'; TRACK='istanbul-park-v2'; RACERS=8
+VERSION='neat-race-v3'; TRACK='istanbul-park-v3'; RACERS=10
 BLOCKLIST_ENV='PROFANITY_BLOCKLIST_GZ_B64'
 RESERVED=('admin','administrator','moderator','github','system','official','leaderboard','racebot','raceleaderboard','armandogru','nokiabelllabs')
 LEET=str.maketrans({'@':'a','4':'a','3':'e','1':'i','!':'i','|':'i','0':'o','5':'s','$':'s','7':'t','+':'t'})
@@ -44,7 +44,6 @@ def is_blocked_name(name,blocked):
     full=skeleton(normalized)
     if full in blocked or any(token in blocked for token in tokens):
         return True
-    # Catch short prefix/suffix obfuscation while avoiding broad arbitrary substring matching.
     for token in tokens:
         for term in blocked:
             if len(term)>=4 and len(token)<=len(term)+2 and (token.startswith(term) or token.endswith(term)):
@@ -80,7 +79,7 @@ def render(entries,updated):
         y=137
         for i,e in enumerate(entries[:8],1):
             name=esc(e.get('display_name') or e['github'])[:30];rows.append(f'<text class="m rank" x="42" y="{y}">#{i}</text><text class="m name" x="105" y="{y}">{name}</text><text class="m score" x="760" y="{y}">{int(e["score"]):,}</text><text class="m time" x="1015" y="{y}">{int(e["elapsed_ms"])/1000:.3f}s</text>');y+=24
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="350" viewBox="0 0 1200 350" role="img" aria-label="NEAT Istanbul Grand Prix leaderboard"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#11111b"/><stop offset="1" stop-color="#181825"/></linearGradient><pattern id="p" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#89dceb" stroke-opacity=".035"/></pattern><style>.m{{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}}.title{{fill:#cdd6f4;font-size:22px;font-weight:700}}.sub{{fill:#7f849c;font-size:12px}}.accent{{fill:#a6e3a1}}.muted{{fill:#7f849c}}.rank{{fill:#cba6f7;font-size:14px}}.name{{fill:#cdd6f4;font-size:14px;font-weight:700}}.score{{fill:#a6e3a1;font-size:14px;font-weight:700;text-anchor:end}}.time{{fill:#89dceb;font-size:13px;text-anchor:end}}</style></defs><rect width="1200" height="350" rx="18" fill="url(#g)"/><rect width="1200" height="350" rx="18" fill="url(#p)"/><rect x="1" y="1" width="1198" height="348" rx="17" fill="none" stroke="#45475a"/><text class="m title" x="38" y="52">ISTANBUL PARK // NEAT GRAND PRIX</text><text class="m sub" x="38" y="78">8-car grid · 3 laps · best accepted score per GitHub account</text><line x1="38" y1="105" x2="1162" y2="105" stroke="#45475a"/>{''.join(rows)}<text class="m muted" x="38" y="326" font-size="10">TRACK {TRACK} · GAME {VERSION} · UPDATED {esc(updated)}</text></svg>'''
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="350" viewBox="0 0 1200 350" role="img" aria-label="NEAT Istanbul Grand Prix leaderboard"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#11111b"/><stop offset="1" stop-color="#181825"/></linearGradient><pattern id="p" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#89dceb" stroke-opacity=".035"/></pattern><style>.m{{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}}.title{{fill:#cdd6f4;font-size:22px;font-weight:700}}.sub{{fill:#7f849c;font-size:12px}}.accent{{fill:#a6e3a1}}.muted{{fill:#7f849c}}.rank{{fill:#cba6f7;font-size:14px}}.name{{fill:#cdd6f4;font-size:14px;font-weight:700}}.score{{fill:#a6e3a1;font-size:14px;font-weight:700;text-anchor:end}}.time{{fill:#89dceb;font-size:13px;text-anchor:end}}</style></defs><rect width="1200" height="350" rx="18" fill="url(#g)"/><rect width="1200" height="350" rx="18" fill="url(#p)"/><rect x="1" y="1" width="1198" height="348" rx="17" fill="none" stroke="#45475a"/><text class="m title" x="38" y="52">ISTANBUL PARK // NEAT GRAND PRIX</text><text class="m sub" x="38" y="78">10-car grid · 3 laps · best accepted score per GitHub account</text><line x1="38" y1="105" x2="1162" y2="105" stroke="#45475a"/>{''.join(rows)}<text class="m muted" x="38" y="326" font-size="10">TRACK {TRACK} · GAME {VERSION} · UPDATED {esc(updated)}</text></svg>'''
 
 def main(event_path):
     blocked=load_private_blocklist()
