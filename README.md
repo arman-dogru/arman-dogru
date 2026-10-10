@@ -12,20 +12,19 @@
 
 <p align="center">
   <b>Applied AI Researcher @ Nokia Bell Labs</b><br/>
-  Digital Twins · Computer Vision · Multi-Agent RL · Agentic Systems · Wireless Simulation
+  Digital Twins · Computer Vision · Multi-Agent RL · Wireless Simulation
 </p>
 
 ---
 
 ## `./portfolio`
 
-The companion site is a working terminal-style portfolio with:
+The companion site is a terminal-style portfolio with four main pieces:
 
-- a tmux / neovim-inspired shell for navigating my work;
-- an **OpenStreetMap-based career journey** with satellite mode and event dossiers;
-- public project launchers and research notes;
-- a tightly scoped **Grok portfolio Q&A** relay that never exposes the API key in the browser;
-- **NEAT Grand Prix v3.2** — a 10-car Istanbul Park race with traffic-trained neuroevolved opponents, physical contact, braking/reverse, recoverable slip, player-follow camera and a minimap.
+- a command-line shell for navigating my work;
+- a career map with event notes for each stop;
+- a scoped Grok Q&A panel about my public work; and
+- a 10-car race at Istanbul Park against NEAT drivers.
 
 ```text
 help
@@ -34,7 +33,6 @@ trace huawei
 projects
 research
 race
-leaderboard
 chat what did Arman work on at Bell Labs?
 ```
 
@@ -46,15 +44,13 @@ chat what did Arman work on at Bell Labs?
 
 ---
 
-## `./neat_gp --track istanbul`
+## `./neat_gp`
 
-The default race is **Intercity Istanbul Park**. The road remains exactly **3.5 car widths** wide. The browser uses a 120 Hz longitudinal/lateral vehicle model with distinct throttle, braking and reverse behavior, speed-sensitive steering, controllable slip, grass/runoff and oriented-body car-to-car collision.
+**NEAT Grand Prix** is a 10-car race at Istanbul Park against opponents evolved with NEAT. They were trained in packs so they react to traffic as well as the track. The game uses one circuit only: Istanbul Park.
 
-v3.2 makes steering slightly more responsive and trains the AI differently. The nine opponents now use a **16-input NEAT controller** that sees both track state and nearby traffic. Training uses a population of 36 over 24 generations, with controllers evaluated in moving **nine-car packs** rather than only in isolation.
+Player handling focuses on braking into corners, controllable slip, and recovery after contact. The AI grid mixes stronger and weaker drivers instead of cloning a single champion into every car.
 
-The AI also has a narrow asphalt-safety invariant that keeps its whole car body on the paved surface; training penalizes use of that intervention. In three committed 120-second pack regressions, the shipped grid recorded **0 grass time, 0 outer-wall hits, and 0 stuck recoveries**, while every agent covered at least 2.85 laps. The browser now follows the player at a modest zoom with a full-track minimap.
-
-[Read the race, training and validation notes →](./NEAT_RACE.md)
+[Race / training notes →](./NEAT_RACE.md)
 
 ---
 
@@ -75,7 +71,7 @@ Developed **PANAMA**, a network-aware MARL framework for multi-agent path findin
 
 | Project | What it is |
 |---|---|
-| **[Ottawa Sionna RT Cellular Digital Twin](https://github.com/arman-dogru/Sionna_Canada_Testbed)** | Reproducible outdoor cellular-propagation digital twin built from public Ottawa geometry, terrain, spectrum-site data, NVIDIA Sionna RT, APIs, and a browser engineering UI. |
+| **[Ottawa Sionna RT Cellular Digital Twin](https://github.com/arman-dogru/Sionna_Canada_Testbed)** | Outdoor cellular-propagation digital twin built from public Ottawa geometry, terrain, spectrum-site data, NVIDIA Sionna RT, and a browser engineering UI. |
 | **[Skate 3 Rust — macOS Apple Silicon](https://github.com/arman-dogru/skate3-rust-MacOS)** | Native ARM64 macOS port/continuation of the open-source Skate 3 Rust Engine using Rust, Bevy, SDL3, Metal, and Apple Silicon CI. |
 | **[GSANet-DCNN](https://github.com/arman-dogru/GSANet-DCNN)** | Guided slot-attention architecture for unsupervised video object segmentation using spatial, temporal, and optical-flow information. |
 | **[Developer Performance Tracker](https://github.com/arman-dogru/ai-powered-developer-productivity-dashboard)** | LLM-assisted GitHub engineering analytics for pull-request review, developer analysis, and productivity dashboards. |
@@ -94,8 +90,8 @@ Developed **PANAMA**, a network-aware MARL framework for multi-agent path findin
 
 ## `cat race-leaderboard.svg`
 
-<p align="center"><img src="./assets/race-leaderboard.svg" width="100%" alt="Istanbul Park NEAT Grand Prix leaderboard" /></p>
+<p align="center"><img src="https://arman-dogru-chat.arman-dogru.workers.dev/leaderboard.svg" width="100%" alt="Istanbul Park NEAT Grand Prix leaderboard" /></p>
 
 ---
 
-<p align="center"><code>Build systems that still work after the demo.</code></p>
+Contact: [LinkedIn](https://www.linkedin.com/in/arman-dogru/) · arman.dogru@gmail.com

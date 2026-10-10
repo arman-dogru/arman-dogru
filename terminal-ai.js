@@ -1,30 +1,75 @@
-export function createAI({addLine,addBlock,escapeHtml}){
+export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatInput}){
   const endpoint=()=>window.ARMAN_CHAT_ENDPOINT||localStorage.getItem('arman.chatEndpoint')||'';
   const canonical='https://arman-dogru.arman-dogru.workers.dev';
-  async function chat(message){
-    const text=(message||'').trim();
-    if(!text){addLine('usage: chat <question about Arman or his work>','yellow');return}
-    if(/^(help|--help|-h)$/i.test(text)){
-      addBlock('<b>CHAT // PORTFOLIO Q&A</b><br>Ask one scoped question about Arman\'s public work.<br><br><span class="cyan">chat what did Arman work on at Huawei?</span><br><span class="cyan">chat summarize the Sionna project</span><br><span class="cyan">chat what is Arman researching at Bell Labs?</span><br><br>No browsing, no agent loops, no private-data inference.');
+  const STORAGE_KEY='arman.chat.history';
+  let history=[];
+  function loadHistory(){
+    try{history=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{history=[]}
+    if(!Array.isArray(history))history=[];
+    history=history.filter(x=>x&&typeof x.role==='string'&&typeof x.content==='string').slice(-12);
+  }
+  function saveHistory(){localStorage.setItem(STORAGE_KEY,JSON.stringify(history.slice(-12)))}
+  function renderHistory(){
+    if(!chatWindow)return;
+    chatWindow.innerHTML='';
+    if(!history.length){
+      const hello=[
+        {role:'assistant',content:'I am Morpheus in portfolio mode. Ask about Arman\'s work, research, papers, or projects.'},
+        {role:'assistant',content:'If you are searching for the person behind the code, start with: “What makes Arman useful on hard problems?”'}
+      ];
+      hello.forEach(m=>renderMessage(m,false));
       return;
     }
-    if(text.length>600){addLine('chat input rejected: maximum 600 characters.','error');return}
+    history.forEach(m=>renderMessage(m,false));
+    chatWindow.scrollTop=chatWindow.scrollHeight;
+  }
+  function renderMessage(m,store=true){
+    if(store){history.push({role:m.role,content:m.content});history=history.slice(-12);saveHistory()}
+    if(!chatWindow)return;
+    const div=document.createElement('div');
+    div.className=`chat-msg ${m.role==='user'?'user':'ai'}`;
+    div.innerHTML=`<span class="who">${m.role==='user'?'YOU':'MORPHEUS'}</span>${escapeHtml(m.content).replace(/\n/g,'<br>')}`;
+    chatWindow.appendChild(div);
+    chatWindow.scrollTop=chatWindow.scrollHeight;
+  }
+  async function send(message,{fromTerminal=false}={}){
+    const text=(message||'').trim();
+    if(!text){if(fromTerminal)addLine('usage: chat <question about Arman or his work>','yellow');return}
+    if(/^help$/i.test(text)){
+      const help='Ask about Arman\'s research, publications, timeline, or public projects. Use “chat clear” to wipe local memory.';
+      if(fromTerminal)addBlock(`<b>CHAT HELP</b><br>${escapeHtml(help)}`); else renderMessage({role:'assistant',content:help});
+      return;
+    }
+    if(/^clear$/i.test(text)){
+      history=[];saveHistory();renderHistory();if(fromTerminal)addLine('chat memory cleared','green');return;
+    }
     const url=endpoint();
-    if(!url){addBlock(`<b>GROK RELAY NOT CONFIGURED</b><br>This static site never stores an xAI key. Deploy the included <span class="cyan">grok-relay/worker.js</span>, set <span class="purple">XAI_API_KEY</span> as a server secret, then configure this browser with:<br><br><span class="cyan">connect-chat https://your-worker.example.workers.dev/</span>`);return}
-    const marker=addLine('<span class="purple">grok</span> // answering from portfolio context…','dim');
+    if(!url){
+      const msg='Chat relay is not configured. Open the canonical portfolio or set a worker URL with connect-chat <url>.';
+      if(fromTerminal)addBlock(`<b>CHAT RELAY NOT CONFIGURED</b><br>${escapeHtml(msg)}`); else renderMessage({role:'assistant',content:msg});
+      return;
+    }
+    const prior=history.slice(-10);
+    renderMessage({role:'user',content:text});
+    if(fromTerminal)addLine(`<span class="purple">you</span> // ${escapeHtml(text)}`,'dim');
     try{
-      const res=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:text})});
+      const res=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:text,history:prior})});
       const data=await res.json().catch(()=>({}));
       if(!res.ok)throw new Error(data.error||`HTTP ${res.status}`);
-      marker.remove();addBlock(`<b>GROK // PORTFOLIO MODE</b><br>${escapeHtml(data.reply||'No response text returned.').replace(/\n/g,'<br>')}`);
+      const reply=data.reply||'No response text returned.';
+      renderMessage({role:'assistant',content:reply});
+      if(fromTerminal)addBlock(`<b>MORPHEUS</b><br>${escapeHtml(reply).replace(/\n/g,'<br>')}`);
     }catch(err){
-      marker.remove();
       const msg=String(err?.message||err);
-      if(/failed to fetch|networkerror|load failed/i.test(msg)){
-        const here=location.origin;
-        addBlock(`<b>GROK RELAY UNREACHABLE</b><br>Browser network/CORS request failed from <span class="yellow">${escapeHtml(here)}</span>.<br><br>Open the canonical portfolio at <span class="cyan">${canonical}</span> or verify that the Cloudflare chat Worker is deployed and its <span class="purple">ALLOWED_ORIGIN</span> matches the portfolio origin.`);
-      }else addLine(`Grok relay failed: ${escapeHtml(msg)}`,'error');
+      const out=/failed to fetch|networkerror|load failed/i.test(msg)
+        ?`The path is there, but the door is closed. Open the canonical portfolio at ${canonical} or verify the worker and CORS origin.`
+        :`Relay error: ${msg}`;
+      if(fromTerminal)addLine(`Grok relay failed: ${escapeHtml(out)}`,'error');
+      else renderMessage({role:'assistant',content:out});
     }
   }
-  return{chat};
+  if(chatForm){chatForm.addEventListener('submit',e=>{e.preventDefault();const v=chatInput?.value||'';if(chatInput)chatInput.value='';send(v)});}  
+  loadHistory();
+  renderHistory();
+  return{chat:send,clear:()=>send('clear'),renderHistory};
 }

@@ -1,49 +1,57 @@
-# Grok portfolio chat setup
+# Cloudflare portfolio backend
 
-The browser never receives the xAI API key. `grok-relay/worker.js` is a minimal Cloudflare Worker-style relay that performs exactly one model request per visitor question.
+`grok-relay/worker.js` serves two small backend features for the portfolio:
 
-## Model and cost controls
+1. the Grok Q&A panel; and
+2. the Istanbul Park leaderboard.
 
-The relay defaults to `grok-4.3` with `reasoning_effort: "none"`, `temperature: 0.15`, and `max_tokens: 180`. There are no tools, searches, function calls, recursive agents, or follow-up model loops.
+The browser never receives the xAI key or the private moderation corpus.
 
-Environment variables / secrets:
+## Worker variables and secrets
 
-- `XAI_API_KEY` — required secret.
-- `XAI_MODEL` — optional override. Default: `grok-4.3`.
-- `ALLOWED_ORIGIN` — strongly recommended; set it to the production portfolio origin.
+Configure these on the `arman-dogru-chat` Worker:
 
-For Cloudflare, also add an edge Rate Limiting rule for the worker route. A reasonable portfolio limit is 6–10 requests per IP per minute with a small daily budget/alert at the xAI account level.
+- `XAI_API_KEY` — secret, required for chat.
+- `XAI_MODEL` — optional, defaults to `grok-4.3`.
+- `ALLOWED_ORIGIN` — set to the production portfolio origin, for example `https://arman-dogru.arman-dogru.workers.dev`.
+- `PROFANITY_BLOCKLIST_GZ_B64` — secret, required for global score submissions. It is a gzip-compressed, base64-encoded newline-separated moderation list.
 
-## Scope guardrails
+The chat uses one model request per visitor question, `reasoning_effort: "none"`, `temperature: 0.15`, and a short output cap. It has no tools, browsing, recursive calls, or agent loop.
 
-The system prompt allows answers only about Arman Doğru's public professional background, education, research, publications, and public projects. It explicitly blocks prompt override attempts, private-personal inference, unrelated questions, unpublished/confidential research claims, tool use, browsing, and chain-of-thought disclosure.
+Conversation history is kept in the visitor's browser and only the most recent turns are sent with each chat request. The Worker does not persist chat transcripts.
 
-The relay additionally:
+## Leaderboard storage
 
-- accepts POST only;
-- requires JSON;
-- limits request bodies and question length;
-- normalizes Unicode/control characters;
-- restricts CORS when `ALLOWED_ORIGIN` is configured;
-- does not return upstream error bodies to clients;
-- sends one model request and returns one short text answer.
-
-## Front-end configuration
-
-After deployment, either define before `terminal.js` loads:
-
-```html
-<script>window.ARMAN_CHAT_ENDPOINT = "https://your-worker.example.workers.dev/";</script>
-```
-
-or use the terminal once in that browser:
+Create a Cloudflare KV namespace and bind it to the Worker with the binding name:
 
 ```text
-connect-chat https://your-worker.example.workers.dev/
+LEADERBOARD
 ```
 
-Then:
+In the Cloudflare dashboard this is under the Worker's **Settings → Bindings** section.
+
+The Worker exposes:
 
 ```text
-chat what did Arman work on at Huawei?
+GET  /leaderboard
+POST /leaderboard
+GET  /leaderboard.svg
 ```
+
+The browser posts scores directly to the Worker. The Worker recomputes the score from elapsed time and finishing position, validates the race/track version, validates the display name, applies the private moderation corpus, rate-limits submissions, and keeps the best score for each normalized display name.
+
+`/leaderboard.svg` renders the same board as an SVG so the GitHub profile can display it without committing leaderboard updates back into the repository.
+
+If the KV binding is missing, chat continues to work and the race falls back to a local browser board.
+
+## Private moderation corpus
+
+Create a local `blocklist.txt`, one term per line, then encode it without committing the source file:
+
+```bash
+gzip -c blocklist.txt | base64 | tr -d '\n'
+```
+
+Paste the result into the Cloudflare secret `PROFANITY_BLOCKLIST_GZ_B64`.
+
+The public repository contains normalization and validation logic, but no profanity corpus.
