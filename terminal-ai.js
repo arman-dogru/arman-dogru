@@ -1,5 +1,6 @@
 export function createAI({addLine,addBlock,escapeHtml}){
   const endpoint=()=>window.ARMAN_CHAT_ENDPOINT||localStorage.getItem('arman.chatEndpoint')||'';
+  const canonical='https://arman-dogru.arman-dogru.workers.dev';
   async function chat(message){
     const text=(message||'').trim();
     if(!text){addLine('usage: chat <question about Arman or his work>','yellow');return}
@@ -12,7 +13,14 @@ export function createAI({addLine,addBlock,escapeHtml}){
       const data=await res.json().catch(()=>({}));
       if(!res.ok)throw new Error(data.error||`HTTP ${res.status}`);
       marker.remove();addBlock(`<b>GROK // PORTFOLIO MODE</b><br>${escapeHtml(data.reply||'No response text returned.').replace(/\n/g,'<br>')}`);
-    }catch(err){marker.remove();addLine(`Grok relay failed: ${escapeHtml(err.message)}`,'error')}
+    }catch(err){
+      marker.remove();
+      const msg=String(err?.message||err);
+      if(/failed to fetch|networkerror|load failed/i.test(msg)){
+        const here=location.origin;
+        addBlock(`<b>GROK RELAY UNREACHABLE</b><br>Browser network/CORS request failed from <span class="yellow">${escapeHtml(here)}</span>.<br><br>Open the canonical portfolio at <span class="cyan">${canonical}</span> or verify that the Cloudflare chat Worker is deployed and its <span class="purple">ALLOWED_ORIGIN</span> matches the portfolio origin.`);
+      }else addLine(`Grok relay failed: ${escapeHtml(msg)}`,'error');
+    }
   }
   return{chat};
 }
