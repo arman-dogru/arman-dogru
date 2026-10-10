@@ -25,7 +25,7 @@ The companion site is a working terminal-style portfolio rather than a decorativ
 - an **OpenStreetMap-based career journey** with satellite mode and event dossiers describing what I built, achieved, and learned at each stop;
 - public project launchers and research notes;
 - a tightly scoped **Grok portfolio Q&A** relay that never exposes the API key in the browser;
-- **NEAT Grand Prix v2** — an 8-car browser race against seven retrained neuroevolved drivers.
+- **NEAT Grand Prix v3** — a 10-car browser race against nine retrained neuroevolved drivers, with slower raceable handling, braking/reverse, recoverable collisions, grass/runoff, and controllable slip.
 
 ```text
 help
@@ -48,13 +48,13 @@ chat what did Arman work on at Bell Labs?
 
 ## `./neat_gp --track istanbul`
 
-The default race is **Intercity Istanbul Park**. The selectable circuit layouts are sourced from the MIT-licensed `bacinger/f1-circuits` GeoJSON dataset: Istanbul Park, Monza, Spa-Francorchamps, and Monaco.
+The default race is **Intercity Istanbul Park**. The selectable circuit layouts are sourced from the MIT-licensed `bacinger/f1-circuits` GeoJSON dataset: Istanbul Park, Monza, Spa-Francorchamps, and Monaco. Istanbul Park is pinned locally so the browser game and the training harness use the same centerline geometry.
 
-The road is deliberately fixed at **3.5 car widths**. The physics model runs at 120 Hz and includes speed-dependent lateral grip / drift, track-edge collision, and full car-to-car oriented-box collision using SAT plus linear and angular collision impulses.
+The paved road remains deliberately fixed at **3.5 car widths**, but v3 uses a larger simulation world and separates asphalt from grass/runoff and the outer collision boundary. The 120 Hz vehicle model works in longitudinal/lateral velocity coordinates: throttle, braking and reverse are distinct, steering authority decreases with speed, lateral velocity is damped rather than snapped to the body heading, sliding/steering scrub speed, grass slows the car aggressively, and outer-barrier collisions preserve enough inward motion to recover instead of gluing the car to the wall. Car-to-car contact still uses oriented-body collision resolution with linear and angular impulses.
 
-Seven new NEAT champions were retrained for the v2 physics. The training code and exported networks are committed in this repository; the exported champions completed roughly 7–8 laps each in the extended post-training verification run.
+Nine v3 NEAT opponents were retrained for the new Istanbul physics. A deterministic path follower supplies a safe racing baseline while each evolved network learns a residual steering correction and pace bias. The committed headless pack validator then raced all nine together for 100 simulated seconds with traffic avoidance, collisions, grass/runoff, and recovery enabled: every agent progressed beyond roughly **2.08 laps**, the fastest reached about **2.24 laps**, and none ended stuck in recovery.
 
-Global leaderboard competition is intentionally limited to Istanbul Park so scores remain comparable. Display names are validated server-side with Unicode normalization, a character allowlist, length/repetition checks, private content filtering, reserved-name checks, and HTML escaping before they reach the profile SVG. The moderation vocabulary is supplied only through the `PROFANITY_BLOCKLIST_GZ_B64` GitHub Actions secret and is not stored in this public repository.
+Global leaderboard competition is intentionally limited to Istanbul Park so scores remain comparable. v3 resets the board because the physics, grid size, track identifier, and score formula are incompatible with v2 results. Display names are validated server-side with Unicode normalization, a character allowlist, length/repetition checks, private content filtering, reserved-name checks, and HTML escaping before they reach the profile SVG. The moderation vocabulary is supplied only through the `PROFANITY_BLOCKLIST_GZ_B64` GitHub Actions secret and is not stored in this public repository.
 
 [Read the race / training notes →](./NEAT_RACE.md)
 
