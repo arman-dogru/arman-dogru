@@ -1,6 +1,18 @@
-export function createAI({ addLine, addBlock, escapeHtml, context }) {
-  let engine=null,state='offline';
-  async function bootLocal(){if(state==='online'){addLine('local LLM already online. run: chat <message>','green');return}if(state==='loading'){addLine('local LLM is already loading…','yellow');return}if(!('gpu' in navigator)){addLine('WebGPU unavailable in this browser. Configure a relay with connect-chat <url>.','error');return}state='loading';addBlock(`<b>LOCAL AI BOOT</b><br>Engine: <span class="cyan">WebLLM / WebGPU</span><br>Model: <span class="purple">Qwen2.5-0.5B-Instruct-q4f16_1-MLC</span><br>Privacy: inference stays in this browser.<br><br><span class="yellow">First launch downloads and caches a substantial model. Expect noticeable GPU memory use.</span>`);const progress=addLine('loading WebLLM runtime…','dim');try{const webllm=await import('https://esm.run/@mlc-ai/web-llm');engine=await webllm.CreateMLCEngine('Qwen2.5-0.5B-Instruct-q4f16_1-MLC',{initProgressCallback:p=>{progress.innerHTML=`<span class="purple">local-ai</span> // ${escapeHtml(p.text||'loading model…')}`}});state='online';progress.innerHTML='<span class="green">local-ai // ONLINE // WebGPU inference ready</span>';addLine('run: chat ask me about Arman’s research trajectory','cyan')}catch(err){state='failed';progress.remove();addLine(`local AI boot failed: ${escapeHtml(err.message)} // use connect-chat <url> for a remote relay`,'error')}}
-  async function chat(message){if(!message){addLine('usage: chat <message>','yellow');return}if(state==='online'&&engine){const marker=addLine('<span class="purple">local-ai</span> // generating on your GPU…','dim');try{const reply=await engine.chat.completions.create({messages:[{role:'system',content:context},{role:'user',content:message}],temperature:.45,max_tokens:320});marker.remove();addBlock(`<b>LOCAL LLM</b><br>${escapeHtml(reply.choices?.[0]?.message?.content||'No response text returned.').replace(/\n/g,'<br>')}`)}catch(err){marker.remove();addLine(`local LLM failed: ${escapeHtml(err.message)}`,'error')}return}const endpoint=localStorage.getItem('arman.chatEndpoint');if(!endpoint){addBlock(`<b>NO LLM ACTIVE</b><br>Option A — run <span class="cyan">local-ai</span> to download a WebGPU model and keep inference entirely in-browser.<br><br>Option B — configure a rate-limited server relay with <span class="cyan">connect-chat https://your-relay.example.com/chat</span>.<br><br>No API keys are ever stored in this static page.`);return}const marker=addLine('<span class="purple">llm</span> // thinking…','dim');try{const res=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message,session:'portfolio'})});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();marker.remove();addBlock(`<b>LLM</b><br>${escapeHtml(data.reply||data.output||data.content||'No response text returned.').replace(/\n/g,'<br>')}`)}catch(err){marker.remove();addLine(`LLM relay failed: ${escapeHtml(err.message)}`,'error')}}
-  return{bootLocal,chat};
+export function createAI({addLine,addBlock,escapeHtml}){
+  const endpoint=()=>window.ARMAN_CHAT_ENDPOINT||localStorage.getItem('arman.chatEndpoint')||'';
+  async function chat(message){
+    const text=(message||'').trim();
+    if(!text){addLine('usage: chat <question about Arman or his work>','yellow');return}
+    if(text.length>600){addLine('chat input rejected: maximum 600 characters.','error');return}
+    const url=endpoint();
+    if(!url){addBlock(`<b>GROK RELAY NOT CONFIGURED</b><br>This static site never stores an xAI key. Deploy the included <span class="cyan">grok-relay/worker.js</span>, set <span class="purple">XAI_API_KEY</span> as a server secret, then configure this browser with:<br><br><span class="cyan">connect-chat https://your-worker.example.workers.dev/</span>`);return}
+    const marker=addLine('<span class="purple">grok</span> // answering from portfolio context…','dim');
+    try{
+      const res=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:text})});
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok)throw new Error(data.error||`HTTP ${res.status}`);
+      marker.remove();addBlock(`<b>GROK // PORTFOLIO MODE</b><br>${escapeHtml(data.reply||'No response text returned.').replace(/\n/g,'<br>')}`);
+    }catch(err){marker.remove();addLine(`Grok relay failed: ${escapeHtml(err.message)}`,'error')}
+  }
+  return{chat};
 }
