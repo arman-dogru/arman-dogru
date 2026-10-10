@@ -5,94 +5,66 @@
 </p>
 
 <p align="center">
+  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/index.html"><img src="https://img.shields.io/badge/OPEN-INTERACTIVE_TERMINAL-7dcfff?style=for-the-badge&logo=gnometerminal&logoColor=05070d" alt="Open interactive terminal"></a>
   <a href="https://www.linkedin.com/in/arman-dogru/"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"></a>
-  <a href="https://scholar.google.com/citations?user=BUeifBIAAAAJ"><img alt="Google Scholar" src="https://img.shields.io/badge/Google_Scholar-4285F4?style=for-the-badge&logo=googlescholar&logoColor=white"></a>
-  <a href="mailto:arman.dogru@gmail.com"><img alt="Email" src="https://img.shields.io/badge/Email-111827?style=for-the-badge&logo=gmail&logoColor=white"></a>
+  <a href="https://scholar.google.com/citations?user=BUeifBIAAAAJ"><img alt="Google Scholar" src="https://img.shields.io/badge/Scholar-4285F4?style=for-the-badge&logo=googlescholar&logoColor=white"></a>
 </p>
 
 <p align="center">
-  <b>Digital Twins</b> · <b>Edge Intelligence</b> · <b>Computer Vision</b> · <b>Multi-Agent RL</b> · <b>Agentic LLM Systems</b>
+  <b>Applied AI Researcher @ Nokia Bell Labs</b><br/>
+  Digital Twins · Computer Vision · Multi-Agent RL · Agentic Systems · Wireless Simulation
 </p>
 
 ---
 
-## `whoami`
+## `./portfolio`
 
-I am an **Applied AI Researcher at Nokia Bell Labs** and an M.Sc. Computer Science candidate at the **University of Ottawa**, specializing in AI. My work sits at the boundary between machine learning and physical systems: semantic edge-to-cloud digital twins, computer vision, wireless simulation, multi-agent reinforcement learning, and reliable multi-agent LLM workflows.
-
-The recurring theme is simple: **make intelligent systems operate under real constraints — latency, bandwidth, uncertainty, coordination, and imperfect observations.**
-
-<table>
-<tr>
-<td width="25%"><b>&gt;99.9%</b><br/><sub>data reduction in semantic edge-cloud digital-twin research</sub></td>
-<td width="25%"><b>0.12 m</b><br/><sub>mean vehicle-coordinate error in a vision localization pipeline</sub></td>
-<td width="25%"><b>256 agents</b><br/><sub>MARL/MAPF warehouse-scale experiments</sub></td>
-<td width="25%"><b>2× IEEE GLOBECOM</b><br/><sub>accepted papers in 2025 and 2026</sub></td>
-</tr>
-</table>
-
----
-
-## `launch --terminal`
-
-<p align="center">
-  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/index.html">
-    <img src="https://img.shields.io/badge/LAUNCH-CINEMATIC_RESEARCH_TERMINAL-7dcfff?style=for-the-badge&logo=gnometerminal&logoColor=05070d" alt="Launch cinematic research terminal" />
-  </a>
-  &nbsp;
-  <a href="https://github.com/arman-dogru/arman-dogru">
-    <img src="https://img.shields.io/badge/VIEW-SOURCE-bb9af7?style=for-the-badge&logo=github&logoColor=white" alt="View source" />
-  </a>
-</p>
-
-The profile has an executable companion site styled as a cinematic research/intelligence terminal. It is not a screenshot: the shell accepts commands, reconstructs a **public career journey** across Istanbul, Ottawa, San Francisco, and Kanata, launches projects, queries live public GitHub metadata, switches terminal themes, and embeds the original WebAssembly edge-twin kernel as a subsystem.
-
-Try:
+This repository is the source for my interactive terminal portfolio. It is built as a working interface rather than a decorative README: a tmux-inspired personal shell, a timeline of my work, project launchers, public GitHub telemetry, a browser-local LLM mode, and a playable **NEAT racing challenge** against neuroevolved AI drivers.
 
 ```text
 help
 journey
-trace 2025
 projects
-open sionna
 research
-scan
-wasm
+race
+leaderboard
 local-ai
 chat what did Arman work on at Huawei?
 ```
 
-`local-ai` optionally boots **WebLLM + WebGPU** and runs a small Qwen model entirely in the visitor's browser. No portfolio API key is exposed. The first local-model launch requires a substantial model download/cache and compatible WebGPU hardware.
+The race is a deterministic browser game. AI opponents are exported NEAT genomes trained offline and evaluated in the same track dynamics used by the game. Personal bests are saved locally. Global leaderboard submissions are routed through GitHub and reflected back into the profile leaderboard artifact after validation.
 
-> The process monitor is intentionally cinematic/simulated. Career events, research claims, and project links are based on the public profile data; the map is a visualization of that public timeline, not live location tracking.
+<p align="center">
+  <a href="https://raw.githack.com/arman-dogru/arman-dogru/main/index.html">
+    <img src="https://img.shields.io/badge/LAUNCH-NEAT_RACE_%2B_TERMINAL-bb9af7?style=for-the-badge&logo=github&logoColor=white" alt="Launch terminal and NEAT race" />
+  </a>
+</p>
 
 ---
 
-## `research --current`
+## `cat research.md`
 
 ### Nokia Bell Labs — Applied AI Researcher `2026 → present`
-Building semantic **edge-to-cloud digital twins** for urban mobility: camera-to-semantic representations, real-time reconstruction in physics simulation, guided-attention foreground separation, object localization, homography, and Kalman filtering. Current work includes an accepted **IEEE GLOBECOM 2026** paper.
+Semantic edge-to-cloud digital twins for urban mobility, computer vision localization, guided attention, real-time scene reconstruction, and an accepted **IEEE GLOBECOM 2026** paper.
 
 ### Smart Connected Vehicles Innovation Centre / NEXTCONLAB — Applied AI Researcher `2026`
-Worked on autonomous multi-agent systems using drones/UGVs, computer vision localization, **MARL/MAPF**, and RF geolocation using phase-difference-of-arrival measurements with ML/RL.
+Autonomous multi-agent systems using drones/UGVs, computer vision localization, **MARL/MAPF**, and RF geolocation from phase-difference-of-arrival measurements.
 
 ### Huawei Canada — Applied AI Researcher `2025`
-Developed **PANAMA**, a network-aware MARL framework for multi-agent path finding in digital-twin environments. Also developed a multi-agent LLM reliability approach for hallucination detection/mitigation that resulted in a **U.S. patent filing (pending)**. First-author work was accepted at **IEEE GLOBECOM 2025**.
+Developed **PANAMA**, a network-aware MARL framework for multi-agent path finding in digital-twin environments. Also developed a multi-agent LLM reliability approach for hallucination detection/mitigation that resulted in a **U.S. patent filing (pending)**. First-author work accepted at **IEEE GLOBECOM 2025**.
 
 ---
 
 ## `ls ./featured-projects`
 
-| Project | What it does | Core stack |
-|---|---|---|
-| **[Ottawa Sionna RT Cellular Digital Twin](https://github.com/arman-dogru/Sionna_Canada_Testbed)** | Reproducible outdoor cellular-propagation digital twin using public Ottawa geometry, terrain, spectrum-site data, ray tracing, APIs, and a browser engineering UI. The current public build documents a 4×4 km multi-band demonstration with 14K+ buildings and 576 completed GPU jobs. | Python · NVIDIA Sionna RT · CUDA · FastAPI · React · MapLibre/deck.gl |
-| **[Skate 3 Rust — macOS Apple Silicon](https://github.com/arman-dogru/skate3-rust-MacOS)** | Native ARM64 macOS port/continuation of the open-source Skate 3 Rust Engine, with Metal rendering, SDL3 input, native Rust crates, and Apple Silicon CI. | Rust · Bevy · SDL3 · Metal · GitHub Actions |
-| **[GSANet-DCNN](https://github.com/arman-dogru/GSANet-DCNN)** | Guided slot-attention architecture for unsupervised video object segmentation using spatial, temporal, and optical-flow information. | PyTorch · Slot Attention · RAFT · Transformers · KNN filtering |
-| **[Developer Performance Tracker](https://github.com/arman-dogru/ai-powered-developer-productivity-dashboard)** | LLM-assisted GitHub engineering analytics: automated PR review, developer analysis, and productivity dashboards. | React · Node.js · Express · MongoDB · GitHub OAuth · LLM APIs |
-| **[One-Pixel Adversarial Attack](https://github.com/arman-dogru/one-pixel-attack-2025)** | Black-box adversarial attacks against image classifiers using differential evolution. | TensorFlow/Keras · CIFAR-10 · Differential Evolution |
-| **[LLM Bias Reduction](https://github.com/arman-dogru/LLM-Bias-Reduction)** | Fairness evaluation and bias-reduction experiments across LLM/traditional classification pipelines and multiple datasets. | Python · LLMs · Fair-SMOTE/SMOTE · Random Forest · SVM |
-
-<sub>Forks and upstream continuations are described as such rather than presented as original projects.</sub>
+| Project | What it is |
+|---|---|
+| **[Ottawa Sionna RT Cellular Digital Twin](https://github.com/arman-dogru/Sionna_Canada_Testbed)** | Reproducible outdoor cellular-propagation digital twin built from public Ottawa geometry, terrain, spectrum-site data, NVIDIA Sionna RT, APIs, and a browser engineering UI. |
+| **[Skate 3 Rust — macOS Apple Silicon](https://github.com/arman-dogru/skate3-rust-MacOS)** | Native ARM64 macOS port/continuation of the open-source Skate 3 Rust Engine using Rust, Bevy, SDL3, Metal, and Apple Silicon CI. |
+| **[GSANet-DCNN](https://github.com/arman-dogru/GSANet-DCNN)** | Guided slot-attention architecture for unsupervised video object segmentation using spatial, temporal, and optical-flow information. |
+| **[Developer Performance Tracker](https://github.com/arman-dogru/ai-powered-developer-productivity-dashboard)** | LLM-assisted GitHub engineering analytics for pull-request review, developer analysis, and productivity dashboards. |
+| **[One-Pixel Adversarial Attack](https://github.com/arman-dogru/one-pixel-attack-2025)** | Black-box adversarial attacks against image classifiers using differential evolution. |
+| **[LLM Bias Reduction](https://github.com/arman-dogru/LLM-Bias-Reduction)** | Fairness evaluation and bias-reduction experiments across LLM and traditional classification pipelines. |
 
 ---
 
@@ -104,28 +76,14 @@ Developed **PANAMA**, a network-aware MARL framework for multi-agent path findin
 
 ---
 
-## `tail -f /var/log/profile`
+## `cat race-leaderboard.svg`
 
 <p align="center">
-  <img src="./assets/live.svg" width="100%" alt="Automatically refreshed GitHub profile telemetry" />
+  <img src="./assets/race-leaderboard.svg" width="100%" alt="NEAT race leaderboard" />
 </p>
 
-This card is generated from the public GitHub API by a scheduled **GitHub Actions** workflow and committed only when the underlying profile data changes.
+The leaderboard is generated from `leaderboard.json`. New global scores are submitted through GitHub, validated by an Actions workflow, and then committed back into this repository. The game also keeps a local personal best immediately in the browser.
 
 ---
 
-## `stack --signal-only`
-
-<p align="center">
-  <img src="https://skillicons.dev/icons?i=python,cpp,rust,js,ts,react,nodejs,pytorch,tensorflow,docker,azure,linux,git,mongodb,supabase&perline=15" alt="Technical stack" />
-</p>
-
-**ML / AI:** PyTorch · TensorFlow · CUDA · Hugging Face · Computer Vision · Reinforcement Learning / MARL · RAG · Multi-agent systems  
-**Systems / Infra:** Docker · Azure · Linux · REST APIs · FastAPI · GitHub Actions · MongoDB · Supabase  
-**Languages:** Python · C/C++ · Rust · Java · Kotlin · JavaScript/TypeScript · SQL
-
----
-
-<p align="center">
-  <code>Build systems that still work after the demo.</code>
-</p>
+<p align="center"><code>Build systems that still work after the demo.</code></p>
