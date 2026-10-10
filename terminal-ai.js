@@ -4,6 +4,10 @@ export function createAI({addLine,addBlock,escapeHtml}){
   async function chat(message){
     const text=(message||'').trim();
     if(!text){addLine('usage: chat <question about Arman or his work>','yellow');return}
+    if(/^(help|--help|-h)$/i.test(text)){
+      addBlock('<b>CHAT // PORTFOLIO Q&A</b><br>Ask one scoped question about Arman\'s public work.<br><br><span class="cyan">chat what did Arman work on at Huawei?</span><br><span class="cyan">chat summarize the Sionna project</span><br><span class="cyan">chat what is Arman researching at Bell Labs?</span><br><br>No browsing, no agent loops, no private-data inference.');
+      return;
+    }
     if(text.length>600){addLine('chat input rejected: maximum 600 characters.','error');return}
     const url=endpoint();
     if(!url){addBlock(`<b>GROK RELAY NOT CONFIGURED</b><br>This static site never stores an xAI key. Deploy the included <span class="cyan">grok-relay/worker.js</span>, set <span class="purple">XAI_API_KEY</span> as a server secret, then configure this browser with:<br><br><span class="cyan">connect-chat https://your-worker.example.workers.dev/</span>`);return}
