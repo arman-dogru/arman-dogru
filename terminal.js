@@ -32,7 +32,7 @@ async function scan(){addLine('querying public GitHub metadata…','cyan');try{c
 async function boot(){addLine(`<pre class="ascii">┌────────────────────────────────────────┐
 │ ARMAN // APPLIED AI RESEARCH TERMINAL │
 │ Bell Labs · twins · CV · MARL · agents│
-└────────────────────────────────────────┘</pre>`);for(const x of['mounting public career graph','indexing project registry','loading Istanbul Park race geometry','arming seven NEAT champions','connecting scoped portfolio interface']){addLine(`<span class="dim">[boot]</span> ${x.padEnd(41,' ')} <span class="green">OK</span>`);await sleep(55)}addLine('');addLine(`Type <b>help</b>. Recommended: <b>journey</b>, <b>race</b>, <b>projects</b>, <b>chat</b>.`,'cyan')}
+└────────────────────────────────────────┘</pre>`);for(const x of['mounting public career graph','indexing project registry','loading Istanbul Park race geometry','arming nine NEAT champions','connecting scoped portfolio interface']){addLine(`<span class="dim">[boot]</span> ${x.padEnd(41,' ')} <span class="green">OK</span>`);await sleep(55)}addLine('');addLine(`Type <b>help</b>. Recommended: <b>journey</b>, <b>race</b>, <b>projects</b>, <b>chat</b>.`,'cyan')}
 async function run(raw){const value=raw.trim();if(!value)return;history.push(value);historyIndex=history.length;addLine(`<span class="cmd-prompt">[arman@dogru:~]$</span> ${escapeHtml(value)}`,'term-command');const[cmd,...args]=value.split(/\s+/),rest=value.slice(cmd.length).trim();switch(cmd.toLowerCase()){
   case'help':showHelp();break;case'whoami':whoami();break;case'experience':case'xp':experience();break;
   case'journey':switchTab('journey');addLine('reconstructing public career trace on OpenStreetMap…','cyan');journey.animate();break;
