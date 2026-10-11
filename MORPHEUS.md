@@ -32,6 +32,8 @@ pages and a supplied public posting, then make the fit judgment in character.
 Source requests about Arman's own biography/publications use the verified
 professional reference and his own public GitHub rather than importing similarly
 titled papers from web results. Unknown publication identifiers are rejected.
+If biography-source generation fails, the verified reference index supplies real
+links directly; it does not manufacture a paper or present a connection error.
 
 This is a research executor within the existing Worker, not a second public
 scraping endpoint. Only web search is exposed, never shell, code execution,

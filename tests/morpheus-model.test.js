@@ -73,6 +73,12 @@ test('unknown publication identifiers cannot be attributed from model memory',as
   const result=await answerMorpheus({...question,message:'What sources document his papers?',evidence:{paper:'https://arxiv.org/abs/2508.06767'}},env,{request:async()=>Response.json(answer(++calls===1?'His paper is arXiv 2509.21259.':'Use [PANAMA](https://arxiv.org/abs/2508.06767).'))});
   assert.equal(calls,2);assert.doesNotMatch(result.reply,/2509/);assert.match(result.reply,/2508\.06767/);
 });
+test('unavailable biography generation falls back to verified references, not an invented source or connection error',async()=>{
+  const verifiedReferences=[{title:'PANAMA',url:'https://arxiv.org/abs/2508.06767'},{title:'Unsafe',url:'javascript:alert(1)'}];
+  const result=await answerMorpheus({...question,message:'What sources document his papers?',verifiedReferences},env,{request:async()=>Response.json(answer('His paper is arXiv 2509.21259.'))});
+  assert.equal(result.degraded,false);assert.equal(result.reference_fallback,true);assert.equal(result.researched,false);
+  assert.match(result.reply,/\[PANAMA\]\(https:\/\/arxiv.org\/abs\/2508\.06767\)/);assert.doesNotMatch(result.reply,/2509|javascript|connection slipped/i);
+});
 test('only retrieved or supplied links survive output filtering',async()=>{
   const result=await answerMorpheus(question,env,{request:async()=>Response.json(answer('[Real](https://example.test/jobs) [Fake](https://example.test/made-up) https://example.test/also-fake',{usage:{server_side_tool_usage_details:{web_search_calls:1}},citations:['https://example.test/jobs']}))});
   assert.match(result.reply,/\[Real\]\(https:\/\/example.test\/jobs\)/);assert.doesNotMatch(result.reply,/made-up|also-fake/);

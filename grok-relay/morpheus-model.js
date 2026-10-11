@@ -45,7 +45,7 @@ export function readResponse(data){
 
 // Runs in the Cloudflare Worker. Only the provider's public-web tool is exposed:
 // no arbitrary URL fetch proxy, shell, private files, cookies or new credentials.
-export async function answerMorpheus({message,history=[],evidence},env,{request=fetch,timeoutMs=52000}={}){
+export async function answerMorpheus({message,history=[],evidence,verifiedReferences=[]},env,{request=fetch,timeoutMs=52000}={}){
   const boundary=history.findLastIndex(m=>m.role==='assistant'&&m.persona_version!==MORPHEUS_VERSION)+1;
   // Preserve prior visitor intent without feeding obsolete assistant prose back
   // into the model. The complete saved transcript remains visible in the UI.
@@ -76,6 +76,10 @@ export async function answerMorpheus({message,history=[],evidence},env,{request=
       }
       console.warn('Morpheus unusable upstream response');
     }catch{console.warn('Morpheus upstream request failed')}finally{clearTimeout(timer)}
+  }
+  if(profileSources){
+    const citations=verifiedReferences.filter(x=>x&&citationURL(x.url)).slice(0,3).map(x=>({url:citationURL(x.url),title:String(x.title||new URL(x.url).hostname).slice(0,160)}));
+    if(citations.length)return{reply:'Begin with the work itself.\n\n'+citations.map(x=>`- [${x.title.replace(/[\[\]\\]/g,'')}](${x.url})`).join('\n'),citations,researched:false,degraded:false,reference_fallback:true};
   }
   return{reply:CONNECTION_REPLY,citations:[],researched:false,degraded:true};
 }
