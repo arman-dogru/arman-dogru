@@ -35,6 +35,7 @@ for(const item of cases){
   if(item.web&&(!data.researched||!data.citations?.length))failures.push('missing actual research/citations');
   if(item.officialDomain&&!(data.citations||[]).some(c=>{try{const host=new URL(c.url).hostname;return host===item.officialDomain||host.endsWith('.'+item.officialDomain)}catch{return false}}))failures.push('requested official source missing');
   if(item.web&&words>140)failures.push('role-fit answer too long');
+  if(item.web&&/one official source is|official source:|one official source:/i.test(reply))failures.push('source announcement instead of natural inline support');
   if(item.general&&/\bArman\b/i.test(reply))failures.push('irrelevant Arman pitch in general help');
   if(item.falsePremise&&!/not|isn't|is not|cannot|can't|don't|do not|haven't|hasn't|unconfirmed|unsupported|no basis/i.test(reply))failures.push('did not correct unsupported production premise');
   if(item.oneExample&&words>100)failures.push('one-example answer too long');
