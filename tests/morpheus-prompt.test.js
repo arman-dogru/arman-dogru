@@ -23,4 +23,5 @@ test('portfolio purpose guides natural redirection instead of generic homework a
   assert.doesNotMatch(SYSTEM_PROMPT,/For general knowledge, homework, coding or unrelated conversation, help directly|Follow the latest visitor request\./);
   assert.doesNotMatch(SYSTEM_PROMPT,/<boundary_demonstrations>|Visitor:|We could examine the backend systems/);
   assert.match(SYSTEM_PROMPT,/no solution, hint, definition, research, or manufactured connection/);
+  assert.match(SYSTEM_PROMPT,/Do not confirm that Arman sent the visitor/);
 });
