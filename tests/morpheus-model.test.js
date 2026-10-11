@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {answerMorpheus,readResponse,CONNECTION_REPLY} from '../grok-relay/morpheus-model.js';
+import {answerMorpheus,readResponse,requiresResearch,CONNECTION_REPLY} from '../grok-relay/morpheus-model.js';
 import {MORPHEUS_VERSION} from '../chat-version.js';
-const env={XAI_API_KEY:'test-only-secret',XAI_MODEL:'grok-4.3'},question={message:'Would Arman fit an AI engineer role at Example?',evidence:{profile:'public work'},history:[]};
+const env={XAI_API_KEY:'test-only-secret',XAI_MODEL:'grok-4.3'},question={message:'What do you think of Arman as an engineer?',evidence:{profile:'public work'},history:[]};
 const answer=(text,extra={})=>({status:'completed',output:[{type:'message',role:'assistant',content:[{type:'output_text',text}]}],...extra});
 test('only final assistant output is shown, never reasoning or tool content',()=>{
   const result=readResponse(answer('Yes.',{output:[{type:'reasoning',summary:[{text:'private reasoning'}]},{type:'message',role:'tool',content:[{type:'output_text',text:'internal result'}]},{type:'message',role:'assistant',content:[{type:'output_text',text:'Yes.'},{type:'output_text',text:'He builds.'}]}]}));
@@ -37,8 +37,29 @@ test('only real research supplies deduplicated safe citations',()=>{
   delete data.usage;assert.deepEqual(readResponse(data).citations,[]);
 });
 test('adjacent provider citations do not merge into an invented source URL',()=>{
-  const data=answer('Fit.[[1]](https://one.test/job)[[2]](https://two.test/team)',{usage:{server_side_tool_usage_details:{web_search_calls:1}}});
+  const data=answer('Fit.[[1]](https://one.test/job)[[2]](https://two.test/team)',{usage:{server_side_tool_usage_details:{web_search_calls:1}},citations:['https://one.test/job','https://two.test/team']});
   assert.deepEqual(readResponse(data).citations.map(x=>x.url),['https://one.test/job','https://two.test/team']);
+});
+test('current facts and source requests require research, ordinary judgments do not',()=>{
+  for(const text of ['Check Anthropic online','Give me one official careers link','Would Arman fit an AI role at Example?','Read https://example.test/jobs','What are their current needs?'])assert.equal(requiresResearch(text),true);
+  for(const text of ['Is Arman good?','Would you hire him?','Explain the derivative of x squared.'])assert.equal(requiresResearch(text),false);
+});
+test('a source request forces a tool call and rejects unresearched generated URLs',async()=>{
+  const calls=[];
+  const result=await answerMorpheus({...question,message:'Give me the official careers link.'},env,{request:async(url,init)=>{
+    calls.push(JSON.parse(init.body));
+    return Response.json(calls.length===1?answer('https://example.test/invented'):answer('I could not check the posting.'));
+  }});
+  assert.equal(calls[0].tool_choice,'required');assert.equal(calls[1].tool_choice,'none');
+  assert.equal(result.researched,false);assert.equal(result.reply,'I could not check the posting.');
+});
+test('generated links are not promoted to provider sources',()=>{
+  const data=answer('[Invented](https://example.test/made-up)',{usage:{server_side_tool_usage_details:{web_search_calls:1}}});
+  assert.deepEqual(readResponse(data).citations,[]);
+});
+test('only retrieved or supplied links survive output filtering',async()=>{
+  const result=await answerMorpheus(question,env,{request:async()=>Response.json(answer('[Real](https://example.test/jobs) [Fake](https://example.test/made-up) https://example.test/also-fake',{usage:{server_side_tool_usage_details:{web_search_calls:1}},citations:['https://example.test/jobs']}))});
+  assert.match(result.reply,/\[Real\]\(https:\/\/example.test\/jobs\)/);assert.doesNotMatch(result.reply,/made-up|also-fake/);
 });
 test('operator can disable web research without changing the character prompt',async()=>{
   await answerMorpheus(question,{...env,MORPHEUS_WEB_SEARCH:'off'},{request:async(url,init)=>{assert.deepEqual(JSON.parse(init.body).tools,[]);return Response.json(answer('Yes.'))}});

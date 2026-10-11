@@ -25,7 +25,9 @@ and moderation routes; do not deploy it as the chat entrypoint.
 `grok-relay/morpheus-model.js` runs the character through xAI's Responses API with
 the `web_search` tool. This tool searches and reads public pages server-side; no
 separate search key, arbitrary-fetch proxy or new Cloudflare service is required.
-Morpheus chooses when research is needed. Prefer the employer's own careers/team
+Ordinary questions leave tool use optional. Requests for current information,
+company roles or external links/sources require a web-tool call and traceable
+provider sources before a researched answer is accepted. Prefer the employer's own careers/team
 pages and a supplied public posting, then make the fit judgment in character.
 
 This is a research executor within the existing Worker, not a second public
@@ -52,7 +54,11 @@ authenticated browsing, local files or private employer information.
   limits and Cloudflare edge rate limits for hard protection.
 - `store:false` disables provider response persistence for later API retrieval;
   this does not claim zero provider retention under its separate data policies.
-- Research citations are validated HTTP(S) links, with no credential URLs. Only
+- Research citations come from provider annotations/collected sources, not URLs
+  invented in the answer. Model-authored links absent from retrieved sources or
+  the visitor/reference are suppressed. This does not guarantee every source
+  stays live indefinitely; check source quality in real-browser evaluations.
+- Citation links accept HTTP(S) only, with no credential URLs. Only
   assistant output text is presented, never reasoning or tool output.
 
 ## Preview, verify, deploy
@@ -72,6 +78,9 @@ are evaluation fixtures, not a production FAQ or list of allowed questions.
 Deploy with authenticated Wrangler or the authorized Cloudflare code editor,
 preserving existing secrets, origins and the `LEADERBOARD` binding. Frontend files
 are a separate GitHub/site deployment. Do not silently publish unfinished race work.
+The root `wrangler.jsonc` deploys **arman-dogru**, not the chat relay. Its build
+copies an explicit public-file allowlist into `dist/`; dependencies, backend code,
+test data and credentials must never be included. See `DEPLOYMENT.md`.
 
 Live checks (not replaced by mocked API tests):
 
