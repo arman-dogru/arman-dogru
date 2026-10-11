@@ -38,7 +38,7 @@ async function chat(request,env,origin){
   // Progressive disclosure: do not put the entire CV/benchmark table into every
   // redirection or opinion request. Detailed facts remain available through a
   // bounded read-only lookup, not a whitelist of questions.
-  const orientation=knowledgeOrientation(),referenceLibrary=knowledgeLibrary({github:gh,page:client,board});
+  const orientation=knowledgeOrientation(retrievalQuery),referenceLibrary=knowledgeLibrary({github:gh,page:client,board});
   const result=await answerMorpheus({message,history,evidence:orientation,referenceLibrary,verifiedReferences},env),sources=['internal-knowledge'];if(gh.provenance==='VERIFIED_EXTERNAL')sources.push('github-public');if(client)sources.push('page-state');if(board.length)sources.push('paddock-board');if(result.researched)sources.push('public-web');
   return json({...result,persona_version:MORPHEUS_VERSION,sources:[...new Set(sources)]},200,origin||'*');
 }

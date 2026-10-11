@@ -76,6 +76,16 @@ not biography. Ordinary answers do not print these labels or source hashes. Morp
 may introduce current outside findings as something found “on the Matrix,” sparingly.
 Outside conflicts do not silently replace or merge with the internal record.
 
+The orientation is explicitly a summary, not an exhaustive record. A small,
+data-derived project index exposes up to three relevant titles and exact links
+from the résumé, using the current question and bounded recent context. It does
+not decide scope or generate answers, and does not copy project facts/metrics into
+ordinary opinion prompts. Live testing exposed an unfamiliar-project false denial
+without this discovery metadata. Detailed explanations still use the read-only lookup.
+Unknown attribution stays unknown; it does not establish either ownership or that
+the resource definitely belongs to someone else. The server's UTC request date
+helps distinguish current opportunities from stale program pages.
+
 This uses the explicit context boundaries and regression-testing approach in
 [OpenAI Docs](https://developers.openai.com/api/docs/guides/prompt-engineering),
 with structured source boundaries informed by
@@ -114,7 +124,15 @@ to interpret its result. For current external requests, that continuation may
 research the world after consulting the internal record; it cannot request another
 portfolio tool. The overall deadline remains 52 seconds, with at most three calls
 only after a successful lookup (two otherwise). Repair/recovery cannot start new
-research. It cannot execute code,
+research.
+For current/external requests, both tools remain available initially. Removing web
+access until a lookup caused a live regression where the model incorrectly claimed
+it could not access current pages, so that experimental restriction was discarded.
+Scope is judged by the model: unrelated requests can decline naturally without
+retrieving anything. Internal facts retain priority regardless of tool-call order.
+An accessible page is not sufficient proof of current availability, and an unknown
+identity connection is not proof that a resource belongs to a different person.
+It cannot execute code,
 read arbitrary files or select a private data source. Requests for current information,
 company roles or external links/sources are research hints, not forced tool calls:
 the model first decides whether the task serves the portfolio purpose. Unrelated
@@ -138,7 +156,8 @@ authenticated browsing, local files or private employer information.
 
 - Existing `XAI_API_KEY` and pinned `XAI_MODEL=grok-4.3` are retained.
 - `MORPHEUS_WEB_SEARCH=off` disables external research without changing the voice.
-- Four agentic turns per initial request, with parallel tool calls disabled.
+- Four agentic turns per tool-enabled generation, with parallel tool calls disabled;
+  web search is available in at most one generation per visitor request.
 - 3,000 output tokens including low-effort reasoning; the prompt keeps ordinary
   answers much shorter. The existing grok-4.3 model is unchanged.
 - Provider budget: 52 seconds, two attempts or at most three after a successful
@@ -198,6 +217,25 @@ Use `node scripts/evaluate-morpheus.mjs --suite=knowledge` for eight checks of e
 profile links, namesake accounts, conflicting education dates, new résumé projects,
 fabricated credentials, current Tesla requirements, inference and concise opinions.
 Suite reports are saved separately under ignored `work/morpheus-live-eval-<suite>.json`.
+For a focused rerun, add `--case="exact case name"` (repeatable); conversation
+prerequisites are included automatically. Targeted reports use a `-targeted` suffix,
+so the full-suite report is preserved. An unknown case name fails rather than
+silently producing an empty success. Match checks are reviewed against real answers:
+an uncertainty response need not echo a known account unless asked, and the correct
+school year answers a conflicting-year question without compulsory discrepancy prose.
+Unknown-person attribution, unsupported quality upgrades and past-dated cohorts
+are checked explicitly. These tests remain evidence, not a guarantee of every answer.
+Local verification on October 11, 2026 ran all sixteen knowledge/intent scenarios
+and inspected their actual replies. Iteration corrected unfamiliar-project denial,
+lost follow-up context, unjustified namesake exclusion, stale opportunity cohorts,
+source jargon and missing example links. The final v25 targeted rerun passed all
+five cases, including the complete boundary-to-legitimate-follow-up chain; the
+full v24 reports remain preserved rather than relabelled as v25 results. All 104
+automated checks and both builds passed on v25. Tesla research returned provider
+citations, but direct source checks received HTTP 403, not independent confirmation
+of vacancy availability. This combines task-specific checks with human review,
+as recommended in [OpenAI's evaluation guidance](https://developers.openai.com/api/docs/guides/evaluation-best-practices).
+Reports and diagnostic scripts stay ignored; nothing was pushed or deployed.
 Use `node scripts/evaluate-morpheus.mjs http://localhost:4173/api/chat --suite=scope`
 for the bounded scope/follow-up suite plus company-research and injection regressions.
 This leaves room within the visitor cap for browser QA; the default runs all cases.

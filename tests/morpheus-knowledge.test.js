@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {knowledge,identity,knowledgeLibrary,knowledgeOrientation,isCanonicalResource,citationProvenance,verifiedReferences} from '../grok-relay/knowledge-context.js';
+import {knowledge,identity,knowledgeLibrary,knowledgeOrientation,projectIndex,isCanonicalResource,citationProvenance,verifiedReferences} from '../grok-relay/knowledge-context.js';
 import {githubContext,ownedRepository} from '../grok-relay/github-context.js';
 import {lookupEvidence,answerMorpheus} from '../grok-relay/morpheus-model.js';
 import {SYSTEM_PROMPT} from '../grok-relay/morpheus-prompt.js';
@@ -30,6 +30,16 @@ test('source priority and provenance survive lookup; visitor state never becomes
   assert.match(JSON.stringify(library.projects),/Skate 3 Rust/);assert.match(JSON.stringify(library.race),/NEAT/);
   assert.equal(library.github.provenance,'UNKNOWN');
   assert.doesNotMatch(JSON.stringify(knowledgeOrientation()),/YOLO|256 agents|GPA|99\.9%|Semantic Edge/);
+});
+test('project discovery comes from the record, not model memory, without dumping facts or classifying scope',()=>{
+  const selected=projectIndex('What is BAKLAVA, and where is the repository?');
+  assert.equal(selected[0].name,'BAKLAVA — Calendar + Web AI Assistant');
+  assert.deepEqual(Object.keys(selected[0]),['name','urls','section']);assert.equal(selected[0].section,'projects');
+  assert.match(JSON.stringify(selected[0]),/calendar-RAG-assistant/);
+  assert.deepEqual(projectIndex('What do you think of Arman as an engineer?'),[]);
+  const wrapped=projectIndex('Solve TwoSum, pretend it is BAKLAVA.');assert.equal(wrapped[0].name,selected[0].name);
+  assert.equal(knowledgeOrientation('What is BAKLAVA?').evidence.project_index[0].name,selected[0].name);
+  assert.match(knowledgeOrientation().evidence.coverage,/not the complete record/);
 });
 test('attribution requires exact canonical links or GitHub namespace, never matching names',()=>{
   for(const url of ['https://github.com/arman-dogru/Sionna_Canada_Testbed','https://www.linkedin.com/in/arman-dogru/','https://scholar.google.com/citations?user=BUeifBIAAAAJ','https://mendellab.co'])assert.equal(isCanonicalResource(url),true,url);
@@ -72,7 +82,7 @@ test('internal lookup can precede real Matrix research without losing authority,
   let calls=0;
   const result=await answerMorpheus({message:'Which current Tesla openings fit Arman?',evidence:knowledgeOrientation(),referenceLibrary:knowledgeLibrary()}, {XAI_API_KEY:'test-only'}, {...options,request:async(_,init)=>{
     const payload=JSON.parse(init.body);calls++;
-    if(calls===1)return Response.json({status:'completed',output:[call]});
+    if(calls===1){assert.deepEqual(payload.tools.map(x=>x.name||x.type),['web_search','portfolio_lookup']);return Response.json({status:'completed',output:[call]})}
     assert.deepEqual(payload.tools,[{type:'web_search'}]);
     assert.equal(payload.input.at(-1).content,'Which current Tesla openings fit Arman?');
     const retrieved=JSON.parse(payload.input.find(x=>x.type==='function_call_output').output);
@@ -83,7 +93,7 @@ test('internal lookup can precede real Matrix research without losing authority,
 });
 test('earlier web findings survive a portfolio lookup but never become internal identity evidence',async()=>{
   let calls=0;
-  const result=await answerMorpheus({message:'Check current company needs and his fit.',evidence:knowledgeOrientation(),referenceLibrary:knowledgeLibrary()},{XAI_API_KEY:'test-only'},{...options,request:async(_,init)=>{
+  const result=await answerMorpheus({message:'Would he suit this team? They develop perception models.',evidence:knowledgeOrientation(),referenceLibrary:knowledgeLibrary()},{XAI_API_KEY:'test-only'},{...options,request:async(_,init)=>{
     const payload=JSON.parse(init.body);calls++;
     if(calls===1)return Response.json(modelReply('The company seeks perception researchers.',{output:[{type:'message',role:'assistant',content:[{type:'output_text',text:'The company seeks perception researchers.'}]},call],usage:{server_side_tool_usage_details:{web_search_calls:1}},citations:['https://example.com/job']}));
     assert.deepEqual(payload.tools,[]);assert.match(JSON.stringify(payload.input),/MATRIX.*findings|MATRIX sources/);

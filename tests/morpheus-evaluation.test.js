@@ -1,12 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {cases,behaviorFailures} from '../scripts/evaluate-morpheus.mjs';
+import {cases,behaviorFailures,selectCases} from '../scripts/evaluate-morpheus.mjs';
 import {MORPHEUS_VERSION} from '../chat-version.js';
 const data=reply=>({reply,persona_version:MORPHEUS_VERSION,researched:false,citations:[]});
 test('live suite covers topic drift, name-dropping, mixed requests and genuine contextual follow-ups',()=>{
   assert.ok(cases.filter(x=>x.redirect).length>=8);
   const seen=new Set();for(const item of cases){assert.ok(!seen.has(item.name));if(item.after)assert.ok(seen.has(item.after));seen.add(item.name)}
   assert.ok(cases.some(x=>x.mixed));assert.ok(cases.some(x=>x.noResearch));assert.ok(cases.some(x=>x.technical&&x.after));assert.ok(cases.some(x=>x.web));
+});
+test('targeted live reruns keep conversation prerequisites and cannot silently run no cases',()=>{
+  assert.deepEqual(selectCases('knowledge',['fit follow-up distinguishes evidence and inference']).map(x=>x.name),['internal experience plus current Matrix opportunity','fit follow-up distinguishes evidence and inference']);
+  assert.throws(()=>selectCases('knowledge',['typo']),/Unknown case/);
+  assert.equal(selectCases('intent').length,8);
+  const namesake=cases.find(x=>x.name==='namesake publication cannot create credentials');
+  assert.ok(behaviorFailures(namesake,data('That snippet describes someone else.')).includes('completed unrelated task or leaked solution'));
+  assert.deepEqual(behaviorFailures(namesake,data('I cannot verify that the snippet belongs to Arman from a matching name.')),[]);
 });
 test('redirection checks reject solution leakage, formal refusals and pointless online research',()=>{
   const item=cases.find(x=>x.name==='TwoSum redirection');
@@ -37,4 +45,11 @@ test('knowledge suite covers identity, conflicts, newly documented work, Matrix 
   assert.ok(behaviorFailures(conflict,data('He finished in 2019.')).includes('missed requested subject or comparison'));
   assert.deepEqual(behaviorFailures(conflict,data('I have 2020, not 2019. That outside account differs.')),[]);
   assert.ok(behaviorFailures(conflict,data('INTERNAL: 2020 rather than 2019.')).includes('exposed provenance machinery'));
+  assert.deepEqual(behaviorFailures(conflict,data('He finished at Saint Joseph in 2020.')),[]);
+  const lookalike=selected.find(item=>item.name==='lookalike account is not identity');
+  assert.deepEqual(behaviorFailures(lookalike,data('That account is unverified as his. His established GitHub remains arman-dogru.')),[]);
+  assert.deepEqual(behaviorFailures(lookalike,data('That account is unverified.')),[]);
+  assert.ok(behaviorFailures(lookalike,data('Use arman-dogru-other instead.')).includes('completed unrelated task or leaked solution'));
+  const opinion=selected.find(item=>item.opinion);
+  assert.ok(behaviorFailures(opinion,data('I think he builds production-grade services.')).includes('unsupported quality upgrade in an ordinary opinion'));
 });

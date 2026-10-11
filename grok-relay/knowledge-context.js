@@ -18,7 +18,18 @@ const internal=evidence=>({provenance:'INTERNAL',source:knowledge.source,evidenc
 // These existing portfolio implementation notes remain a narrowly labelled
 // supplement, not a second biography. The master résumé wins any conflict.
 const portfolioSupplement={provenance:'INTERNAL',source:'Reviewed portfolio implementation; subordinate to the master résumé',projects:[{name:'Skate 3 Rust — macOS Apple Silicon',url:`${knowledge.profile.github}/skate3-rust-MacOS`,facts:['Native ARM64 macOS port/continuation of upstream open-source SK8-ENGINE work.','Uses Rust, Bevy, SDL3 and Metal.','Arman is not the creator of the original upstream engine.']}]};
-export function knowledgeOrientation(){return internal({name:identity.name,identity:{github_owner:identity.githubOwner,profiles:identity.profiles},work:'Applied AI research and software engineering: computer vision and digital twins, learning and coordination among agents, LLM reliability, backend services and interactive software. His work spans research simulations and prototypes as well as industry and startup software, API and applied ML contributions.',portfolio:'The portfolio includes a playable NEAT Grand Prix and a Skate 3 Rust continuation. Retrieve their documented implementation for technical questions.',references:verifiedReferences})}
+const INDEX_STOP=new Set('arman dogru github https projects project documented work portfolio would could should about which where there their those these think engineer engineering reference examples online current actual from with what that have does name give into than they this just please'.split(' '));
+const indexTokens=value=>[...new Set((String(value).normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().match(/[a-z0-9][a-z0-9+#.-]{3,}/g)||[]).map(token=>token.replace(/[.-]+$/g,'')))].filter(token=>!INDEX_STOP.has(token));
+export function projectIndex(query=''){
+  const words=indexTokens(query);
+  // Discovery metadata, not a topic gate or a factual answer. A relevant title
+  // helps the model find unfamiliar projects without receiving the entire CV.
+  return knowledge.projects.map(project=>{
+    const hay=indexTokens([project.name,...project.stack||[],...project.facts||[]].join(' '));
+    return{project,score:words.filter(word=>hay.includes(word)).length};
+  }).filter(item=>item.score>0).sort((a,b)=>b.score-a.score).slice(0,3).map(({project})=>({name:project.name,urls:project.urls||[],section:'projects'}));
+}
+export function knowledgeOrientation(query=''){return internal({coverage:'Short orientation only, not the complete record. Read the appropriate lookup section before asserting a specific project/fact is absent.',name:identity.name,identity:{github_owner:identity.githubOwner,profiles:identity.profiles},work:'Applied AI research and software engineering: computer vision and digital twins, learning and coordination among agents, LLM reliability, backend services and interactive software. His work spans research simulations and prototypes as well as industry and startup software, API and applied ML contributions.',portfolio:'The portfolio includes a playable NEAT Grand Prix and a Skate 3 Rust continuation. Retrieve their documented implementation for technical questions.',project_index:projectIndex(query),references:verifiedReferences})}
 export function knowledgeLibrary({github,page,board=[]}={}){
   return{
     profile:internal(knowledge.profile),experience:internal(knowledge.experience),research:internal(knowledge.research),education:internal(knowledge.education),skills:internal(knowledge.skills),
