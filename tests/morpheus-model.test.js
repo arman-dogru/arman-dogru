@@ -69,6 +69,8 @@ test('duplicate source announcements disappear without removing the actual citat
   assert.equal(compactSourceNotes(unique),unique);
   const code='```python\nsource = "https://example.com/api"\n```';assert.equal(compactSourceNotes(code),code);
   const codeAndSource=code+'\n\nSource: https://example.com/api';assert.equal(compactSourceNotes(codeAndSource),codeAndSource);
+  const literal=point+'\n\n```python\nvalue = """one\n\n\nthree"""\n```';
+  assert.equal(compactSourceNotes(literal+'\n\nOne official source is https://www.anthropic.com/careers/jobs.'),literal);
 });
 test('biographical sources use verified references while company sources still research',async()=>{
   assert.equal(usesProfileSources('What sources would you suggest for a case study about Arman?'),true);

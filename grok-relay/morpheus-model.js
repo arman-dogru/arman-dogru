@@ -35,17 +35,18 @@ function textURLs(text){return [...String(text||'').matchAll(/https?:\/\/[^\s<>"
 export function compactSourceNotes(reply){
   // A cosmetic duplicate, not a factual rewrite: retain the actual inline
   // citation and remove a standalone announcement of that very same URL.
-  const kept=[],seen=new Set();let fenced=false;
-  for(const paragraph of reply.split(/\n\s*\n/)){
+  const kept=[],seen=new Set(),parts=reply.split(/(\n\s*\n)/);let fenced=false;
+  for(let i=0;i<parts.length;i+=2){
+    const paragraph=parts[i],separator=i?parts[i-1]:'';
     const fences=(paragraph.match(/^\s*(?:`{3,}|~{3,})/gm)||[]).length,inCode=fenced||fences>0;
     if(fences%2)fenced=!fenced;
-    if(inCode){kept.push(paragraph);continue}
+    if(inCode){kept.push(separator,paragraph);continue}
     const urls=textURLs(paragraph.replace(/`+[^`\n]*`+/g,''));
     const note=/^(?:(?:one|an?|the)\s+)?(?:official\s+)?(?:source|reference|citation)\s*(?:is\s+|:\s*)/i.test(paragraph.trim());
     if(note&&urls.length&&urls.every(url=>seen.has(url)))continue;
-    kept.push(paragraph);for(const url of urls)seen.add(url);
+    kept.push(separator,paragraph);for(const url of urls)seen.add(url);
   }
-  return kept.join('\n\n');
+  return kept.join('');
 }
 export function groundedLinks(reply,allowed){
   const approved=value=>allowed.has(citationURL(value));
