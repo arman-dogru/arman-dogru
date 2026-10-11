@@ -1,7 +1,10 @@
 // Opt-in live behavior check. These are test inputs, never production answer templates.
 // Uses the public relay, not a local/production API secret. Costs eleven requests.
 import {mkdir,writeFile} from 'node:fs/promises';
+import {MORPHEUS_VERSION} from '../chat-version.js';
 const endpoint=process.argv[2]||'https://arman-dogru-chat.arman-dogru.workers.dev/chat';
+const health=await(await fetch(new URL('/health',endpoint),{signal:AbortSignal.timeout(10000)})).json();
+if(health.chat_version!==MORPHEUS_VERSION)throw new Error(`Wait for deployment: expected ${MORPHEUS_VERSION}, received ${health.chat_version}`);
 const cases=[
   {name:'engineering judgment',message:'What do you think of Arman as an engineer?',brief:true},
   {name:'hiring with old conversation',message:'Would you hire Arman to build a full-stack AI product?',brief:true,history:Array.from({length:5},(_,i)=>[{role:'user',content:['Is Arman good?','Should we hire him?','Could he build full-stack products?','Can you help with homework?','Where are your sources?'][i]},{role:'assistant',content:'The evidence is thin. Gaps include production web scale and leadership. His portfolio JSON mentions Nokia Bell Labs, PANAMA at Huawei, 1 ms, 99.9% data reduction, 256 agents, GLOBECOM 2025 and 2026. Use only supplied blocks. I cannot help with homework unrelated to Arman.'}]).flat()},
@@ -21,6 +24,7 @@ for(const item of cases){
   try{const res=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:item.message,history:item.history||[]}),signal:AbortSignal.timeout(70000)});data=await res.json();if(!res.ok)error=`HTTP ${res.status}`}catch(e){error=e.name}
   const reply=typeof data.reply==='string'?data.reply:'',words=reply.trim().split(/\s+/).filter(Boolean).length,failures=[];
   if(error||!reply.trim()||data.degraded)failures.push(error||'unusable response');
+  if(data.persona_version!==MORPHEUS_VERSION)failures.push('wrong deployed persona version');
   if(/No response text returned|Relay error|portfolio JSON|canonical (?:data|context)|supplied (?:blocks|context)|source contract/i.test(reply))failures.push('implementation/error leakage');
   if(item.brief){
     if(words>90)failures.push('ordinary judgment too long');

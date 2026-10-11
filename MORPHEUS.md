@@ -12,7 +12,7 @@ is a perceptive mentor, not a salesman: belief in Arman's potential does not
 require an automatic yes, praise on unrelated topics, or invented achievements.
 The latest question controls the subject; earlier turns only resolve follow-ups.
 
-The v7 prompt replaces conflicting "be accurate / always favor him" pressure with
+The prompt replaces conflicting "be accurate / always favor him" pressure with
 a clear priority order, descriptive sections, positive style guidance and a brief
 silent relevance/claim-scope/editing check. These are adaptations of published
 guidance, not claims about proprietary system prompts:
@@ -22,13 +22,20 @@ guidance, not claims about proprietary system prompts:
 - [Google: direct instructions, verbosity, prioritization and iterative testing](https://ai.google.dev/gemini-api/docs/prompting-strategies)
 
 These general techniques are tested on the existing grok-4.3 integration. No
-model migration, extra model/grader call or canned production Q&A was added.
+model migration, separate model/grader or canned production Q&A was added. Short
+voice fragments demonstrate register across judgment, teaching and correction;
+they do not define permitted topics or prepared answers.
 
 ## Request path
 
 The active entrypoint is `grok-relay/agent-worker.js` (see `wrangler.jsonc`). It
-provides the public profile, recent conversation, bounded public GitHub excerpts,
-selected page state and public race board. Reference material is separate from
+provides a short orientation and recent conversation. Detailed public profile,
+bounded GitHub excerpts, selected page state and public race board remain behind
+`portfolio_lookup`, a read-only tool that retrieves a named public section when
+specific facts/examples are needed. General opinions and homework no longer
+receive the complete CV and benchmark table. This v8 progressive-disclosure
+change followed live tests where wording alone still produced résumé dumps.
+Reference material is separate from
 the trusted character instructions. Old assistant replies remain in the visible
 transcript but are excluded from the model; previous visitor requests retain
 continuity without reproducing obsolete answers. New replies carry `chat-version.js`'s persona version; changing it
@@ -39,7 +46,10 @@ and moderation routes; do not deploy it as the chat entrypoint.
 `grok-relay/morpheus-model.js` runs the character through xAI's Responses API with
 the `web_search` tool. This tool searches and reads public pages server-side; no
 separate search key, arbitrary-fetch proxy or new Cloudflare service is required.
-Ordinary questions leave tool use optional. Requests for current information,
+Ordinary questions leave tool use optional. A detail lookup may use the second
+model call to interpret its result, within the same two-call/52-second budget;
+tools are disabled on that final call to prevent loops. It cannot execute code,
+read arbitrary files or select a private data source. Requests for current information,
 company roles or external links/sources require a web-tool call and traceable
 provider sources before a researched answer is accepted. Prefer the employer's own careers/team
 pages and a supplied public posting, then make the fit judgment in character.
@@ -60,7 +70,8 @@ authenticated browsing, local files or private employer information.
 - Four agentic turns per initial request, with parallel tool calls disabled.
 - 1,200 visible output tokens; the prompt keeps ordinary answers much shorter.
 - Provider budget: 52 seconds, at most two attempts. A recovery attempt has no web
-  tools and is told it has no verified live findings. No duplicate paid research.
+  tools and is told it has no verified live findings. A source-repair or reference
+  continuation retains only its already retrieved evidence. No duplicate paid research.
 - Empty, malformed, incomplete and failed replies never become raw customer errors.
   After recovery fails, an honest in-character connection message and Retry appear.
   Transient failures do not enter the conversation memory.

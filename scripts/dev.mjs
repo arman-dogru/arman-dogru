@@ -6,7 +6,7 @@ import {gzipSync} from 'node:zlib';
 import worker from '../grok-relay/agent-worker.js';
 
 const root=resolve(import.meta.dirname,'..'), port=Number(process.env.PORT||4173);
-const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg'};
+const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript','.mjs':'text/javascript','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg'};
 const localVars={};
 try{for(const line of (await readFile(resolve(root,'grok-relay/.dev.vars'),'utf8')).split('\n')){const m=line.match(/^([A-Z_]+)\s*=\s*(.*)$/);if(m)localVars[m[1]]=m[2].replace(/^['"]|['"]$/g,'')}}catch{}
 const storePath=resolve(root,'work/dev-kv.json');
@@ -19,7 +19,7 @@ const kv={
 };
 const env={...localVars, XAI_API_KEY:localVars.XAI_API_KEY||process.env.XAI_API_KEY, XAI_MODEL:localVars.XAI_MODEL||'grok-4.3', LEADERBOARD:kv, ALLOWED_ORIGINS:`http://localhost:${port},http://127.0.0.1:${port}`, PROFANITY_BLOCKLIST_GZ_B64:localVars.PROFANITY_BLOCKLIST_GZ_B64||gzipSync('local-reserved-test-name').toString('base64')};
 const subscribers=new Set();let reloadTimer;
-watch(root,{recursive:true},(_,file)=>{if(!file||/^(work|node_modules|\.git|\.wrangler|scripts|tests|grok-relay)\//.test(file)||file.startsWith('.')||! /\.(html|css|js|json|svg|png|jpe?g)$/.test(file))return;clearTimeout(reloadTimer);reloadTimer=setTimeout(()=>{for(const res of subscribers)res.write('data: reload\n\n')},150)});
+watch(root,{recursive:true},(_,file)=>{if(!file||/^(work|node_modules|\.git|\.wrangler|scripts|tests|grok-relay)\//.test(file)||file.startsWith('.')||! /\.(html|css|m?js|json|svg|png|jpe?g)$/.test(file))return;clearTimeout(reloadTimer);reloadTimer=setTimeout(()=>{for(const res of subscribers)res.write('data: reload\n\n')},150)});
 const server=createServer(async(req,res)=>{
   try{
     const url=new URL(req.url,`http://localhost:${port}`);

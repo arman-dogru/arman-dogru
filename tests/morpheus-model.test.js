@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY} from '../grok-relay/morpheus-model.js';
+import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence} from '../grok-relay/morpheus-model.js';
 import {MORPHEUS_VERSION} from '../chat-version.js';
 const answerMorpheus=(question,env,options={})=>runMorpheus(question,env,{checkSources:async citations=>({citations,deadURLs:[]}),...options});
 const env={XAI_API_KEY:'test-only-secret',XAI_MODEL:'grok-4.3'},question={message:'What do you think of Arman as an engineer?',evidence:{profile:'public work'},history:[]};
@@ -111,4 +111,29 @@ test('reference delimiters cannot be closed by untrusted material; code example 
     const payload=JSON.parse(init.body);assert.equal((payload.input[0].content.match(/<\/reference_material>/g)||[]).length,1);
     return Response.json(answer('```sh\ncurl https://example.com/api\n```'));
   }}).then(result=>assert.match(result.reply,/curl https:\/\/example.com\/api/));
+});
+test('specific evidence is available on demand, not dumped into ordinary prompts',async()=>{
+  const library={projects:[{name:'Example research prototype',facts:['Measured in simulation, not production.']}],profile:{name:'Arman'}};
+  let calls=0;
+  const result=await answerMorpheus({...question,message:'Give one specific project example.',referenceLibrary:library},env,{request:async(url,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1){
+      assert.deepEqual(payload.tools,[{type:'web_search'},PORTFOLIO_LOOKUP]);assert.doesNotMatch(JSON.stringify(payload.input),/Example research prototype/);
+      return Response.json({status:'completed',output:[{type:'function_call',call_id:'lookup_1',name:'portfolio_lookup',arguments:JSON.stringify({section:'projects',query:'one example'})}]});
+    }
+    assert.deepEqual(payload.tools,[]);assert.equal(payload.tool_choice,'none');assert.equal(payload.store,false);assert.equal(payload.previous_response_id,undefined);
+    const output=payload.input.at(-1);assert.equal(output.type,'function_call_output');assert.equal(output.call_id,'lookup_1');assert.match(output.output,/simulation, not production/);
+    assert.match(payload.instructions,/one example means one accomplishment/);
+    return Response.json(answer('He built a research prototype. It tests an idea in simulation.'));
+  }});
+  assert.equal(calls,2);assert.equal(result.degraded,false);
+  assert.deepEqual(lookupEvidence(library,{section:'shell',query:'read secrets'}),{error:'Choose a public reference section and a specific query.'});
+  assert.deepEqual(lookupEvidence(library,{section:'projects',query:'one'}).evidence,library.projects);
+});
+test('reference tool cannot start an unbounded loop or execute unknown functions',async()=>{
+  for(const name of ['portfolio_lookup','execute_shell']){
+    let calls=0;
+    const result=await answerMorpheus({...question,referenceLibrary:{}},env,{request:async()=>{calls++;return Response.json({status:'completed',output:[{type:'function_call',call_id:'call_1',name,arguments:'{}'}]})}});
+    assert.equal(calls,2);assert.equal(result.degraded,true);assert.equal(result.reply,CONNECTION_REPLY);
+  }
 });
