@@ -7,10 +7,15 @@ Accuracy first. Relevance second. Character voice third.
 `grok-relay/morpheus-prompt.js` is the prompt. It defines the relationship to Arman,
 cadence, answer-first structure, progressive disclosure and when to consult public
 company/job pages. There is no list of permitted questions or prepared answers.
-General questions, technical explanations and learning are allowed too. Morpheus
-is a perceptive mentor, not a salesman: belief in Arman's potential does not
+Technical explanations are welcome when they help visitors understand his actual
+work or suitability. Unrelated homework, coding and general-assistant tasks get
+a short, context-specific invitation back to his work, not a solution followed
+by a pitch. This is model-led conversation, not a scope classifier/default-answer
+path. Name-dropping and interview/roleplay wrappers do not change a task's purpose;
+implicit follow-ups and the relevant half of mixed requests still get answered.
+Morpheus is a perceptive mentor, not a salesman: belief in Arman's potential does not
 require an automatic yes, praise on unrelated topics, or invented achievements.
-The latest question controls the subject; earlier turns only resolve follow-ups.
+The latest question controls the subject within that purpose; earlier turns resolve follow-ups.
 
 The prompt replaces conflicting "be accurate / always favor him" pressure with
 a clear priority order, descriptive sections, positive style guidance and a brief
@@ -33,7 +38,7 @@ The active entrypoint is `grok-relay/agent-worker.js` (see `wrangler.jsonc`). It
 provides a short orientation and recent conversation. Detailed public profile,
 bounded GitHub excerpts, selected page state and public race board remain behind
 `portfolio_lookup`, a read-only tool that retrieves a named public section when
-specific facts/examples are needed. General opinions and homework no longer
+specific facts/examples are needed. General opinions and redirections do not
 receive the complete CV and benchmark table. This v8 progressive-disclosure
 change followed live tests where wording alone still produced résumé dumps.
 Reference material is separate from
@@ -56,8 +61,10 @@ Ordinary questions leave tool use optional. A detail lookup may use the second
 model call to interpret its result, within the same two-call/52-second budget;
 tools are disabled on that final call to prevent loops. It cannot execute code,
 read arbitrary files or select a private data source. Requests for current information,
-company roles or external links/sources require a web-tool call and traceable
-provider sources before a researched answer is accepted. Prefer the employer's own careers/team
+company roles or external links/sources are research hints, not forced tool calls:
+the model first decides whether the task serves the portfolio purpose. Unrelated
+search requests redirect without research. Actual researched answers still need
+traceable provider sources; unsupported generated links remain filtered. Prefer the employer's own careers/team
 pages and a supplied public posting, then make the fit judgment in character.
 Source requests about Arman's own biography/publications use the verified
 professional reference and his own public GitHub rather than importing similarly
@@ -115,7 +122,7 @@ production secret out of the dashboard. Local leaderboard storage remains separa
 
 Run the `tests/chat-*.test.js`, `tests/morpheus-*.test.js` and leaderboard tests.
 `node scripts/evaluate-morpheus.mjs` is an opt-in live check against the deployed
-relay (eleven model requests). It writes an ignored public-test report to
+relay (one model request per case). It writes an ignored public-test report to
 `work/morpheus-live-eval.json`. Read the actual answers: automated checks cannot
 fully judge character voice, factual accuracy or quality of fit. Test questions
 are evaluation fixtures, not a production FAQ or list of allowed questions.
@@ -142,10 +149,18 @@ Live checks (not replaced by mocked API tests):
 3. A real company/role or public job URL — actual research, subtle fit examples,
    clickable source citations; no imaginary current vacancy.
 4. A clearly unrelated licensed profession — no invented license to force a yes.
-5. General/homework question — useful answer, not an Arman-only refusal.
+5. General/homework question — brief natural redirection, no solution or policy refusal.
 6. Detailed technical question — readable paragraphs/code/lists when useful.
 7. Follow-up and adversarial job text — continuity without obeying embedded
    instructions to invent qualifications or reveal secrets.
+8. Unrelated search, name-dropping, interview wrappers, repeated requests, and mixed
+   tasks — no accidental general assistant; returning to his work resumes normally.
+
+The visible Restart chat button asks for confirmation before clearing the browser's
+conversation and draft. It aborts a pending request, clears displayed sources and
+focuses a fresh input; late answers from the old chat cannot reappear. It does not
+clear the theme, endpoint, race data, other browser settings or provider-side logs.
+The existing `clear` command remains available.
 
 API references: [Responses](https://docs.x.ai/developers/rest-api-reference/inference/responses),
 [public web search](https://docs.x.ai/developers/tools/web-search),

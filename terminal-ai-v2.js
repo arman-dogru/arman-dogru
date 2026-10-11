@@ -1,6 +1,6 @@
 import {renderMarkdown,publicLink} from './chat-markdown.js';
 import {MORPHEUS_VERSION} from './chat-version.js';
-export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatInput,contextProvider,onSources}){
+export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatInput,chatRestart,contextProvider,onSources}){
   const endpoint=()=>window.ARMAN_CHAT_ENDPOINT||localStorage.getItem('arman.chatEndpoint')||'';
   const interrupted='The connection slipped. Your question is still here. Try again.';
   const rateLimited='The signal needs a pause. Try again after the hour turns.';
@@ -32,10 +32,15 @@ export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatIn
   function clientContext(){
     try{const value=contextProvider?.()||{};return JSON.parse(JSON.stringify(value,(k,v)=>typeof v==='string'?v.slice(0,1200):v))}catch{return{}}
   }
+  function restart(){
+    generation++;controller?.abort();controller=null;setBusy(false);
+    history=[];saveHistory();renderHistory();onSources?.([]);
+    if(chatInput){chatInput.value='';chatInput.focus()}
+  }
   async function send(message,{fromTerminal=false,retryHistory=null}={}){
     const text=(message||'').trim();
     if(!text){if(fromTerminal)addLine('usage: chat <message>','yellow');return}
-    if(/^clear$/i.test(text)){generation++;controller?.abort();setBusy(false);history=[];saveHistory();renderHistory();if(fromTerminal)addLine('chat memory cleared','green');return}
+    if(/^clear$/i.test(text)){restart();if(fromTerminal)addLine('chat memory cleared','green');return}
     if(busy)return;
     const url=endpoint();
     const prior=retryHistory||history.slice(-10),turn=generation;
@@ -68,6 +73,10 @@ export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatIn
   chatWindow?.setAttribute('role','log');chatWindow?.setAttribute('aria-live','polite');
   if(chatForm)chatForm.addEventListener('submit',e=>{e.preventDefault();if(busy)return;const v=chatInput?.value||'';if(chatInput)chatInput.value='';send(v)});
   if(chatInput)chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();chatForm?.requestSubmit()}});
+  chatRestart?.addEventListener('click',()=>{
+    if((history.length||busy||chatInput?.value?.trim())&&!window.confirm('Restart this chat? This clears the conversation and your draft from this browser.'))return;
+    restart();
+  });
   loadHistory();renderHistory();
   return{chat:send,clear:()=>send('clear'),renderHistory,focus:()=>{chatInput?.focus();if(chatWindow)chatWindow.scrollTop=chatWindow.scrollHeight},history:()=>history.slice()};
 }

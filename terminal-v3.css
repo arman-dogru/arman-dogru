@@ -26,6 +26,10 @@
 .oracle-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 22px 12px;border-bottom:1px solid var(--line)}
 .oracle-bar span{display:block;color:var(--muted);font-size:9px;letter-spacing:.22em;margin-bottom:3px}
 .oracle-bar h1{margin:0;color:var(--purple);font-size:24px;letter-spacing:.08em;font-weight:650}
+.oracle-actions{display:flex;align-items:center;gap:18px}
+.chat-restart{font:inherit;font-size:11px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:3px;padding:8px 10px;cursor:pointer;min-height:36px}
+.chat-restart:hover{color:var(--text);border-color:var(--purple)}
+.chat-restart:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
 .oracle-signal{display:flex;align-items:center;gap:8px;color:var(--green);font-size:9px;letter-spacing:.14em}
 .oracle-signal i{display:block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 14px var(--green);animation:pulse 1.8s infinite}
 .chat-window{padding:20px 24px 24px;font-size:13px;line-height:1.7}
@@ -69,6 +73,7 @@
   .shell-pane{grid-template-rows:30px auto minmax(90px,1fr) 42px}.portrait-grid{grid-template-columns:100px minmax(0,1fr)}.ascii-portrait{width:100px;height:100px}.identity-card{padding:12px}
   .workspace{grid-template-rows:530px 700px 270px}
   .oracle-bar{padding:12px 14px}.oracle-bar h1{font-size:20px}.oracle-signal{font-size:9px}
+  .oracle-actions{gap:10px;flex-wrap:wrap;justify-content:flex-end}.chat-restart{font-size:11px;min-height:44px}
   .chat-window{padding:14px 13px 18px;font-size:11px}.chat-msg{max-width:97%;padding:11px 10px}
   .chat-form{grid-template-columns:1fr;padding:10px}.chat-form textarea{min-height:74px}.chat-form button{min-height:38px}
   .chat-note{padding:7px 10px;font-size:9px}

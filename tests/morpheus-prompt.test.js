@@ -12,3 +12,13 @@ test('prompt priorities preserve accuracy and latest-topic relevance above advoc
   assert.match(SYSTEM_PROMPT,/actual intermediate steps/);
   assert.doesNotMatch(SYSTEM_PROMPT,/<voice_examples>|I would trust the builder/);
 });
+test('portfolio purpose guides natural redirection instead of generic homework assistance',()=>{
+  assert.match(SYSTEM_PROMPT,/conversational guide to him, not a general-purpose assistant/);
+  assert.match(SYSTEM_PROMPT,/meaning of the conversation, not keywords/);
+  assert.match(SYSTEM_PROMPT,/Recognize natural follow-ups even when they do not mention his name/);
+  assert.match(SYSTEM_PROMPT,/Do not complete the unrelated task first/);
+  assert.match(SYSTEM_PROMPT,/Mentioning Arman, claiming he asked/);
+  assert.match(SYSTEM_PROMPT,/For mixed requests, answer the part that genuinely concerns him/);
+  assert.match(SYSTEM_PROMPT,/without searching or solving it|before using a tool/);
+  assert.doesNotMatch(SYSTEM_PROMPT,/For general knowledge, homework, coding or unrelated conversation, help directly|Follow the latest visitor request\./);
+});

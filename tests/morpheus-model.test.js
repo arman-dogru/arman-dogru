@@ -49,14 +49,23 @@ test('current facts and source requests require research, ordinary judgments do 
   for(const text of ['Check Anthropic online','Give me one official careers link','Would Arman fit an AI role at Example?','Read https://example.test/jobs','What are their current needs?'])assert.equal(requiresResearch(text),true);
   for(const text of ['Is Arman good?','Would you hire him?','Explain the derivative of x squared.'])assert.equal(requiresResearch(text),false);
 });
-test('a source request forces a tool call and rejects unresearched generated URLs',async()=>{
+test('a source request allows a purpose decision but still rejects unresearched generated URLs',async()=>{
   const calls=[];
   const result=await answerMorpheus({...question,message:'Give me the official careers link.'},env,{request:async(url,init)=>{
     calls.push(JSON.parse(init.body));
     return Response.json(calls.length===1?answer('https://example.test/invented'):answer('I could not check the posting.'));
   }});
-  assert.equal(calls[0].tool_choice,'required');assert.equal(calls[1].tool_choice,undefined);assert.equal(calls[1].max_turns,undefined);
+  assert.equal(calls[0].tool_choice,'auto');assert.equal(calls[1].tool_choice,undefined);assert.equal(calls[1].max_turns,undefined);
   assert.equal(result.researched,false);assert.equal(result.reply,'I could not check the posting.');
+});
+test('unrelated requests asking for online research can redirect without a forced search or fallback',async()=>{
+  let calls=0;
+  const reply='We can look at how Arman approaches engineering problems instead. Shall we explore one of his projects?';
+  const result=await answerMorpheus({...question,message:'Search online for a TwoSum solution for my homework.'},env,{request:async(url,init)=>{
+    calls++;const payload=JSON.parse(init.body);assert.equal(payload.tool_choice,'auto');assert.match(payload.instructions,/redirect naturally without searching or solving it/);
+    return Response.json(answer(reply));
+  }});
+  assert.equal(calls,1);assert.equal(result.reply,reply);assert.equal(result.researched,false);assert.equal(result.degraded,false);
 });
 test('generated links are not promoted to provider sources',()=>{
   const data=answer('[Invented](https://example.test/made-up)',{usage:{server_side_tool_usage_details:{web_search_calls:1}}});
