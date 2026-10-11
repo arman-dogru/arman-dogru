@@ -126,6 +126,9 @@ relay (one model request per case). It writes an ignored public-test report to
 `work/morpheus-live-eval.json`. Read the actual answers: automated checks cannot
 fully judge character voice, factual accuracy or quality of fit. Test questions
 are evaluation fixtures, not a production FAQ or list of allowed questions.
+Use `node scripts/evaluate-morpheus.mjs https://arman-dogru-chat.arman-dogru.workers.dev/chat --suite=scope`
+for the bounded scope/follow-up suite plus company-research and injection regressions.
+This leaves room within the visitor cap for browser QA; the default runs all cases.
 
 Rendering is independent of prompting: `chat-markdown.js` escapes source HTML,
 renders useful Markdown and safe links, and uses pinned self-hosted KaTeX for

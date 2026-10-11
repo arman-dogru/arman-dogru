@@ -10,15 +10,16 @@ class Element{
   remove(){if(this.parent)this.parent.children=this.parent.children.filter(x=>x!==this)}
   setAttribute(k,v){this.attrs[k]=v}addEventListener(k,fn){this.listeners[k]=fn}
   focus(){this.focused=true}
+  showModal(){this.open=true}close(){this.open=false}
   querySelector(){return this.submit}
 }
 function setup(t,request,existing=[]){
-  const store=new Map([['arman.chat.history.v3',JSON.stringify(existing)]]),chatWindow=new Element(),chatForm=new Element(),chatInput=new Element(),chatRestart=new Element(),sources=[];chatForm.submit=new Element();
+  const store=new Map([['arman.chat.history.v3',JSON.stringify(existing)]]),chatWindow=new Element(),chatForm=new Element(),chatInput=new Element(),chatRestart=new Element(),chatRestartDialog=new Element(),chatRestartConfirm=new Element(),chatRestartCancel=new Element(),sources=[];chatForm.submit=new Element();
   const originals=Object.fromEntries(['document','localStorage','window','fetch'].map(k=>[k,globalThis[k]]));
   Object.assign(globalThis,{document:{createElement:()=>new Element()},localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},window:{ARMAN_CHAT_ENDPOINT:'/chat',confirm:()=>true},fetch:request});
   t.after(()=>Object.assign(globalThis,originals));
-  const ai=createAI({chatWindow,chatForm,chatInput,chatRestart,onSources:value=>sources.push(value),escapeHtml:escapeHTML,addLine:()=>{},addBlock:()=>{}});
-  return{ai,chatWindow,chatForm,chatInput,chatRestart,store,sources};
+  const ai=createAI({chatWindow,chatForm,chatInput,chatRestart,chatRestartDialog,chatRestartConfirm,chatRestartCancel,onSources:value=>sources.push(value),escapeHtml:escapeHTML,addLine:()=>{},addBlock:()=>{}});
+  return{ai,chatWindow,chatForm,chatInput,chatRestart,chatRestartDialog,chatRestartConfirm,chatRestartCancel,store,sources};
 }
 test('existing history is preserved; only assistant Markdown is interpreted',async t=>{
   const old=[{role:'user',content:'**literal**'},{role:'assistant',content:'**Yes.**'}],{ai,chatWindow}=setup(t,async()=>Response.json({reply:'He builds.'}),old);
@@ -57,23 +58,23 @@ test('hourly limit is explained honestly, with no fake network failure or model 
   await ai.chat('Hello');const failure=chatWindow.children.at(-1);assert.match(failure.innerHTML,/after the hour turns/);assert.doesNotMatch(failure.innerHTML,/connection slipped|Internal limit/);assert.equal(ai.history().length,1);assert.equal(failure.children[0].textContent,'Retry');
 });
 test('restart button confirms, clears only chat memory and draft, and focuses a fresh conversation',async t=>{
-  const {ai,chatWindow,chatInput,chatRestart,store,sources}=setup(t,async()=>Response.json({reply:'He builds.'}),[{role:'user',content:'Old question'}]);
+  const {ai,chatWindow,chatInput,chatRestart,chatRestartDialog,chatRestartConfirm,chatRestartCancel,store,sources}=setup(t,async()=>Response.json({reply:'He builds.'}),[{role:'user',content:'Old question'}]);
   store.set('arman.theme','dracula');store.set('arman.chatEndpoint','/custom');chatInput.value='Unsent draft';
-  let confirmations=0;window.confirm=message=>{confirmations++;assert.match(message,/clears the conversation and your draft/);return false};
-  chatRestart.listeners.click();assert.equal(ai.history().length,1);assert.equal(chatInput.value,'Unsent draft');
-  window.confirm=()=>{confirmations++;return true};chatRestart.listeners.click();
-  assert.equal(confirmations,2);assert.deepEqual(ai.history(),[]);assert.deepEqual(JSON.parse(store.get('arman.chat.history.v3')),[]);
+  chatRestart.listeners.click();assert.equal(chatRestartDialog.open,true);assert.equal(chatRestartCancel.focused,true);
+  chatRestartCancel.listeners.click();assert.equal(chatRestartDialog.open,false);assert.equal(ai.history().length,1);assert.equal(chatInput.value,'Unsent draft');
+  chatRestart.listeners.click();chatRestartConfirm.listeners.click();
+  assert.equal(chatRestartDialog.open,false);assert.deepEqual(ai.history(),[]);assert.deepEqual(JSON.parse(store.get('arman.chat.history.v3')),[]);
   assert.equal(chatWindow.children.length,1);assert.match(chatWindow.children[0].innerHTML,/Ask\./);assert.equal(chatInput.value,'');assert.equal(chatInput.focused,true);
   assert.equal(store.get('arman.theme'),'dracula');assert.equal(store.get('arman.chatEndpoint'),'/custom');assert.deepEqual(sources.at(-1),[]);
   await ai.chat('Fresh question');assert.equal(ai.history().length,2);
 });
 test('restart aborts an in-flight reply and stale completion cannot overwrite a newer conversation',async t=>{
   let finishOld,oldSignal;const bodies=[];
-  const {ai,chatWindow,chatRestart,chatForm}=setup(t,async(url,init)=>{
+  const {ai,chatWindow,chatRestart,chatRestartConfirm,chatForm}=setup(t,async(url,init)=>{
     bodies.push(JSON.parse(init.body));if(bodies.length===1){oldSignal=init.signal;return new Promise(resolve=>finishOld=resolve)}
     return Response.json({reply:'Fresh answer',persona_version:MORPHEUS_VERSION});
   });
-  const old=ai.chat('Old question');chatRestart.listeners.click();assert.equal(oldSignal.aborted,true);assert.equal(chatForm.submit.disabled,false);
+  const old=ai.chat('Old question');chatRestart.listeners.click();chatRestartConfirm.listeners.click();assert.equal(oldSignal.aborted,true);assert.equal(chatForm.submit.disabled,false);
   await ai.chat('New question');assert.deepEqual(bodies[1].history,[]);
   finishOld(Response.json({reply:'Stale answer'}));await old;
   assert.deepEqual(ai.history().map(x=>x.content),['New question','Fresh answer']);assert.doesNotMatch(chatWindow.children.map(x=>x.innerHTML).join(''),/Stale answer/);
