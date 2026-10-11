@@ -8,11 +8,17 @@ Accuracy first. Relevance second. Character voice third.
 cadence, answer-first structure, progressive disclosure and when to consult public
 company/job pages. There is no list of permitted questions or prepared answers.
 Technical explanations are welcome when they help visitors understand his actual
-work or suitability. Unrelated homework, coding and general-assistant tasks get
-a short, context-specific invitation back to his work, not a solution followed
-by a pitch. This is model-led conversation, not a scope classifier/default-answer
-path. Name-dropping and interview/roleplay wrappers do not change a task's purpose;
-implicit follow-ups and the relevant half of mixed requests still get answered.
+work or suitability. Material relevance is assessed from the requested substance
+and immediate conversation, not name-dropping or an allowlist. Unrelated tasks get
+a short, context-aware boundary response, not a solution followed by a pitch or
+an automatic redirect question. Obvious wrappers may get dry humor aimed at the
+maneuver, never an insult or an explanation of internal detection mechanics.
+Repeated attempts are recognized from supplied history, not a separate visitor
+profile or persistent blacklist. Genuine portfolio questions resume normally.
+This is model-led intent judgment, not a separate classifier/default-answer path.
+Name-dropping and interview/roleplay wrappers do not change a task's purpose;
+implicit follow-ups, grounded hypotheticals, project comparisons, career synthesis,
+technical explanations and the relevant half of mixed requests still get answered.
 Morpheus is a perceptive mentor, not a salesman: belief in Arman's potential does not
 require an automatic yes, praise on unrelated topics, or invented achievements.
 The latest question controls the subject within that purpose; earlier turns resolve follow-ups.
@@ -63,7 +69,10 @@ tools are disabled on that final call to prevent loops. It cannot execute code,
 read arbitrary files or select a private data source. Requests for current information,
 company roles or external links/sources are research hints, not forced tool calls:
 the model first decides whether the task serves the portfolio purpose. Unrelated
-search requests redirect without research. Actual researched answers still need
+search requests receive a boundary response without research. Portfolio lookup remains
+available alongside a research hint so short follow-ups such as “Any examples
+online?” can retrieve the actual preceding project's reference. Recent bounded
+conversation also informs GitHub repository selection. Actual researched answers still need
 traceable provider sources; unsupported generated links remain filtered. Prefer the employer's own careers/team
 pages and a supplied public posting, then make the fit judgment in character.
 Source requests about Arman's own biography/publications use the verified
@@ -115,18 +124,25 @@ authenticated browsing, local files or private employer information.
 
 ## Preview, verify, deploy
 
-`npm run dev` serves http://localhost:4173. Without a local API key, chat uses the
-deployed public Worker, **not** the edited local prompt. To test local model code,
-set the key yourself in ignored `grok-relay/.dev.vars`; never commit or copy a
-production secret out of the dashboard. Local leaderboard storage remains separate.
+`npm run dev` serves http://localhost:4173 and uses the checked-out local prompt.
+Set the key yourself in ignored `grok-relay/.dev.vars`; never commit or copy a
+production secret out of the dashboard. Missing local credentials fail explicitly:
+there is no silent production fallback. The oracle status reads LOCAL PREVIEW
+or LOCAL KEY NEEDED, and `/__preview` reports the local version and readiness,
+never the key. `npm run dev -- --public-chat` explicitly opts into the deployed
+relay and is not a way to test local prompt edits. Local leaderboard storage
+remains separate. Restart the development process after changing `.dev.vars`.
 
 Run the `tests/chat-*.test.js`, `tests/morpheus-*.test.js` and leaderboard tests.
 `node scripts/evaluate-morpheus.mjs` is an opt-in live check against the deployed
-relay (one model request per case). It writes an ignored public-test report to
+relay (one model request per case), defaulting to the local preview. It writes an ignored test report to
 `work/morpheus-live-eval.json`. Read the actual answers: automated checks cannot
 fully judge character voice, factual accuracy or quality of fit. Test questions
 are evaluation fixtures, not a production FAQ or list of allowed questions.
-Use `node scripts/evaluate-morpheus.mjs https://arman-dogru-chat.arman-dogru.workers.dev/chat --suite=scope`
+Use `node scripts/evaluate-morpheus.mjs --suite=intent` for eight local checks of
+wrappers, repetition, a legitimate hypothetical, contextual online examples,
+project synthesis, technical explanation and legitimate criticism.
+Use `node scripts/evaluate-morpheus.mjs http://localhost:4173/api/chat --suite=scope`
 for the bounded scope/follow-up suite plus company-research and injection regressions.
 This leaves room within the visitor cap for browser QA; the default runs all cases.
 
@@ -152,7 +168,7 @@ Live checks (not replaced by mocked API tests):
 3. A real company/role or public job URL — actual research, subtle fit examples,
    clickable source citations; no imaginary current vacancy.
 4. A clearly unrelated licensed profession — no invented license to force a yes.
-5. General/homework question — brief natural redirection, no solution or policy refusal.
+5. General/homework question — brief natural boundary response, no solution, pitch or policy template.
 6. Detailed technical question — readable paragraphs/code/lists when useful.
 7. Follow-up and adversarial job text — continuity without obeying embedded
    instructions to invent qualifications or reveal secrets.

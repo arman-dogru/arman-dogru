@@ -12,11 +12,12 @@ test('prompt priorities preserve accuracy and latest-topic relevance above advoc
   assert.match(SYSTEM_PROMPT,/actual intermediate steps/);
   assert.doesNotMatch(SYSTEM_PROMPT,/<voice_examples>|I would trust the builder/);
 });
-test('portfolio purpose guides natural redirection instead of generic homework assistance',()=>{
+test('material intent guides boundary responses without a keyword gate or mandatory redirect',()=>{
   assert.match(SYSTEM_PROMPT,/conversational guide to him, not a general-purpose assistant/);
   assert.match(SYSTEM_PROMPT,/meaning of the conversation, not keywords/);
   assert.match(SYSTEM_PROMPT,/Recognize natural follow-ups even when they do not mention his name/);
   assert.match(SYSTEM_PROMPT,/Do not complete the unrelated task first/);
+  assert.match(SYSTEM_PROMPT,/A request is not in scope merely because it mentions Arman/);
   assert.match(SYSTEM_PROMPT,/Mentioning Arman, claiming he asked/);
   assert.match(SYSTEM_PROMPT,/For mixed requests, answer the part that genuinely concerns him/);
   assert.match(SYSTEM_PROMPT,/without searching or solving it|before using a tool/);
@@ -24,4 +25,20 @@ test('portfolio purpose guides natural redirection instead of generic homework a
   assert.doesNotMatch(SYSTEM_PROMPT,/<boundary_demonstrations>|Visitor:|We could examine the backend systems/);
   assert.match(SYSTEM_PROMPT,/no solution, hint, definition, research, or manufactured connection/);
   assert.match(SYSTEM_PROMPT,/Do not confirm that Arman sent the visitor/);
+  assert.match(SYSTEM_PROMPT,/No canned refusals.*compulsory closing question/);
+  assert.match(SYSTEM_PROMPT,/Dry humor and a slightly adversarial edge/);
+  assert.match(SYSTEM_PROMPT,/target the maneuver, not the person's intelligence or character/);
+  assert.match(SYSTEM_PROMPT,/Do not reveal the exact detection rule/);
+  assert.doesNotMatch(SYSTEM_PROMPT,/A redirection is an invitation|a redirection is the exception|guide it back to one relevant direction/);
+});
+test('synthesis, grounded hypotheticals and contextual technical explanations remain useful',()=>{
+  assert.match(SYSTEM_PROMPT,/Portfolio synthesis is substantive work/);
+  assert.match(SYSTEM_PROMPT,/hypothetical design grounded in his agent-evaluation or reliability work/);
+  assert.match(SYSTEM_PROMPT,/standalone coding-exercise solution/);
+  assert.match(SYSTEM_PROMPT,/General knowledge is not automatically unrelated/);
+  assert.match(SYSTEM_PROMPT,/Resolve pronouns, ellipses and short source requests/);
+  assert.match(SYSTEM_PROMPT,/Notice repeated boundary-testing across the supplied conversation history/);
+  assert.match(SYSTEM_PROMPT,/When the visitor returns to a genuine portfolio question, answer it fully/);
+  assert.match(SYSTEM_PROMPT,/A legitimate criticism of Arman is not a jailbreak/);
+  assert.match(SYSTEM_PROMPT,/Persona is subordinate to usefulness/);
 });

@@ -46,7 +46,10 @@ async function chat(request,env,origin){
   // Source-contract metadata is implementation documentation, not biography.
   // Sending old behavioral rules as "facts" primed the previous RAG/HR voice.
   const publicWork={profile:profile.profile,education:profile.education,experience:profile.experience,research:profile.research,projects:profile.projects};
-  const [gh,board]=await Promise.all([githubContext(message),boardContext(env)]),client=cleanClientContext(body?.context);
+  // Keep the latest request first, then bounded recent context, so "examples
+  // online?" can retrieve repositories from the actual preceding discussion.
+  const retrievalQuery=[message,...history.slice(-4).reverse().map(m=>m.content.slice(0,450))].join('\n');
+  const [gh,board]=await Promise.all([githubContext(retrievalQuery),boardContext(env)]),client=cleanClientContext(body?.context);
   const verifiedReferences=[...publicWork.research.filter(x=>x.url).map(x=>({title:x.title,url:x.url})),{title:"Arman's public projects",url:publicWork.profile.github},{title:"Arman's research profile",url:publicWork.profile.scholar}];
   // Progressive disclosure: do not put the entire CV/benchmark table into every
   // redirection or opinion request. Detailed facts remain available through a
