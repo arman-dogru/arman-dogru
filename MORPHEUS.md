@@ -50,10 +50,14 @@ change followed live tests where wording alone still produced résumé dumps.
 Reference material is separate from
 the trusted character instructions. Old assistant replies remain in the visible
 transcript but are excluded from the model; previous visitor requests retain
-continuity without reproducing obsolete answers. Current history is quoted as
-data, not replayed as assistant demonstrations, and the active visitor request
-is repeated after a reference lookup. This prevents a previous homework answer
-from becoming the answer to a new company question. Benchmark-heavy fact bullets
+continuity without reproducing obsolete answers. Current-version dialogue is sent
+as ordered user/assistant messages, separate from the reference material and
+trusted instructions. The active visitor request is repeated after a reference
+lookup. Once a legitimate new topic has been answered, neutral follow-ups stay
+with that topic rather than reviving an older refused exercise. This follows
+[OpenAI's conversation-state guidance](https://developers.openai.com/api/docs/guides/conversation-state)
+and was verified with the eight-case local intent suite after a live regression
+exposed that JSON-embedded history lost the immediate topic. Benchmark-heavy fact bullets
 are omitted from ordinary lookups; `include_measurements` makes them available
 when quantitative results are requested. New replies carry `chat-version.js`'s persona version; changing it
 does not delete saved conversations. The old source-contract/behavior metadata
