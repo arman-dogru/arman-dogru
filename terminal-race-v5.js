@@ -1,7 +1,8 @@
-import{TRACKS,WORLD_W,WORLD_H,CAR_W,CAR_L,ROAD_W,RUNOFF_HALF,DT,MAX_FWD,LAPS,RACERS,GLOBAL_TRACK,AI_INPUTS,AI_BIAS,CAMERA_ZOOM,COLORS,esc,fmt,scoreFor,validateName,normalizeGeo,makeTrack,trackPoint,compile}from'./race-engine-v5.js';
+import{TRACKS,WORLD_W,WORLD_H,CAR_W,CAR_L,ROAD_W,RUNOFF_HALF,DT,MAX_FWD,LAPS,RACERS,GLOBAL_TRACK,AI_INPUTS,AI_BIAS,CAMERA_ZOOM,COLORS,esc,fmt,scoreFor,validateName,normalizeGeo,makeTrack,trackPoint}from'./race-engine-v5.js';
 
 import {createLeaderboard} from './leaderboard-client.js';
 import {createCar,stepSimulation} from './race-sim.js';
+import {championRoster} from './race-roster.js';
 
 export function createRace({canvas,overlay,modeEl,clockEl,lapEl,posEl,standingsEl,leaderboardEl,trackSelect,log,onBoard}){
   const ctx=canvas.getContext('2d'),keys=new Set();
@@ -15,7 +16,7 @@ export function createRace({canvas,overlay,modeEl,clockEl,lapEl,posEl,standingsE
     const j=await fetch('./neat-champions-v5.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject(new Error(`agents HTTP ${r.status}`)));
     if(j.input_count!==AI_INPUTS||j.bias_node!==AI_BIAS)throw new Error('driver/controller schema mismatch');
     const raw=j.drivers||[];
-    agents=raw.map((d,i)=>({...d,rating:Number(d.rating||86),generation:Number(d.generation||0),net:compile(d),poolIndex:i}));
+    agents=championRoster(raw,j.race_policy?.champion_name).map((d,i)=>({...d,rating:Number(d.rating||86),generation:Number(d.generation||0),poolIndex:i}));
     if(agents.length<9)throw new Error('race grid requires at least nine trained drivers');
   }
   function pickGrid(){

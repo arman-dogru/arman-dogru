@@ -5,6 +5,7 @@ import {evolution} from './neat-evolution.mjs';
 import {rng,SIMULATION_SHA256,simulationSourceMatches} from './race-evaluation.mjs';
 import {TRAINING_OBJECTIVE,distanceFitness} from './race-fitness.mjs';
 import {packCases,REGRESSION_SEEDS} from './race-pack-cases.mjs';
+import {selectGridChampion} from './champion-selection.mjs';
 
 const args=Object.fromEntries(process.argv.slice(2).filter(x=>x.startsWith('--')).map(x=>x.slice(2).split('=')));
 const checkpoint=args.checkpoint?JSON.parse(readFileSync(args.checkpoint)):null;
@@ -68,8 +69,9 @@ try{
   }
   const report={seed,objective:TRAINING_OBJECTIVE,population:size,generations,pack_size:packSize,episodes:history.reduce((n,r)=>n+r.starts,0),simulation_step:1/120,elapsed_s:checkpoint?null:(Date.now()-started)/1000,selection_elapsed_s:checkpoint?(Date.now()-started)/1000:undefined,history,qualified:qualified.length,selectionHistory,validation};
   writeFileSync('work/neat-training-report.json',JSON.stringify(report,null,2));
+  const drivers=makeRoster(chosen),race_policy=await selectGridChampion(drivers,run);
   if(!simulationSourceMatches())throw new Error('Simulation changed during the run; roster was not overwritten. Rerun selection against the current code.');
-  const roster={version:'neat-race-v5',seed,track:'istanbul-park-v4',population:size,generations,pack_size:packSize,pack_rounds_per_generation:2,input_count:20,bias_node:20,output_nodes:[21,22],controller:'shared-physics trajectory planner, predictive traffic separation, learned NEAT steering and pace, ordinary reverse recovery',road_width_cars:5.4,physics_sha256:SIMULATION_SHA256,training:{objective:TRAINING_OBJECTIVE,episodes:report.episodes,elapsed_s:report.elapsed_s,qualified:qualified.length,topology_mutation:true,innovation_aligned_crossover:true,speciation:true},validation:{...validation,results:undefined},drivers:makeRoster(chosen)};
+  const roster={version:'neat-race-v5',seed,track:'istanbul-park-v4',population:size,generations,pack_size:packSize,pack_rounds_per_generation:2,input_count:20,bias_node:20,output_nodes:[21,22],controller:'shared-physics trajectory planner, predictive traffic separation, learned NEAT steering and pace, ordinary reverse recovery',road_width_cars:5.4,physics_sha256:SIMULATION_SHA256,training:{objective:TRAINING_OBJECTIVE,episodes:report.episodes,elapsed_s:report.elapsed_s,qualified:qualified.length,topology_mutation:true,innovation_aligned_crossover:true,speciation:true},validation:{...validation,results:undefined},drivers,race_policy};
   writeFileSync(new URL('../neat-champions-v5.json',import.meta.url),JSON.stringify(roster,null,2)+'\n');
   console.log(`Exported 22 qualified drivers. Report: work/neat-training-report.json (${((Date.now()-started)/1000).toFixed(1)}s this run)`);
 }finally{await Promise.all(workers.map(w=>w.terminate()))}

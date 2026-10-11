@@ -1,6 +1,6 @@
 # NEAT Grand Prix
 
-Ten cars race three laps of the pinned Istanbul Park circuit. The player starts at the back; nine opponents are drawn from the 22-driver roster.
+Ten cars race three laps of the pinned Istanbul Park circuit. The player starts at the back; all nine opponents use one champion policy, with identities drawn from the 22-driver roster. The champion is the highest-distance-fitness archived policy that completes the cloned-grid release checks, not simply the latest generation or highest decorative rating. `race-roster.js` applies that same policy to every opponent. Names, colors and ratings do not change controls or physics. The full trained archive remains intact for comparison and future retraining.
 
 ## One simulation
 
@@ -38,6 +38,12 @@ This selects and validates the completed checkpoint; it does **not** resume evol
 
 This optimizes measured performance on this circuit and these scenarios. It does not establish globally optimal driving or immunity to arbitrary deliberate player obstruction.
 
+The trainer also selects a single active champion from the exported archive, testing nine identical copies at all five blocked positions and then the full pack-release arrangements. Candidates are considered in descending distance-fitness order; only non-completion excludes them. Fitness and incident thresholds are unchanged. `race_policy` records the selected policy and its cloned-grid checks. To repeat just this step without retraining:
+
+```sh
+node scripts/select-race-champion.mjs
+```
+
 ## Validation
 
 ```sh
@@ -49,9 +55,15 @@ python3 scripts/validate_ui.py
 
 Unit tests cover distance-only fitness invariance, equal episode duration, progress beyond the finish marker, initial-position normalization, reverse progress, identical player/AI physics, real grass behavior, angle wrapping, topology evolution, blocked traffic at a fixed reference pace, wrong-way recovery and reorientation hysteresis, leaderboard persistence/concurrency and offline retry.
 
-The race validator runs the actual exported policies through complete three-lap grid, actual ten-car grid with an idle player at the back, stopped-player and off-track recovery races. Every driver is tested, including the lowest ratings. It writes `work/race-validation.json`; `--unseen` uses seeds absent from training and selection, writing `work/race-unseen-validation.json`. The roster contains the selection summary and a hash of its simulation source. Both validators retain stricter incident gates in addition to completion; a nonzero exit must not be described as a clean pass.
+The race validator uses the same champion-roster selector as the browser, testing cloned-champion complete three-lap grid, actual ten-car grid with an idle player at the back, stopped-player and off-track recovery races. Every themed identity is tested, including the lowest decorative ratings. It writes `work/race-validation.json`; `--unseen` uses seeds absent from training and selection, writing `work/race-unseen-validation.json`. Reports identify the active champion and policy mode. The archive contains the original mixed-policy selection summary and a hash of its simulation source, not a validation of the cloned grid. Both validators retain stricter incident gates in addition to completion; a nonzero exit must not be described as a clean pass.
 
-### Local distance-only retraining: 2026-10-11
+### Single-champion grid: 2026-10-11
+
+All nine opponents use the generation-59 policy archived as Gemini Russell. It has the highest distance fitness among archived models that complete the identical-grid release checks. The raw top scorer (generation 99) stalled seven cars behind a stopped player at circuit position 1700 when cloned, so it failed the existing completion requirement. No weights, physics, fitness formula or incident thresholds were changed to select its replacement.
+
+The selected champion completed 864/864 release starts. The separate regression and unseen suites each completed 324/324 starts and passed every existing incident threshold: no wall hits, no persistent queues, longest stop 0.867 seconds. Each suite reported two aggregate contacts in stopped-player races, so this is not a collision-free claim. Mean three-lap times were 87.19 seconds on the normal grid and 91.23 seconds with an idle player at the back. The original mixed-grid measurements below remain historical, not the results for this new policy mode.
+
+### Local distance-only retraining: 2026-10-11 (original mixed-policy grid)
 
 Seed 20261011, 64 genomes, 100 generations, 12,800 evolutionary car episodes. The 192-policy archive was screened on six identical fixed-duration solo conditions. The exported 22 policies then completed all 864 pack-selection starts. The same exported roster completed all 324 known-regression starts and all 324 additional unseen starts, with no wall hits. The longest stop was 0.875 seconds in regressions and 1.442 seconds in unseen arrangements.
 

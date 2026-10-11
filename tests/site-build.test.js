@@ -17,6 +17,7 @@ test('site deployment includes only public assets, not dependencies, secrets or 
     assert.deepEqual((await readdir(out)).sort(),[...PUBLIC_FILES,'assets'].sort());
     assert.equal(await readFile(join(out,'terminal-ai-v2.js'),'utf8'),'terminal-ai-v2.js');
     assert.equal(await readFile(join(out,'race-sim.js'),'utf8'),'race-sim.js');
+    assert.equal(await readFile(join(out,'race-roster.js'),'utf8'),'race-roster.js');
   } finally {await rm(root,{recursive:true,force:true})}
 });
 

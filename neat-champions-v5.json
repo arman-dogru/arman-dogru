@@ -7378,5 +7378,44 @@
       "pack_fitness": 15378.487660134018,
       "solo_ms": 81125
     }
-  ]
+  ],
+  "race_policy": {
+    "mode": "single-champion",
+    "selection": "highest distance-fitness policy completing cloned-grid release races",
+    "champion_name": "Gemini Russell",
+    "generation": 59,
+    "fitness": 14774.253501391924,
+    "selection_seeds": [
+      701,
+      809,
+      911,
+      1201,
+      2027,
+      17389,
+      24071,
+      48163
+    ],
+    "validation": {
+      "runs": 96,
+      "starts": 864,
+      "finished": 864,
+      "contacts": 6,
+      "wall_hits": 0,
+      "max_stall_s": 0.866666666666666
+    },
+    "rejected": [
+      {
+        "name": "LaMDA Norris",
+        "generation": 99,
+        "fitness": 14846.628155180048,
+        "stage": "blocked-grid screen",
+        "runs": 5,
+        "starts": 45,
+        "finished": 38,
+        "contacts": 10,
+        "wall_hits": 0,
+        "max_stall_s": 82.84166666667866
+      }
+    ]
+  }
 }
