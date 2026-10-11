@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence} from '../grok-relay/morpheus-model.js';
+import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence,compactSourceNotes} from '../grok-relay/morpheus-model.js';
 import {MORPHEUS_VERSION} from '../chat-version.js';
 const answerMorpheus=(question,env,options={})=>runMorpheus(question,env,{checkSources:async citations=>({citations,deadURLs:[]}),...options});
 const env={XAI_API_KEY:'test-only-secret',XAI_MODEL:'grok-4.3'},question={message:'What do you think of Arman as an engineer?',evidence:{profile:'public work'},history:[]};
@@ -61,6 +61,14 @@ test('a source request forces a tool call and rejects unresearched generated URL
 test('generated links are not promoted to provider sources',()=>{
   const data=answer('[Invented](https://example.test/made-up)',{usage:{server_side_tool_usage_details:{web_search_calls:1}}});
   assert.deepEqual(readResponse(data).citations,[]);
+});
+test('duplicate source announcements disappear without removing the actual citation or a unique source',()=>{
+  const point='A grounded point.[[1]](https://www.anthropic.com/careers/jobs)';
+  assert.equal(compactSourceNotes(point+'\n\nOne official source is https://www.anthropic.com/careers/jobs.'),point);
+  const unique='A grounded point.\n\nOne official source is https://www.anthropic.com/careers/jobs.';
+  assert.equal(compactSourceNotes(unique),unique);
+  const code='```python\nsource = "https://example.com/api"\n```';assert.equal(compactSourceNotes(code),code);
+  const codeAndSource=code+'\n\nSource: https://example.com/api';assert.equal(compactSourceNotes(codeAndSource),codeAndSource);
 });
 test('biographical sources use verified references while company sources still research',async()=>{
   assert.equal(usesProfileSources('What sources would you suggest for a case study about Arman?'),true);

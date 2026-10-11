@@ -32,6 +32,21 @@ function textURLs(text){return [...String(text||'').matchAll(/https?:\/\/[^\s<>"
   while(value.endsWith(')')&&(value.match(/\)/g)||[]).length>(value.match(/\(/g)||[]).length)value=value.slice(0,-1);
   return citationURL(value);
 }).filter(Boolean)}
+export function compactSourceNotes(reply){
+  // A cosmetic duplicate, not a factual rewrite: retain the actual inline
+  // citation and remove a standalone announcement of that very same URL.
+  const kept=[],seen=new Set();let fenced=false;
+  for(const paragraph of reply.split(/\n\s*\n/)){
+    const fences=(paragraph.match(/^\s*(?:`{3,}|~{3,})/gm)||[]).length,inCode=fenced||fences>0;
+    if(fences%2)fenced=!fenced;
+    if(inCode){kept.push(paragraph);continue}
+    const urls=textURLs(paragraph.replace(/`+[^`\n]*`+/g,''));
+    const note=/^(?:(?:one|an?|the)\s+)?(?:official\s+)?(?:source|reference|citation)\s*(?:is\s+|:\s*)/i.test(paragraph.trim());
+    if(note&&urls.length&&urls.every(url=>seen.has(url)))continue;
+    kept.push(paragraph);for(const url of urls)seen.add(url);
+  }
+  return kept.join('\n\n');
+}
 export function groundedLinks(reply,allowed){
   const approved=value=>allowed.has(citationURL(value));
   let changed=false;
@@ -114,7 +129,7 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
           repair={draft:filtered.reply,citations:checked.citations,researched:result.researched||Boolean(repair?.researched)};
           console.warn('Morpheus source rewrite required');continue;
         }
-        return{...result,citations:checked.citations,researched:(result.researched||Boolean(repair?.researched))&&checked.citations.length>0,reply:filtered.reply,degraded:false};
+        return{...result,citations:checked.citations,researched:(result.researched||Boolean(repair?.researched))&&checked.citations.length>0,reply:compactSourceNotes(filtered.reply),degraded:false};
       }
       console.warn('Morpheus unusable upstream response');
     }catch{console.warn('Morpheus upstream request failed')}finally{clearTimeout(timer)}
