@@ -29,3 +29,12 @@ test('intent suite includes repetition, grounded hypotheticals, short sources, s
   assert.deepEqual(behaviorFailures(repeated,data('You renamed the same exercise. That changes nothing.')),[]);
   assert.ok(behaviorFailures(repeated,data('No.')).includes('did not acknowledge repeated attempt'));
 });
+test('knowledge suite covers identity, conflicts, newly documented work, Matrix opportunity and concise follow-ups',()=>{
+  const selected=cases.filter(item=>item.knowledge),seen=new Set();assert.equal(selected.length,8);
+  for(const item of selected){if(item.after)assert.ok(seen.has(item.after));seen.add(item.name)}
+  assert.ok(selected.some(item=>item.context));assert.ok(selected.some(item=>item.web));assert.ok(selected.some(item=>item.brief));
+  const conflict=selected.find(item=>item.name==='internal education wins outside conflict');
+  assert.ok(behaviorFailures(conflict,data('He finished in 2019.')).includes('missed requested subject or comparison'));
+  assert.deepEqual(behaviorFailures(conflict,data('I have 2020, not 2019. That outside account differs.')),[]);
+  assert.ok(behaviorFailures(conflict,data('INTERNAL: 2020 rather than 2019.')).includes('exposed provenance machinery'));
+});

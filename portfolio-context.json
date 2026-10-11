@@ -189,7 +189,7 @@
     }
   ],
   "agent_source_contract": {
-    "canonical": "This JSON is the canonical bundled public professional context until Arman replaces or expands it from a master resume.",
+    "canonical": "Legacy public portfolio snapshot, not Morpheus's source of truth. Morpheus uses the curated master-resume record in the backend; external findings cannot override it.",
     "github": "The deployed relay may retrieve live public GitHub profile/repository metadata and a targeted public README when relevant.",
     "page_state": "The browser may send the active portfolio tab, race state, theme, current timeline selection and top paddock entries as untrusted display state.",
     "linkedin": "LinkedIn is a navigation link only; the agent does not scrape or authenticate to LinkedIn.",

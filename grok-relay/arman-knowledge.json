@@ -1,0 +1,624 @@
+{
+  "source": {
+    "title": "Arman Doğru — Master Resume",
+    "organized_at": "2026-09-23",
+    "sha256": "2225ae9c66f0d0b2f0517e2a76a43c64bfe7ff5ebda30fec6d4d07363bcb461f",
+    "edition": "Professional facts curated for the portfolio. Personal phone/email and document workflow instructions are excluded. Dates and present-tense claims reflect the source edition, not live verification."
+  },
+  "profile": {
+    "name": "Arman Doğru",
+    "location": "Ottawa, Ontario, Canada",
+    "headline": "AI Researcher at Nokia Bell Labs; previously Huawei; Master's in Computer Science and AI at the University of Ottawa; IEEE Young Professionals Ottawa",
+    "github_username": "arman-dogru",
+    "github": "https://github.com/arman-dogru",
+    "linkedin": "https://www.linkedin.com/in/arman-dogru/",
+    "scholar": "https://scholar.google.com/citations?user=BUeifBIAAAAJ",
+    "focus": [
+      "AI/ML research",
+      "Computer vision",
+      "LLMs and multi-agent systems",
+      "Digital twins",
+      "Research prototypes and software engineering"
+    ]
+  },
+  "education": [
+    {
+      "institution": "University of Ottawa",
+      "degree": "Master's in Computer Science, AI specialization, co-op",
+      "dates": "Sep 2024 – Dec 2026 (expected)",
+      "facts": [
+        "GPA 3.96; approximately $31K scholarship.",
+        "Nominated for Co-op Student of Fall 2025."
+      ]
+    },
+    {
+      "institution": "University of Ottawa",
+      "degree": "B.Sc. Honours Computer Science, cum laude, co-op",
+      "dates": "Sep 2020 – May 2024",
+      "facts": [
+        "GPA 3.5; approximately $212K in scholarships.",
+        "Dean's Honour List."
+      ]
+    },
+    {
+      "institution": "İstanbul Özel Saint Joseph Fransız Lisesi",
+      "degree": "High School Diploma",
+      "dates": "2015 – 2020"
+    }
+  ],
+  "experience": [
+    {
+      "organization": "Nokia Bell Labs",
+      "role": "Applied AI Researcher",
+      "dates": "May 2026 – present (source edition)",
+      "location": "Ottawa / Kanata",
+      "stack": [
+        "Python",
+        "PyTorch",
+        "CUDA",
+        "NumPy",
+        "OpenCV",
+        "Linux"
+      ],
+      "facts": [
+        "Semantic edge-cloud traffic-camera digital twins connecting perception to real-time physics simulation.",
+        "Guided attention segmentation, YOLOv26, planar homography and Kalman filtering for calibration, detection, tracking and temporal estimation.",
+        "Research ablations, benchmarking and edge profiling.",
+        "Evaluated approximately 1 ms latency, over 99.9% data reduction and 0.12 m mean coordinate error.",
+        "Associated work accepted at IEEE GLOBECOM 2026."
+      ]
+    },
+    {
+      "organization": "Smart Connected Vehicles Innovation Centre (SCVIC) / NEXTCONLAB, University of Ottawa",
+      "role": "Applied AI Researcher",
+      "dates": "Jan 2026 – Apr 2026",
+      "stack": [
+        "Python",
+        "PyTorch",
+        "OpenCV",
+        "ROS / ROS2",
+        "CUDA",
+        "RF hardware",
+        "Linux"
+      ],
+      "facts": [
+        "Computer-vision localization and MARL/MAPF navigation for drones and UGVs; simulation before physical deployment.",
+        "RF rogue base-station geolocation using PDoA, signal processing and ML/RL.",
+        "RF geolocation evaluated at approximately 30 m error."
+      ]
+    },
+    {
+      "organization": "Huawei Canada",
+      "role": "Applied AI Researcher",
+      "dates": "May 2025 – Dec 2025",
+      "facts": [
+        "PANAMA: network-aware MARL for multi-agent path finding in digital twins, including D-Robot, D-Factory and D-Net.",
+        "SINR-aware states and rewards, curriculum learning, prioritized experience replay and DDQN.",
+        "Parallel simulation, experiment tracking, sweeps and checkpointing; first-author IEEE GLOBECOM 2025 paper.",
+        "Evaluated 256 agents with over 90% success across approximately 5,000 episodes, reducing approximately 450 steps to 100; training used approximately 10% of the evaluated baseline; out-of-distribution warehouse tests used 64 times the training agent count.",
+        "Multi-agent LLM hallucination detection and mitigation: structured prompting, agent communication, tool use, retrieval verification and self-consistency; U.S. patent pending.",
+        "Evaluated approximately 50–80% task-accuracy improvements in tested LLM models/configurations."
+      ]
+    },
+    {
+      "organization": "Casa (Neo Accelerator)",
+      "role": "Software Developer Intern",
+      "dates": "Jul 2024 – Sep 2024",
+      "location": "San Francisco Bay Area",
+      "stack": [
+        "Kotlin",
+        "Python",
+        "Java",
+        "REST",
+        "Supabase"
+      ],
+      "facts": [
+        "Production endpoints and database migrations.",
+        "RAG agent for real-time Q&A, third-party APIs, MCP tools, ingestion, embeddings, vector search and prompt/context orchestration.",
+        "Authentication, database errors, observability and production deployment."
+      ]
+    },
+    {
+      "organization": "SAS Institute",
+      "role": "Software Developer Intern",
+      "dates": "Sep 2023 – Dec 2023",
+      "stack": [
+        "Python",
+        "SQL",
+        "SAS",
+        "Azure",
+        "Pandas",
+        "Matplotlib",
+        "scikit-learn",
+        "TensorFlow"
+      ],
+      "facts": [
+        "Bank-fraud modelling: exploratory analysis, feature engineering, training, class imbalance and ROC/F1 evaluation; client requirements, demos and reports.",
+        "Approximately 85–95% predictive accuracy in evaluated configurations."
+      ]
+    },
+    {
+      "organization": "Shell",
+      "role": "Software Developer Intern, Fleet Solutions",
+      "dates": "Jun 2023 – Aug 2023",
+      "stack": [
+        "Java",
+        "REST",
+        "Node.js",
+        "SQL",
+        "Python",
+        "Selenium"
+      ],
+      "facts": [
+        "Forecasting and ghost-transaction/fraud initiative in a four-person development team.",
+        "DevOps/Git migration and browser/API automation.",
+        "Approximately 92% demand-forecasting accuracy; approximately $2M estimated defended value, not realized revenue."
+      ]
+    },
+    {
+      "organization": "University of Ottawa",
+      "role": "Engineering Learning Community Advisor / Residence Advisor",
+      "dates": "Sep 2022 – Jun 2025",
+      "facts": [
+        "Mentored over 300 engineering students; residence advisor for 125 students in Stanton, Rideau and Henderson."
+      ]
+    },
+    {
+      "organization": "University of Ottawa",
+      "role": "Computer Science Tutor",
+      "dates": "Sep 2021 – May 2024",
+      "stack": [
+        "Java",
+        "C++",
+        "Python",
+        "React",
+        "PHP",
+        "SQL",
+        "Kotlin",
+        "Go"
+      ]
+    },
+    {
+      "organization": "University of Ottawa",
+      "role": "Undergraduate Researcher",
+      "dates": "Sep 2022 – May 2023",
+      "facts": [
+        "Audio source separation, inverse synthesis-parameter estimation and multi-synthesizer reconstruction."
+      ]
+    },
+    {
+      "organization": "Hack the Hill",
+      "role": "Software Developer",
+      "dates": "Nov 2022 – Mar 2023",
+      "facts": [
+        "React landing page and live site."
+      ]
+    },
+    {
+      "organization": "uOttaHack",
+      "role": "Software Engineer",
+      "dates": "May 2022 – Nov 2022",
+      "facts": [
+        "React and Stripe sponsor portal."
+      ]
+    },
+    {
+      "organization": "SNG Studios",
+      "role": "Machine Learning Engineer",
+      "dates": "Jun 2022 – Aug 2022",
+      "location": "Istanbul",
+      "stack": [
+        "Python",
+        "Pandas",
+        "NumPy",
+        "scikit-learn",
+        "SQL"
+      ],
+      "facts": [
+        "Mobile-game player-behavior modelling and retention insights.",
+        "Approximately 96% prediction accuracy in the evaluated configuration."
+      ]
+    },
+    {
+      "organization": "Getir",
+      "role": "Software Developer Intern",
+      "dates": "Jun 2021 – Aug 2021",
+      "location": "Istanbul",
+      "stack": [
+        "Java",
+        "Spring Boot",
+        "Redis",
+        "AWS"
+      ],
+      "facts": [
+        "Twitter-sentiment web application and full-stack CRM in a three-person team, including backend, database and APIs."
+      ]
+    },
+    {
+      "organization": "Carrefour",
+      "role": "Software Developer Intern",
+      "dates": "Jun 2020 – Aug 2020",
+      "location": "Istanbul",
+      "facts": [
+        "Staff-management UI in a ten-person team; testing, debugging and regressions."
+      ]
+    },
+    {
+      "organization": "SFS Software & Consultancy",
+      "role": "Software Developer Intern",
+      "dates": "Jun 2019 – Aug 2019",
+      "location": "Istanbul",
+      "facts": [
+        "Database-backed dashboard and prototype for an insurance-industry client; database design, UI, testing and debugging.",
+        "Identified and helped resolve 13 production/application defects."
+      ]
+    }
+  ],
+  "research": [
+    {
+      "title": "Semantic Edge-Cloud Communication for Real-Time Urban Traffic Digital Twins",
+      "organization": "Nokia Bell Labs",
+      "venue": "IEEE GLOBECOM 2026",
+      "status": "accepted"
+    },
+    {
+      "title": "PANAMA: A Network-Aware MARL Framework for Multi-Agent Path Finding in Digital Twin Ecosystems",
+      "organization": "Huawei Canada",
+      "venue": "IEEE GLOBECOM 2025",
+      "status": "first-author paper; arXiv preprint available",
+      "link_status": "No exact publication URL or arXiv identifier supplied by this source."
+    },
+    {
+      "title": "Methods and Apparatus For Detecting and Mitigating Hallucinations in Autonomous Multi-Agent Systems",
+      "organization": "Huawei Canada",
+      "status": "U.S. patent pending",
+      "link_status": "No filing identifier or URL supplied by this source."
+    }
+  ],
+  "projects": [
+    {
+      "name": "Developer AI Tool for GitHub (Mendel)",
+      "urls": [
+        "https://github.com/arman-dogru/mendel-webapp",
+        "https://github.com/arman-dogru/ai-powered-developer-productivity-dashboard",
+        "https://mendellab.co"
+      ],
+      "stack": [
+        "React",
+        "Node.js / Express",
+        "MongoDB",
+        "GPT / GitHub APIs",
+        "GitHub OAuth / Webhooks"
+      ],
+      "facts": [
+        "LLM agent for automated PR reviews, developer performance analysis and engineering-productivity dashboards."
+      ]
+    },
+    {
+      "name": "GSANet-DCNN — Unsupervised Video Object Segmentation",
+      "urls": [
+        "https://github.com/arman-dogru/GSANet-DCNN"
+      ],
+      "stack": [
+        "PyTorch",
+        "Guided Slot Attention",
+        "KNN Filtering",
+        "Feature Aggregation Transformers",
+        "RAFT"
+      ],
+      "facts": [
+        "Foreground/background separation using spatial, temporal and optical-flow features.",
+        "Approximately 86% accuracy in project evaluation."
+      ]
+    },
+    {
+      "name": "Ottawa Cellular Digital Twin / Sionna RT Testbed",
+      "urls": [
+        "https://github.com/arman-dogru/Sionna_Canada_Testbed"
+      ],
+      "stack": [
+        "Python",
+        "NVIDIA Sionna RT",
+        "CUDA",
+        "FastAPI",
+        "React",
+        "MapLibre / deck.gl"
+      ],
+      "facts": [
+        "Multi-GPU cellular-propagation digital twin.",
+        "Spans 4×4 km, 14K+ buildings, 812 sector-frequency records and 576 ray-tracing jobs."
+      ]
+    },
+    {
+      "name": "PANAMA — Network-Aware Multi-Agent Path Finding",
+      "visibility": "private repository",
+      "stack": [
+        "Python",
+        "MARL",
+        "MAPF",
+        "Digital Twins"
+      ],
+      "facts": [
+        "Network-aware multi-agent path planning and coordination in digital-twin environments."
+      ]
+    },
+    {
+      "name": "LLM Bias Reduction & Fairness Evaluation",
+      "urls": [
+        "https://github.com/arman-dogru/LLM-Bias-Reduction"
+      ],
+      "stack": [
+        "LLMs",
+        "Fair-SMOTE / SMOTE",
+        "Random Forest",
+        "SVM",
+        "Python"
+      ],
+      "facts": [
+        "Evaluated LLM and traditional classifiers across six datasets using accuracy, F1, demographic parity and equal-opportunity metrics."
+      ]
+    },
+    {
+      "name": "Fake News Detection with Mistral-7B",
+      "urls": [
+        "https://github.com/arman-dogru/fake-news-detection-mistral7B",
+        "https://github.com/arman-dogru/mistralAI-fakenews-detection"
+      ],
+      "stack": [
+        "Mistral-7B",
+        "Python",
+        "Jupyter",
+        "Weights & Biases",
+        "Kaggle"
+      ],
+      "facts": [
+        "University honours research applying LLMs to automated fake-news classification."
+      ]
+    },
+    {
+      "name": "BAKLAVA — Calendar + Web AI Assistant",
+      "urls": [
+        "https://github.com/arman-dogru/calendar-RAG-assistant"
+      ],
+      "stack": [
+        "React",
+        "Node.js",
+        "Gemini API",
+        "Google Calendar API",
+        "Cloudflare Workers"
+      ],
+      "facts": [
+        "Conversational reasoning, web retrieval, calendar operations and voice interaction."
+      ]
+    },
+    {
+      "name": "Web-Augmented Conversational AI",
+      "urls": [
+        "https://github.com/arman-dogru/react-chatbot"
+      ],
+      "stack": [
+        "React",
+        "Node.js",
+        "Gemini 1.5 Flash",
+        "Cloudflare Workers"
+      ],
+      "facts": [
+        "Dynamically routes generation, web search and webpage retrieval while maintaining conversation context."
+      ]
+    },
+    {
+      "name": "One-Pixel Adversarial Attack",
+      "urls": [
+        "https://github.com/arman-dogru/one-pixel-attack-2025"
+      ],
+      "stack": [
+        "Keras",
+        "TensorFlow",
+        "CIFAR-10",
+        "Differential Evolution",
+        "CNNs"
+      ],
+      "facts": [
+        "Black-box adversarial attacks evaluated against LeNet, ResNet, DenseNet, Wide ResNet and CapsNet."
+      ]
+    },
+    {
+      "name": "RF Geolocation of Rogue Base Stations",
+      "visibility": "private repository",
+      "stack": [
+        "Python",
+        "PDoA",
+        "ThinkRF",
+        "RF signal processing"
+      ],
+      "facts": [
+        "Power-difference-of-arrival geolocation from RF measurements."
+      ]
+    },
+    {
+      "name": "Stock Price Forecasting with LSTM Networks",
+      "urls": [
+        "https://github.com/arman-dogru/stock-predictions-LSTM"
+      ],
+      "stack": [
+        "TensorFlow / Keras",
+        "pandas",
+        "scikit-learn",
+        "Yahoo Finance"
+      ],
+      "facts": [
+        "Time-series pipeline with normalized market data and RMSE evaluation.",
+        "Uses 60-day LSTM sequences."
+      ]
+    },
+    {
+      "name": "Neuroevolution for Autonomous Flappy Bird",
+      "urls": [
+        "https://github.com/arman-dogru/ai-learns-flappy-bird"
+      ],
+      "stack": [
+        "Python",
+        "NEAT",
+        "Neural Networks",
+        "pygame"
+      ],
+      "facts": [
+        "Multi-agent neuroevolution evolves neural-network topologies through fitness-based autonomous gameplay."
+      ]
+    },
+    {
+      "name": "Android Car Rental Marketplace",
+      "urls": [
+        "https://github.com/arman-dogru/car-rental-android-app"
+      ],
+      "stack": [
+        "Kotlin",
+        "Firebase Auth",
+        "Firestore",
+        "Cloud Storage",
+        "Android Studio"
+      ],
+      "facts": [
+        "Role-based vehicle listings, availability, customer reservations and agency management."
+      ]
+    },
+    {
+      "name": "FPGA Development Suite",
+      "urls": [
+        "https://github.com/arman-dogru/FPGA_Development_Suite"
+      ],
+      "stack": [
+        "Python",
+        "VHDL",
+        "Verilog",
+        "Simulation",
+        "Synthesis",
+        "Formal Verification"
+      ],
+      "facts": [
+        "IDE for editing, simulation, synthesis, verification and optimization of FPGA designs."
+      ]
+    },
+    {
+      "name": "Bohnanza Card Game Engine",
+      "urls": [
+        "https://github.com/arman-dogru/bohnanza-card-game"
+      ],
+      "stack": [
+        "C++17",
+        "OOP",
+        "CMake",
+        "Design Patterns"
+      ],
+      "facts": [
+        "Multiplayer trading, deck management, game-state persistence and turn-based mechanics."
+      ]
+    }
+  ],
+  "skills": {
+    "languages": [
+      "Python",
+      "C / C++",
+      "Java",
+      "Kotlin",
+      "SQL",
+      "JavaScript / TypeScript",
+      "Go",
+      "PHP",
+      "R",
+      "Rust",
+      "Swift / Objective-C",
+      "Assembly",
+      "Prolog",
+      "VHDL / Verilog"
+    ],
+    "ai_data": [
+      "Digital Twins",
+      "Computer Vision",
+      "LLMs",
+      "PyTorch",
+      "TensorFlow",
+      "Keras",
+      "scikit-learn",
+      "CUDA",
+      "Hugging Face",
+      "RL / MARL",
+      "MAPF",
+      "Generative AI",
+      "RAG",
+      "Multi-agent systems",
+      "Hallucination detection and mitigation",
+      "LangChain",
+      "LangGraph",
+      "NumPy",
+      "Pandas",
+      "SpaCy",
+      "Regression",
+      "Quantitative Research",
+      "Data Analysis",
+      "Jupyter",
+      "MATLAB",
+      "SAS",
+      "Power BI"
+    ],
+    "agents": [
+      "MCP",
+      "Tool use",
+      "Agent-to-agent communication",
+      "LLM evaluation",
+      "Reliability"
+    ],
+    "software": [
+      "Node.js",
+      "React",
+      "React Native",
+      "Next.js",
+      "Vue.js",
+      "FastAPI",
+      "REST APIs",
+      "HTML / CSS",
+      "Tailwind CSS",
+      "OAuth",
+      "Firebase",
+      "Supabase",
+      "MongoDB",
+      "MySQL",
+      "Redis",
+      "Postman",
+      "Selenium",
+      "Web Development",
+      "SEO"
+    ],
+    "systems": [
+      "Docker",
+      "Azure",
+      "AWS",
+      "DigitalOcean",
+      "Git",
+      "Jenkins",
+      "Linux / Unix",
+      "Airflow",
+      "JIRA",
+      "Distributed Systems",
+      "TCP / IP",
+      "Unity",
+      "Unreal Engine",
+      "Vercel",
+      "Reverse Engineering",
+      "Robotics",
+      "Agile"
+    ],
+    "human_languages": {
+      "English": "Native / Bilingual",
+      "French": "Native / Bilingual",
+      "Turkish": "Native / Bilingual",
+      "Spanish": "Elementary"
+    },
+    "honors": [
+      "Merit Scholarship",
+      "French Immersion Scholarship",
+      "Co-op Student of Fall 2025 nomination",
+      "Dean's Honour List"
+    ]
+  }
+}

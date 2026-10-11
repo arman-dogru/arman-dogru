@@ -40,6 +40,48 @@ are ignored without refusing the legitimate question around them.
 
 ## Request path
 
+### Authoritative knowledge and the Matrix
+
+`grok-relay/arman-knowledge.json` is the curated professional record derived from
+**Arman_Dogru_master_resume.md**, organized September 23, 2026. Its source hash
+records the exact input edition. Update this record when Arman supplies an
+approved factual revision; do not let retrieval update it automatically. The raw
+document, personal phone/email and document workflow instructions are not copied
+into public assets or model context. Professional facts in this record are intended
+for public portfolio answers; backend-only packaging does not make them confidential.
+The original document remains outside the repository.
+
+`knowledge-context.js` supplies labelled, read-only sections and the established
+identity/account links. The precedence is internal résumé facts, attributable
+linked resources, independently checked external findings, then search snippets.
+Reviewed portfolio-only implementation notes retain the existing Skate 3 and race
+explanations as subordinate supplements; they cannot replace biographical facts.
+`portfolio-context.json` is now a legacy public snapshot, **not** the agent's fact
+source. Its old publication URL is not imported as résumé evidence: the supplied
+résumé names the paper but gives no exact arXiv identifier.
+
+`github-context.js` queries only the résumé's GitHub owner, then verifies API
+`owner.login`, `full_name` and `html_url` before admitting a public repository or
+reading its README. It does not import remote profile bios, jobs, contact details
+or discovered social accounts. A matching person's name never establishes identity.
+README excerpts remain untrusted content even after account attribution succeeds.
+Unavailable/mismatched retrieval is UNKNOWN, never a reason to substitute another
+account. Fork status remains explicit.
+
+Lookup results retain INTERNAL, VERIFIED_EXTERNAL, MATRIX or UNKNOWN provenance;
+the prompt distinguishes INFERENCE for synthesis/fit judgments. Returned researched
+citations carry source attribution metadata, not a blanket claim that every linked
+sentence is true. Visitor page state and board entries are low-trust display context,
+not biography. Ordinary answers do not print these labels or source hashes. Morpheus
+may introduce current outside findings as something found “on the Matrix,” sparingly.
+Outside conflicts do not silently replace or merge with the internal record.
+
+This uses the explicit context boundaries and regression-testing approach in
+[OpenAI Docs](https://developers.openai.com/api/docs/guides/prompt-engineering),
+with structured source boundaries informed by
+[OpenAI's agent safety guidance](https://developers.openai.com/api/docs/guides/agent-builder-safety).
+The hierarchy itself is this portfolio's design, not a claim about a proprietary prompt.
+
 The active entrypoint is `grok-relay/agent-worker.js` (see `wrangler.jsonc`). It
 provides a short orientation and recent conversation. Detailed public profile,
 bounded GitHub excerpts, selected page state and public race board remain behind
@@ -67,9 +109,12 @@ and moderation routes; do not deploy it as the chat entrypoint.
 `grok-relay/morpheus-model.js` runs the character through xAI's Responses API with
 the `web_search` tool. This tool searches and reads public pages server-side; no
 separate search key, arbitrary-fetch proxy or new Cloudflare service is required.
-Ordinary questions leave tool use optional. A detail lookup may use the second
-model call to interpret its result, within the same two-call/52-second budget;
-tools are disabled on that final call to prevent loops. It cannot execute code,
+Ordinary questions leave tool use optional. A detail lookup uses a continuation
+to interpret its result. For current external requests, that continuation may
+research the world after consulting the internal record; it cannot request another
+portfolio tool. The overall deadline remains 52 seconds, with at most three calls
+only after a successful lookup (two otherwise). Repair/recovery cannot start new
+research. It cannot execute code,
 read arbitrary files or select a private data source. Requests for current information,
 company roles or external links/sources are research hints, not forced tool calls:
 the model first decides whether the task serves the portfolio purpose. Unrelated
@@ -96,9 +141,12 @@ authenticated browsing, local files or private employer information.
 - Four agentic turns per initial request, with parallel tool calls disabled.
 - 3,000 output tokens including low-effort reasoning; the prompt keeps ordinary
   answers much shorter. The existing grok-4.3 model is unchanged.
-- Provider budget: 52 seconds, at most two attempts. A recovery attempt has no web
+- Provider budget: 52 seconds, two attempts or at most three after a successful
+  internal lookup. A recovery attempt has no web
   tools and is told it has no verified live findings. A source-repair or reference
-  continuation retains only its already retrieved evidence. No duplicate paid research.
+  continuation retains its retrieved evidence and any earlier Matrix findings.
+  A successful lookup can be followed by research for a current external question;
+  research already performed is not repeated on continuation, repair or recovery.
   Tool-free requests omit tool-choice and agent-loop options; live testing found
   the old empty-tool combination was rejected with HTTP 400, including on repair.
 - Empty, malformed, incomplete and failed replies never become raw customer errors.
@@ -121,7 +169,7 @@ authenticated browsing, local files or private employer information.
   404/410 responses and unsafe/local redirect destinations are discarded. A
   blocked HEAD or timeout remains unconfirmed, not falsely called verified.
   Unsupported/broken links trigger one source-preserving rewrite within the same
-  two-attempt budget; no second paid web-search loop or ugly placeholder URL.
+  bounded request budget; no second paid web-search loop or ugly placeholder URL.
   This is not a public URL-fetch proxy. No credentials or cookies are forwarded.
 - Citation links accept HTTP(S) only, with no credential URLs. Only
   assistant output text is presented, never reasoning or tool output.
@@ -146,6 +194,10 @@ are evaluation fixtures, not a production FAQ or list of allowed questions.
 Use `node scripts/evaluate-morpheus.mjs --suite=intent` for eight local checks of
 wrappers, repetition, a legitimate hypothetical, contextual online examples,
 project synthesis, technical explanation and legitimate criticism.
+Use `node scripts/evaluate-morpheus.mjs --suite=knowledge` for eight checks of exact
+profile links, namesake accounts, conflicting education dates, new résumé projects,
+fabricated credentials, current Tesla requirements, inference and concise opinions.
+Suite reports are saved separately under ignored `work/morpheus-live-eval-<suite>.json`.
 Use `node scripts/evaluate-morpheus.mjs http://localhost:4173/api/chat --suite=scope`
 for the bounded scope/follow-up suite plus company-research and injection regressions.
 This leaves room within the visitor cap for browser QA; the default runs all cases.
