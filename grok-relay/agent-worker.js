@@ -7,6 +7,7 @@ let githubCache={value:null,at:0};
 
 import {answerMorpheus,CONNECTION_REPLY,usesProfileSources} from './morpheus-model.js';
 import {MORPHEUS_VERSION} from '../chat-version.js';
+import {RACE_CONTEXT} from './portfolio-race-context.js';
 
 function configuredOrigins(env){return String(env.ALLOWED_ORIGINS||env.ALLOWED_ORIGIN||'').split(',').map(v=>v.trim().replace(/\/$/,'')).filter(Boolean)}
 function isAllowedOrigin(origin,env){if(!origin)return true;const allowed=configuredOrigins(env);return allowed.length>0&&allowed.includes(origin.replace(/\/$/,''))}
@@ -48,10 +49,10 @@ async function chat(request,env,origin){
   const [gh,board]=await Promise.all([githubContext(message),boardContext(env)]),client=cleanClientContext(body?.context);
   const verifiedReferences=[...publicWork.research.filter(x=>x.url).map(x=>({title:x.title,url:x.url})),{title:"Arman's public projects",url:publicWork.profile.github},{title:"Arman's research profile",url:publicWork.profile.scholar}];
   // Progressive disclosure: do not put the entire CV/benchmark table into every
-  // homework or opinion request. Detailed facts remain available through a
+  // redirection or opinion request. Detailed facts remain available through a
   // bounded read-only lookup, not a whitelist of questions.
-  const orientation={name:publicWork.profile.name,work:'Applied AI research and software engineering: computer vision and digital twins, learning and coordination among agents, LLM reliability, backend services and interactive software. His work spans research simulations and prototypes as well as industry and startup software, API and applied ML contributions.',references:usesProfileSources(message)?verifiedReferences:verifiedReferences.slice(-2)};
-  const referenceLibrary={profile:publicWork.profile,experience:publicWork.experience,research:publicWork.research,projects:publicWork.projects,education:publicWork.education,github:gh.text,page:client,race:board};
+  const orientation={name:publicWork.profile.name,work:'Applied AI research and software engineering: computer vision and digital twins, learning and coordination among agents, LLM reliability, backend services and interactive software. His work spans research simulations and prototypes as well as industry and startup software, API and applied ML contributions.',portfolio:'This portfolio includes the playable NEAT Grand Prix race. The race lookup has its documented driver architecture as well as the public leaderboard; retrieve it for technical race questions.',references:usesProfileSources(message)?verifiedReferences:verifiedReferences.slice(-2)};
+  const referenceLibrary={profile:publicWork.profile,experience:publicWork.experience,research:publicWork.research,projects:publicWork.projects,education:publicWork.education,github:gh.text,page:client,race:{implementation:RACE_CONTEXT,leaderboard:board}};
   const result=await answerMorpheus({message,history,evidence:orientation,referenceLibrary,verifiedReferences},env),sources=['portfolio-profile',...gh.sources];if(client)sources.push('page-state');if(board.length)sources.push('paddock-board');if(result.researched)sources.push('public-web');
   return json({...result,persona_version:MORPHEUS_VERSION,sources:[...new Set(sources)]},200,origin||'*');
 }
