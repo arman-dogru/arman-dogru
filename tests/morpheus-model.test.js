@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {answerMorpheus,readResponse,requiresResearch,CONNECTION_REPLY} from '../grok-relay/morpheus-model.js';
+import {answerMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY} from '../grok-relay/morpheus-model.js';
 import {MORPHEUS_VERSION} from '../chat-version.js';
 const env={XAI_API_KEY:'test-only-secret',XAI_MODEL:'grok-4.3'},question={message:'What do you think of Arman as an engineer?',evidence:{profile:'public work'},history:[]};
 const answer=(text,extra={})=>({status:'completed',output:[{type:'message',role:'assistant',content:[{type:'output_text',text}]}],...extra});
@@ -60,6 +60,18 @@ test('a source request forces a tool call and rejects unresearched generated URL
 test('generated links are not promoted to provider sources',()=>{
   const data=answer('[Invented](https://example.test/made-up)',{usage:{server_side_tool_usage_details:{web_search_calls:1}}});
   assert.deepEqual(readResponse(data).citations,[]);
+});
+test('biographical sources use verified references while company sources still research',async()=>{
+  assert.equal(usesProfileSources('What sources would you suggest for a case study about Arman?'),true);
+  assert.equal(usesProfileSources('Would Arman fit this company role? Include sources.'),false);
+  await answerMorpheus({...question,message:'What sources document his papers?',evidence:{paper:'https://arxiv.org/abs/2508.06767'}},env,{request:async(url,init)=>{
+    assert.deepEqual(JSON.parse(init.body).tools,[]);return Response.json(answer('[PANAMA](https://arxiv.org/abs/2508.06767)'));
+  }});
+});
+test('unknown publication identifiers cannot be attributed from model memory',async()=>{
+  let calls=0;
+  const result=await answerMorpheus({...question,message:'What sources document his papers?',evidence:{paper:'https://arxiv.org/abs/2508.06767'}},env,{request:async()=>Response.json(answer(++calls===1?'His paper is arXiv 2509.21259.':'Use [PANAMA](https://arxiv.org/abs/2508.06767).'))});
+  assert.equal(calls,2);assert.doesNotMatch(result.reply,/2509/);assert.match(result.reply,/2508\.06767/);
 });
 test('only retrieved or supplied links survive output filtering',async()=>{
   const result=await answerMorpheus(question,env,{request:async()=>Response.json(answer('[Real](https://example.test/jobs) [Fake](https://example.test/made-up) https://example.test/also-fake',{usage:{server_side_tool_usage_details:{web_search_calls:1}},citations:['https://example.test/jobs']}))});

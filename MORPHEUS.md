@@ -29,6 +29,9 @@ Ordinary questions leave tool use optional. Requests for current information,
 company roles or external links/sources require a web-tool call and traceable
 provider sources before a researched answer is accepted. Prefer the employer's own careers/team
 pages and a supplied public posting, then make the fit judgment in character.
+Source requests about Arman's own biography/publications use the verified
+professional reference and his own public GitHub rather than importing similarly
+titled papers from web results. Unknown publication identifiers are rejected.
 
 This is a research executor within the existing Worker, not a second public
 scraping endpoint. Only web search is exposed, never shell, code execution,
