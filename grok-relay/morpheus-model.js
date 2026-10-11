@@ -22,7 +22,11 @@ export function usesProfileSources(message){
   return /\b(?:sources?|references?|citations?|publications?|papers?|case study)\b/i.test(message)&&/\b(?:Arman|his)\b/i.test(message)&&!/\b(?:company|employer|role|position|job|vacancy|careers?)\b/i.test(message);
 }
 
-function textURLs(text){return [...String(text||'').matchAll(/https?:\/\/[^\s<>"`]+/g)].map(m=>citationURL(m[0].replace(/[\]),.;!?]+$/g,''))).filter(Boolean)}
+function textURLs(text){return [...String(text||'').matchAll(/https?:\/\/[^\s<>"`]+/g)].map(m=>{
+  let value=m[0].replace(/[\],.;!?]+$/g,'');
+  while(value.endsWith(')')&&(value.match(/\)/g)||[]).length>(value.match(/\(/g)||[]).length)value=value.slice(0,-1);
+  return citationURL(value);
+}).filter(Boolean)}
 export function groundedLinks(reply,allowed){
   const approved=value=>allowed.has(citationURL(value));
   let changed=false;

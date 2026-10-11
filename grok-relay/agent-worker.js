@@ -12,7 +12,7 @@ function configuredOrigins(env){return String(env.ALLOWED_ORIGINS||env.ALLOWED_O
 function isAllowedOrigin(origin,env){if(!origin)return true;const allowed=configuredOrigins(env);return allowed.length>0&&allowed.includes(origin.replace(/\/$/,''))}
 function corsHeaders(origin){return{'access-control-allow-origin':origin||'*','access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'content-type','access-control-max-age':'86400','vary':'Origin'}}
 function json(body,status=200,origin='*'){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8',...corsHeaders(origin),'cache-control':'no-store','x-content-type-options':'nosniff'}})}
-function cleanText(v,limit=MAX_MESSAGE){if(typeof v!=='string')return'';return v.normalize('NFKC').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g,' ').replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim().slice(0,limit)}
+function cleanText(v,limit=MAX_MESSAGE){if(typeof v!=='string')return'';return v.normalize('NFKC').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g,' ').replace(/\r\n?/g,'\n').trim().slice(0,limit)}
 const limitedFetch=(url,init={})=>fetch(url,{...init,signal:AbortSignal.timeout(5000)});
 const STOP=new Set('the and for with from that this are was were have has had into your you our their they role job team work working about looking experience required preferred responsibilities qualifications years using who what why how good great engineer engineering research researcher candidate position'.split(' '));
 function tokens(s){return[...new Set(String(s||'').toLowerCase().replace(/[^a-z0-9+#.-]+/g,' ').split(/\s+/).filter(x=>x.length>=2&&!STOP.has(x)))].slice(0,48)}

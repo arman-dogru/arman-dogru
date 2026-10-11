@@ -112,6 +112,11 @@ test('reference delimiters cannot be closed by untrusted material; code example 
     return Response.json(answer('```sh\ncurl https://example.com/api\n```'));
   }}).then(result=>assert.match(result.reply,/curl https:\/\/example.com\/api/));
 });
+test('valid reference URLs retain balanced parentheses',async()=>{
+  const url='https://example.com/Function_(mathematics)';
+  const result=await answerMorpheus({...question,evidence:{url}},env,{request:async()=>Response.json(answer(`[Definition](${url}).`))});
+  assert.equal(result.degraded,false);assert.match(result.reply,/Function_\(mathematics\)/);
+});
 test('specific evidence is available on demand, not dumped into ordinary prompts',async()=>{
   const library={projects:[{name:'Example research prototype',facts:['Measured in simulation, not production.']}],profile:{name:'Arman'}};
   let calls=0;

@@ -9,6 +9,7 @@ class Element{
   appendChild(child){this.children.push(child);child.parent=this;return child}
   remove(){if(this.parent)this.parent.children=this.parent.children.filter(x=>x!==this)}
   setAttribute(k,v){this.attrs[k]=v}addEventListener(k,fn){this.listeners[k]=fn}
+  focus(){this.focused=true}
   querySelector(){return this.submit}
 }
 function setup(t,request,existing=[]){
@@ -46,4 +47,12 @@ test('successful current replies retain their persona version without erasing ol
   const old=[{role:'assistant',content:'An old answer.'}],{ai,store}=setup(t,async()=>Response.json({reply:'Yes. He sees beyond the surface.',persona_version:MORPHEUS_VERSION}),old);
   await ai.chat('Do you believe in him?');assert.equal(ai.history()[0].content,old[0].content);assert.equal(ai.history().at(-1).persona_version,MORPHEUS_VERSION);
   assert.equal(JSON.parse(store.get('arman.chat.history.v3')).at(-1).persona_version,MORPHEUS_VERSION);
+});
+test('opening the chat scrolls saved history to the latest response after the hidden pane becomes visible',t=>{
+  const {ai,chatWindow,chatInput}=setup(t,async()=>Response.json({reply:'Unused'}),[{role:'assistant',content:'Saved response'}]);
+  chatWindow.scrollHeight=1000;chatWindow.scrollTop=0;ai.focus();assert.equal(chatWindow.scrollTop,1000);assert.equal(chatInput.focused,true);
+});
+test('hourly limit is explained honestly, with no fake network failure or model answer in history',async t=>{
+  const {ai,chatWindow}=setup(t,async()=>Response.json({reply:'Internal limit details'},{status:429}));
+  await ai.chat('Hello');const failure=chatWindow.children.at(-1);assert.match(failure.innerHTML,/after the hour turns/);assert.doesNotMatch(failure.innerHTML,/connection slipped|Internal limit/);assert.equal(ai.history().length,1);assert.equal(failure.children[0].textContent,'Retry');
 });

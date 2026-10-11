@@ -23,3 +23,8 @@ test('best-effort per-visitor cost cap fails safely, with no upstream calls',asy
   assert.equal((await worker.fetch(post({message:'Hi'}),limited)).status,429);
   const data=await(await worker.fetch(post({message:'Hi'}),{...env,XAI_API_KEY:undefined})).json();assert.equal(data.degraded,true);assert.doesNotMatch(data.reply,/XAI|API_KEY/);
 });
+test('technical questions preserve code indentation when sent to the model',async t=>{
+  const message='Explain this:\n```python\ndef f(x):\n    if x:\n        return 2 * x\n```';let payload;
+  t.mock.method(globalThis,'fetch',async(url,init)=>{if(!String(url).includes('api.x.ai'))return new Response(null,{status:503});payload=JSON.parse(init.body);return Response.json({status:'completed',output:[{type:'message',role:'assistant',content:[{type:'output_text',text:'It doubles a nonzero input.'}]}]})});
+  assert.equal((await worker.fetch(post({message}),env)).status,200);assert.equal(payload.input.at(-1).content,message);
+});

@@ -3,6 +3,7 @@ import {MORPHEUS_VERSION} from './chat-version.js';
 export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatInput,contextProvider,onSources}){
   const endpoint=()=>window.ARMAN_CHAT_ENDPOINT||localStorage.getItem('arman.chatEndpoint')||'';
   const interrupted='The connection slipped. Your question is still here. Try again.';
+  const rateLimited='The signal needs a pause. Try again after the hour turns.';
   const STORAGE_KEY='arman.chat.history.v3';
   let history=[],busy=false,controller=null,generation=0;
 
@@ -47,6 +48,7 @@ export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatIn
       if(!url)throw new Error('unconfigured');
       const res=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:text,history:prior,context:clientContext()}),signal:activeController.signal});
       const data=await res.json();
+      if(res.status===429)throw Object.assign(new Error('rate limited'),{rateLimited:true});
       if(!res.ok||data.degraded||typeof data.reply!=='string'||!data.reply.trim())throw new Error('unavailable');
       if(turn!==generation)return;
       pending?.remove();let reply=data.reply.trim();
@@ -54,17 +56,18 @@ export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatIn
       if(citations.length)reply+='\n\n'+citations.map(c=>`[${c.title||new URL(c.url).hostname}](${c.url})`).join(' · ');
       renderMessage({role:'assistant',content:reply,persona_version:data.persona_version});onSources?.(data.sources||[]);
       if(fromTerminal)addBlock(`<b>MORPHEUS</b><div class="chat-body">${renderMarkdown(reply)}</div>`);
-    }catch{
+    }catch(error){
       if(turn!==generation)return;
-      pending?.remove();const failure=renderMessage({role:'assistant',content:interrupted},false);
+      const notice=error?.rateLimited?rateLimited:interrupted;
+      pending?.remove();const failure=renderMessage({role:'assistant',content:notice},false);
       // A transport failure is not a model answer; keep it out of conversation memory.
       if(failure){const button=document.createElement('button');button.type='button';button.className='chat-retry';button.textContent='Retry';button.addEventListener('click',()=>{if(busy)return;failure.remove();const same=history.at(-1)?.role==='user'&&history.at(-1).content===text;send(text,{fromTerminal,...(same?{retryHistory:prior}:{})})});failure.appendChild(button)}
-      if(fromTerminal)addLine(escapeHtml(interrupted),'yellow');
+      if(fromTerminal)addLine(escapeHtml(notice),'yellow');
     }finally{clearTimeout(timer);pending?.remove();if(turn===generation){controller=null;setBusy(false)}}
   }
   chatWindow?.setAttribute('role','log');chatWindow?.setAttribute('aria-live','polite');
   if(chatForm)chatForm.addEventListener('submit',e=>{e.preventDefault();if(busy)return;const v=chatInput?.value||'';if(chatInput)chatInput.value='';send(v)});
   if(chatInput)chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();chatForm?.requestSubmit()}});
   loadHistory();renderHistory();
-  return{chat:send,clear:()=>send('clear'),renderHistory,focus:()=>chatInput?.focus(),history:()=>history.slice()};
+  return{chat:send,clear:()=>send('clear'),renderHistory,focus:()=>{chatInput?.focus();if(chatWindow)chatWindow.scrollTop=chatWindow.scrollHeight},history:()=>history.slice()};
 }
