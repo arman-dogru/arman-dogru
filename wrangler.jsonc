@@ -1,0 +1,8 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "arman-dogru",
+  "compatibility_date": "2026-10-09",
+  "build": {"command": "node scripts/build-site.mjs"},
+  "assets": {"directory": "./dist"},
+  "observability": {"enabled": true}
+}
