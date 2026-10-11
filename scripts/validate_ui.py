@@ -31,4 +31,4 @@ assert all(x in (ROOT/'terminal-v2.js').read_text() for x in ['PROFILE.github','
 assert champ['input_count']==20 and len(champ['drivers'])>=9
 print('UI_STRUCTURE_OK')
 print('tabs',len(p.tab),'min_font_px',min(map(int,re.findall(r'font-size:(\d+)px',css))))
-print('Structural CSS checks are not visual QA.')
+print('Race quality is checked separately by npm run validate:race; structural CSS checks are not visual QA.')

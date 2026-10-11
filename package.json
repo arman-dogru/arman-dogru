@@ -6,6 +6,8 @@
     "dev": "node --watch scripts/dev.mjs",
     "build:relay": "esbuild grok-relay/agent-worker.js --bundle --format=esm --outfile=work/relay-deploy.js",
     "test": "node --test tests/*.test.js",
+    "train": "node scripts/train-race.mjs",
+    "validate:race": "node scripts/validate-race.mjs",
     "deploy:relay": "wrangler deploy --config grok-relay/wrangler.jsonc"
   },
   "devDependencies": {

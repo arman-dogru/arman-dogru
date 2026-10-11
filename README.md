@@ -48,7 +48,7 @@ chat what did Arman work on at Bell Labs?
 
 **NEAT Grand Prix** is a 10-car race at Istanbul Park against opponents evolved with NEAT. They were trained in packs so they react to traffic as well as the track. The game uses one circuit only: Istanbul Park.
 
-Player handling focuses on braking into corners, controllable slip, and recovery after contact. The AI grid mixes stronger and weaker drivers instead of cloning a single champion into every car.
+Player handling focuses on braking into corners, controllable slip, and recovery after contact. Nine opponents are drawn from 22 evolved policies, all using the same vehicle physics as the player. Training rewards only forward distance within a fixed time limit.
 
 [Race / training notes →](./NEAT_RACE.md)
 

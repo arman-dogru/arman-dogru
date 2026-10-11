@@ -5,7 +5,7 @@ import {resolve, join} from 'node:path';
 
 export const PUBLIC_FILES = [
   'index.html', 'terminal-v2.js', 'terminal-v2.css', 'terminal-v3.css',
-  'terminal-data.js', 'terminal-map.js', 'terminal-race-v5.js', 'race-engine-v5.js',
+  'terminal-data.js', 'terminal-map.js', 'terminal-race-v5.js', 'race-engine-v5.js', 'race-sim.js',
   'race-track-istanbul.json', 'neat-champions-v5.json', 'leaderboard-client.js',
   'terminal-ai-v2.js', 'chat-markdown.js', 'chat-version.js', 'portfolio-context.json'
 ];

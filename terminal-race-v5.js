@@ -1,14 +1,14 @@
-import{TRACKS,WORLD_W,WORLD_H,CAR_W,CAR_L,ROAD_W,ROAD_HALF,RUNOFF_HALF,WHEELBASE,DT,MAX_FWD,MAX_REV,ACCEL,BRAKE,REV_ACCEL,STEER_LOW,STEER_HIGH,TURN_GAIN,STEER_RATE,GRIP_LOW,GRIP_HIGH,STEER_GRIP_DROP,LAPS,RACERS,VERSION,DRIVER_VERSION,GLOBAL_TRACK,AI_INPUTS,AI_BIAS,CAMERA_ZOOM,COLORS,LANES,clamp,wrap,esc,fmt,scoreFor,apiBase,skillFor,validateName,normalizeGeo,makeTrack,nearest,trackPoint,compile,activate,basis,radius,collide}from'./race-engine-v5.js';
+import{TRACKS,WORLD_W,WORLD_H,CAR_W,CAR_L,ROAD_W,RUNOFF_HALF,DT,MAX_FWD,LAPS,RACERS,GLOBAL_TRACK,AI_INPUTS,AI_BIAS,CAMERA_ZOOM,COLORS,esc,fmt,scoreFor,validateName,normalizeGeo,makeTrack,trackPoint,compile}from'./race-engine-v5.js';
 
 import {createLeaderboard} from './leaderboard-client.js';
+import {createCar,stepSimulation} from './race-sim.js';
 
 export function createRace({canvas,overlay,modeEl,clockEl,lapEl,posEl,standingsEl,leaderboardEl,trackSelect,log,onBoard}){
   const ctx=canvas.getContext('2d'),keys=new Set();
   let track=null,trackKey='istanbul',agents=[],cars=[],state='idle',startAt=0,last=0,acc=0,raf=0,paused=false,board=[],playerName=localStorage.getItem('arman.raceName')||'',raceNo=0;
   const camera={x:WORLD_W/2,y:WORLD_H/2,zoom:1};
-
   const leaderboard=createLeaderboard();
-  let loadPromise=null;
+  let loadPromise=null,elapsed=0;
 
   async function loadAgents(){
     if(agents.length)return;
@@ -32,58 +32,27 @@ export function createRace({canvas,overlay,modeEl,clockEl,lapEl,posEl,standingsE
   function spawn(){
     cars=[];const grid=pickGrid();raceNo++;
     for(let i=0;i<RACERS;i++){
-      const slot=i===0?RACERS-1:i-1,row=Math.floor(slot/2),laneIndex=slot%LANES.length,back=row*42,p=trackPoint(track,26-back),left={x:-p.ty,y:p.tx},lane=LANES[laneIndex],off=lane*ROAD_HALF*.88,d=i?grid[(i-1)%grid.length]:null;
-      cars.push({name:d?.name||'YOU',rating:d?.rating||null,generation:d?.generation||null,player:!i,brain:d?.net||null,color:COLORS[i],x:p.x+left.x*off,y:p.y+left.y*off,h:p.heading,vx:0,vy:0,omega:0,steerAngle:0,lastProgress:p.progress,totalProgress:-back,seg:p.i,lap:0,finished:false,finishMs:null,skids:[],slip:0,laneIndex,lane,skill:d?skillFor(d.rating):1,near:null,contacts:0});
+      const slot=i===0?RACERS-1:i-1,back=slot*24,d=i?grid[(i-1)%grid.length]:null;
+      cars.push(createCar(track,{driver:d,player:!i,progress:26-back,offset:slot%2?12:-12,color:COLORS[i]}));
     }
     const p=cars[0];camera.x=p?.x??WORLD_W/2;camera.y=p?.y??WORLD_H/2;camera.zoom=1;
   }
   async function start(){
     try{
-      if(!track||!agents.length)await load();spawn();keys.clear();state='countdown';paused=false;startAt=performance.now()+3000;last=performance.now();acc=0;overlay.innerHTML='<div class="countdown">3</div>';canvas.focus();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);log?.(`${track.meta.name} // ${RACERS} cars // lights out`,'cyan');
+      if(!track||!agents.length)await load();spawn();keys.clear();state='countdown';paused=false;elapsed=0;startAt=performance.now()+3000;last=performance.now();acc=0;overlay.innerHTML='<div class="countdown">3</div>';canvas.focus();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);log?.(`${track.meta.name} // ${RACERS} cars // lights out`,'cyan');
     }catch(e){overlay.innerHTML=`<div class="race-dialog"><h2>RACE BOOT FAILED</h2><p>${esc(e.message)}</p></div>`}
   }
 
-  function progressGap(a,b){return((b.lastProgress-a.lastProgress)%track.len+track.len)%track.len}
-  function trafficFeatures(c){
-    const b=basis(c);let frontA=Infinity,frontS=0,closing=0,leftPressure=0,rightPressure=0,rear=0;
-    for(const o of cars){if(o===c)continue;const dx=o.x-c.x,dy=o.y-c.y,a=dx*b.f.x+dy*b.f.y,s=dx*b.r.x+dy*b.r.y;if(a>0&&a<96&&Math.abs(s)<ROAD_HALF*1.1&&a<frontA){frontA=a;frontS=s;closing=b.long-basis(o).long}if(a>-24&&a<36&&Math.abs(s)<CAR_W*3.1){const w=Math.max(0,1-Math.abs(a)/36)*Math.max(0,1-Math.abs(s)/(CAR_W*3.1));if(s<0)leftPressure=Math.max(leftPressure,w);else rightPressure=Math.max(rightPressure,w)}if(a<0&&a>-55&&Math.abs(s)<CAR_W*2.4)rear=Math.max(rear,Math.max(0,1-(-a)/55))}
-    return[Number.isFinite(frontA)?clamp(1-frontA/96,0,1):0,Number.isFinite(frontA)?clamp(frontS/(ROAD_HALF*1.1),-1,1):0,Number.isFinite(frontA)?clamp(closing/MAX_FWD,-1,1):0,leftPressure,rightPressure,rear];
+  function step(){
+    if(state!=="running"||paused||document.hidden||!document.querySelector('[data-view="race"]')?.classList.contains("active"))return;
+    const playerCommand={steer:(keys.has("ArrowRight")||keys.has("d")?1:0)-(keys.has("ArrowLeft")||keys.has("a")?1:0),drive:keys.has("ArrowUp")||keys.has("w")?1:keys.has("ArrowDown")||keys.has("s")?-1:0,handbrake:keys.has(" ")?1:0};
+    stepSimulation(track,cars,{elapsed,playerCommand});elapsed+=DT;
+    for(const c of cars){if(c.slip>.14&&Math.hypot(c.vx,c.vy)>48&&Math.random()<.14)c.skids.push({x:c.x,y:c.y,t:1});for(const skid of c.skids)skid.t-=.008;c.skids=c.skids.filter(x=>x.t>0).slice(-180)}
+    if(cars[0]?.finished)finish(cars[0]);hud();
   }
-  function sensors(c,n){
-    const b=basis(c),speed=Math.hypot(c.vx,c.vy),out=[speed/MAX_FWD,clamp(b.long/MAX_FWD,-1,1),clamp(b.lat/(MAX_FWD*.35),-1,1),clamp(n.cross/ROAD_HALF,-1.3,1.3)];
-    for(const d of[18,42,82,142]){const p=trackPoint(track,n.progress+d),a=wrap(Math.atan2(p.y-c.y,p.x-c.x)-c.h);out.push(Math.sin(a),Math.cos(a))}
-    const h0=trackPoint(track,n.progress+35).heading,h1=trackPoint(track,n.progress+90).heading,h2=trackPoint(track,n.progress+165).heading;out.push(Math.sin(wrap(h1-h0)),Math.sin(wrap(h2-h1)),...trafficFeatures(c));return out.slice(0,AI_INPUTS);
-  }
-  const driveFor=(speed,target)=>speed<target-3?Math.min(1,.30+(target-speed)/22):speed>target+1?-Math.min(1,.45+(speed-target)/11):.08;
-  function aiControl(c,n){
-    const x=sensors(c,n),[trim,pace]=activate(c.brain,x),speed=Math.hypot(c.vx,c.vy),hs=[24,58,105,165,220].map(d=>trackPoint(track,n.progress+d).heading),curv=Math.max(...hs.slice(0,-1).map((h,i)=>Math.abs(wrap(hs[i+1]-h)))),curve=clamp(curv/1.22,0,1);
-    const targetLane=LANES[c.laneIndex]*(1-.48*curve);c.lane+=clamp(targetLane-c.lane,-.8*DT,.8*DT);
-    const p=trackPoint(track,n.progress+20+.16*speed),left={x:-p.ty,y:p.tx},lanePx=c.lane*ROAD_HALF*.88,tx=p.x+left.x*lanePx,ty=p.y+left.y*lanePx,err=wrap(Math.atan2(ty-c.y,tx-c.x)-c.h),crossErr=n.cross-lanePx,corr=-Math.atan2(2*crossErr,speed+18);
-    let steer=clamp((err+corr)/.35+.055*trim,-1,1),target=142-94*curve-Math.min(25,Math.abs(err)*24+Math.max(0,Math.abs(crossErr)-ROAD_HALF*.60)*.7);target=clamp(target,44,142)*c.skill*(.985+.03*((pace+1)/2));
-    let front=null,best=Infinity;for(const o of cars){if(o===c||o.laneIndex!==c.laneIndex)continue;const gap=progressGap(c,o);if(gap>1&&gap<track.len/2&&gap<best){front=o;best=gap}}
-    if(front){const fv=Math.max(0,basis(front).long),safe=CAR_L+26+speed*.78,rel=Math.max(0,speed-fv),ttc=rel>0?best/Math.max(1,rel):99;if(best<safe*2.8)target=Math.min(target,Math.max(6,fv+(best-safe)*.78));if(best<safe||ttc<1.55)target=Math.min(target,Math.max(0,fv-(safe-best)*2))}
-    for(const o of cars){if(o===c||!o.near)continue;const gap=((o.near.progress-n.progress)%track.len+track.len)%track.len;if(gap>0&&gap<70&&Math.abs(o.near.cross-n.cross)<CAR_W*1.55){const ov=Math.max(0,basis(o).long),safe2=CAR_L+22+speed*.48;target=Math.min(target,Math.max(0,ov+(gap-safe2)*.65));if(gap<safe2*.78)target=Math.min(target,Math.max(0,ov-18))}}
-    return{steer,drive:driveFor(speed,target),handbrake:0};
-  }
-  function control(c,n){if(!c.player)return aiControl(c,n);return{steer:(keys.has('ArrowRight')||keys.has('d')?1:0)-(keys.has('ArrowLeft')||keys.has('a')?1:0),drive:(keys.has('ArrowUp')||keys.has('w'))?1:(keys.has('ArrowDown')||keys.has('s'))?-1:0,handbrake:keys.has(' ')||keys.has('Spacebar')?1:0}}
-
-  function updatePhysics(c,steer,drive,handbrake=0){
-    steer=clamp(steer,-1,1);drive=clamp(drive,-1,1);handbrake=clamp(handbrake,0,1);let b=basis(c),long=b.long,lat=b.lat;
-    if(drive>=0)long+=ACCEL*drive*DT;else if(long>3)long-=BRAKE*(-drive)*DT;else long-=REV_ACCEL*(-drive)*DT;
-    if(Math.abs(long)>1e-6){const decel=(3.8+.00042*long*long)*DT;long=Math.sign(long)*Math.max(0,Math.abs(long)-decel)}long=clamp(long,-MAX_REV,MAX_FWD);c.vx=b.f.x*long+b.r.x*lat;c.vy=b.f.y*long+b.r.y*lat;
-    const ratio=Math.min(1,Math.abs(long)/MAX_FWD),maxSteer=STEER_LOW*(1-ratio)+STEER_HIGH*ratio,target=steer*maxSteer;c.steerAngle+=clamp(target-c.steerAngle,-STEER_RATE*DT,STEER_RATE*DT);let targetYaw=Math.abs(long)>2?(long/WHEELBASE)*Math.tan(c.steerAngle)*TURN_GAIN:0;if(handbrake)targetYaw*=1+.22*handbrake;c.omega+=(targetYaw-c.omega)*Math.min(1,10*DT);c.omega*=Math.exp(-.48*DT);c.h=wrap(c.h+c.omega*DT);
-    b=basis(c);let long2=b.long,lat2=b.lat;const ratio2=Math.min(1,Math.abs(long2)/MAX_FWD),grip=(GRIP_LOW*(1-ratio2)+GRIP_HIGH*(ratio2))*Math.max(.35,1-STEER_GRIP_DROP*Math.abs(steer)*ratio2-.68*handbrake);lat2*=Math.exp(-grip*DT);const scrub=(.05*Math.abs(lat2)+1.15*Math.abs(steer)*ratio2+5.5*handbrake*ratio2)*DT;long2=Math.sign(long2||1)*Math.max(0,Math.abs(long2)-scrub);c.vx=b.f.x*long2+b.r.x*lat2;c.vy=b.f.y*long2+b.r.y*lat2;c.x+=c.vx*DT;c.y+=c.vy*DT;c.slip=Math.atan2(Math.abs(lat2),Math.abs(long2)+1);
-    if(c.slip>.14&&Math.hypot(c.vx,c.vy)>48&&Math.random()<.14)c.skids.push({x:c.x-b.f.x*CAR_L*.35,y:c.y-b.f.y*CAR_L*.35,t:1});for(const s of c.skids)s.t-=.008;c.skids=c.skids.filter(s=>s.t>0).slice(-180);
-    let n=nearest(track,c.x,c.y,c.seg);c.seg=n.i;const crossTrack=n.cross;
-    if(Math.abs(crossTrack)>ROAD_HALF){const factor=Math.exp(-2.2*DT);c.vx*=factor;c.vy*=factor}
-    const left={x:-n.ty,y:n.tx},sg=crossTrack>=0?1:-1,outward={x:left.x*sg,y:left.y*sg},allowed=RUNOFF_HALF-radius(c,outward);
-    if(Math.abs(crossTrack)>allowed){const pen=Math.abs(crossTrack)-allowed;c.x-=outward.x*(pen+.08);c.y-=outward.y*(pen+.08);const vn=c.vx*outward.x+c.vy*outward.y;if(vn>0){c.vx-=outward.x*vn*1.15;c.vy-=outward.y*vn*1.15}c.vx*=.75;c.vy*=.75;c.omega*=.45;n=nearest(track,c.x,c.y,c.seg);c.seg=n.i}
-    return n;
-  }
-  function updateCar(c){let n=c.near||nearest(track,c.x,c.y,c.seg);c.seg=n.i;const cmd=control(c,n);n=updatePhysics(c,cmd.steer,cmd.drive,cmd.handbrake);let dp=n.progress-c.lastProgress;if(dp<-track.len/2)dp+=track.len;else if(dp>track.len/2)dp-=track.len;if(state==='running'&&dp>-55)c.totalProgress+=dp;c.lastProgress=n.progress;c.lap=Math.max(0,Math.floor(c.totalProgress/track.len));if(!c.finished&&c.totalProgress>=LAPS*track.len){c.finished=true;c.finishMs=Math.max(1,performance.now()-startAt);if(c.player)finish(c)}}
-  function step(){if(state!=='running'||paused)return;for(const c of cars)c.near=nearest(track,c.x,c.y,c.seg);cars.forEach(updateCar);for(let pass=0;pass<2;pass++)for(let i=0;i<cars.length;i++)for(let j=i+1;j<cars.length;j++)if(collide(cars[i],cars[j])){cars[i].contacts++;cars[j].contacts++}hud()}
-  function position(c){return[...cars].sort((a,b)=>(b.finished?1:0)-(a.finished?1:0)||b.totalProgress-a.totalProgress).indexOf(c)+1}
-  function hud(){const p=cars[0];if(!p)return;clockEl.textContent=fmt(state==='running'?performance.now()-startAt:p.finishMs||0);lapEl.textContent=`LAP ${Math.min(LAPS,p.lap+1)}/${LAPS}`;posEl.textContent=`P${position(p)} / ${RACERS}`;const pace=Math.round(Math.hypot(p.vx,p.vy)/MAX_FWD*100),drift=p.slip>.14&&Math.hypot(p.vx,p.vy)>48?' // DRIFT':'';modeEl.textContent=`${track.meta.short} // ${pace}% PACE${drift}`;standingsEl.innerHTML=[...cars].sort((a,b)=>b.totalProgress-a.totalProgress).map((c,i)=>`<div class="race-standing ${c.player?'me':''}"><span><i style="background:${c.color}"></i>${i+1}. ${esc(c.name)}${c.rating?` <small>${c.rating}</small>`:''}</span><span>${c.finished?fmt(c.finishMs):`L${Math.min(LAPS,c.lap+1)}`}</span></div>`).join('')}
+  function raceOrder(a,b){return (b.finished?1:0)-(a.finished?1:0)||(a.finished&&b.finished?a.finishMs-b.finishMs:b.totalProgress-a.totalProgress)}
+  function position(c){return[...cars].sort(raceOrder).indexOf(c)+1}
+  function hud(){const p=cars[0];if(!p)return;clockEl.textContent=fmt(state==='running'?elapsed*1000:p.finishMs||0);lapEl.textContent=`LAP ${Math.min(LAPS,p.lap+1)}/${LAPS}`;posEl.textContent=`P${position(p)} / ${RACERS}`;const pace=Math.round(Math.hypot(p.vx,p.vy)/MAX_FWD*100),drift=p.slip>.14&&Math.hypot(p.vx,p.vy)>48?' // DRIFT':'';modeEl.textContent=`${track.meta.short} // ${pace}% PACE${drift}`;standingsEl.innerHTML=[...cars].sort(raceOrder).map((c,i)=>`<div class="race-standing ${c.player?'me':''}"><span><i style="background:${c.color}"></i>${i+1}. ${esc(c.name)}${c.rating?` <small>${c.rating}</small>`:''}</span><span>${c.finished?fmt(c.finishMs):`L${Math.min(LAPS,c.lap+1)}`}</span></div>`).join('')}
   function loop(now){const d=Math.min(.05,(now-last)/1000);last=now;if(state==='countdown'){const left=startAt-now;if(left<=0){state='running';overlay.innerHTML=''}else overlay.innerHTML=`<div class="countdown">${Math.ceil(left/1000)}</div>`}acc+=d;while(acc>=DT){step();acc-=DT}draw();raf=requestAnimationFrame(loop)}
 
   function path(){ctx.beginPath();ctx.moveTo(...track.points[0]);for(let i=1;i<track.points.length;i++)ctx.lineTo(...track.points[i]);ctx.closePath()}
