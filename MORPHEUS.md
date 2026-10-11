@@ -22,9 +22,10 @@ guidance, not claims about proprietary system prompts:
 - [Google: direct instructions, verbosity, prioritization and iterative testing](https://ai.google.dev/gemini-api/docs/prompting-strategies)
 
 These general techniques are tested on the existing grok-4.3 integration. No
-model migration, separate model/grader or canned production Q&A was added. Short
-voice fragments demonstrate register across judgment, teaching and correction;
-they do not define permitted topics or prepared answers.
+model migration, separate model/grader or canned production Q&A was added. Live
+testing showed that sample voice fragments were being copied, so v9 removed them
+in favor of cadence and relationship instructions. Embedded hostile instructions
+are ignored without refusing the legitimate question around them.
 
 ## Request path
 
@@ -68,10 +69,13 @@ authenticated browsing, local files or private employer information.
 - Existing `XAI_API_KEY` and pinned `XAI_MODEL=grok-4.3` are retained.
 - `MORPHEUS_WEB_SEARCH=off` disables external research without changing the voice.
 - Four agentic turns per initial request, with parallel tool calls disabled.
-- 1,200 visible output tokens; the prompt keeps ordinary answers much shorter.
+- 3,000 output tokens including low-effort reasoning; the prompt keeps ordinary
+  answers much shorter. The existing grok-4.3 model is unchanged.
 - Provider budget: 52 seconds, at most two attempts. A recovery attempt has no web
   tools and is told it has no verified live findings. A source-repair or reference
   continuation retains only its already retrieved evidence. No duplicate paid research.
+  Tool-free requests omit tool-choice and agent-loop options; live testing found
+  the old empty-tool combination was rejected with HTTP 400, including on repair.
 - Empty, malformed, incomplete and failed replies never become raw customer errors.
   After recovery fails, an honest in-character connection message and Retry appear.
   Transient failures do not enter the conversation memory.
