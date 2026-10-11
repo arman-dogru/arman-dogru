@@ -39,7 +39,12 @@ change followed live tests where wording alone still produced résumé dumps.
 Reference material is separate from
 the trusted character instructions. Old assistant replies remain in the visible
 transcript but are excluded from the model; previous visitor requests retain
-continuity without reproducing obsolete answers. New replies carry `chat-version.js`'s persona version; changing it
+continuity without reproducing obsolete answers. Current history is quoted as
+data, not replayed as assistant demonstrations, and the active visitor request
+is repeated after a reference lookup. This prevents a previous homework answer
+from becoming the answer to a new company question. Benchmark-heavy fact bullets
+are omitted from ordinary lookups; `include_measurements` makes them available
+when quantitative results are requested. New replies carry `chat-version.js`'s persona version; changing it
 does not delete saved conversations. The old source-contract/behavior metadata
 is excluded from biographical evidence. `worker.js` supplies the existing leaderboard
 and moderation routes; do not deploy it as the chat entrypoint.
@@ -61,7 +66,7 @@ If biography-source generation fails, the verified reference index supplies real
 links directly; it does not manufacture a paper or present a connection error.
 
 This is a research executor within the existing Worker, not a second public
-scraping endpoint. Only web search is exposed, never shell, code execution,
+scraping endpoint. Only public web research and bounded portfolio lookup are exposed, never shell, code execution,
 authenticated browsing, local files or private employer information.
 
 ## Limits and failure behavior

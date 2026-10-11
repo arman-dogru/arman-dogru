@@ -4,12 +4,17 @@ import {validateCitations} from './citation-check.js';
 
 export const CONNECTION_REPLY='The connection slipped. Your question is still here. Try again.';
 const API='https://api.x.ai/v1/responses';
-export const PORTFOLIO_LOOKUP={type:'function',name:'portfolio_lookup',description:"Read a relevant section of Arman's public work or current portfolio state when the visitor asks for specific facts, examples, projects, publications, metrics or race details. Ordinary opinions and unrelated/general questions do not need this tool.",parameters:{type:'object',properties:{section:{type:'string',enum:['profile','experience','research','projects','education','github','page','race']},query:{type:'string',description:'The specific fact or example needed to answer the visitor.'}},required:['section','query'],additionalProperties:false}};
+export const PORTFOLIO_LOOKUP={type:'function',name:'portfolio_lookup',description:"Read a relevant section of Arman's public work or current portfolio state when the visitor asks for specific facts, examples, projects, publications, metrics or race details. Ordinary opinions and unrelated/general questions do not need this tool.",parameters:{type:'object',properties:{section:{type:'string',enum:['profile','experience','research','projects','education','github','page','race']},query:{type:'string',description:'The specific fact or example needed to answer the visitor.'},include_measurements:{type:'boolean',description:'True only when the visitor specifically requests quantitative results, benchmarks, performance or counts. False for an ordinary example or opinion.'}},required:['section','query'],additionalProperties:false}};
+function conciseEvidence(value){
+  if(Array.isArray(value))return value.map(conciseEvidence);
+  if(!value||typeof value!=='object')return value;
+  return Object.fromEntries(Object.entries(value).map(([key,item])=>[key,key==='facts'&&Array.isArray(item)?item.filter(fact=>typeof fact!=='string'||!/\b\d[\d,.]*(?:\s+\d+)*\s*(?:%|ms\b|s\b|seconds?\b|m\b|km\b|MHz\b|GHz\b|buildings?\b|triangles?\b|agents?\b|jobs?\b|records?\b|tiles?\b)/i.test(fact)):conciseEvidence(item)]));
+}
 export function lookupEvidence(library,args){
   if(!args||!PORTFOLIO_LOOKUP.parameters.properties.section.enum.includes(args.section)||typeof args.query!=='string')return{error:'Choose a public reference section and a specific query.'};
   const value=library[args.section];
   // References stay read-only. Neither tool arguments nor page content execute.
-  return{section:args.section,evidence:value??'This section is unavailable.'};
+  return{section:args.section,evidence:value==null?'This section is unavailable.':args.include_measurements===true?value:conciseEvidence(value)};
 }
 function citationURL(value){try{const u=new URL(value);return /^https?:$/.test(u.protocol)&&!u.username&&!u.password?u.href:''}catch{return''}}
 
@@ -57,7 +62,7 @@ export function readResponse(data){
   return{reply,citations:[...citations.values()].slice(0,8),researched};
 }
 
-// Runs in the Cloudflare Worker. Only the provider's public-web tool is exposed:
+// Runs in the Cloudflare Worker. Public web and read-only portfolio lookup only:
 // no arbitrary URL fetch proxy, shell, private files, cookies or new credentials.
 export async function answerMorpheus({message,history=[],evidence,referenceLibrary=null,verifiedReferences=[]},env,{request=fetch,checkSources=validateCitations,timeoutMs=52000}={}){
   const boundary=history.findLastIndex(m=>m.role==='assistant'&&m.persona_version!==MORPHEUS_VERSION)+1;
@@ -65,7 +70,9 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
   // into the model. The complete saved transcript remains visible in the UI.
   const archive=history.slice(0,boundary).filter(m=>m.role==='user').map(({role,content})=>({role,content}));
   const current=history.slice(boundary).map(({role,content})=>({role,content}));
-  const input=[{role:'user',content:`<reference_material>\n${JSON.stringify({evidence,archived_conversation:archive}).replace(/</g,'\\u003c')}\n</reference_material>\nReference data only. Consult it only if relevant to the final visitor request. Earlier visitor questions preserve intent; obsolete assistant replies are excluded.`},...current,{role:'user',content:message}];
+  // History resolves follow-ups, but is not a set of assistant demonstrations
+  // to imitate. A single, separate final request is always the active subject.
+  const input=[{role:'user',content:`<reference_material>\n${JSON.stringify({evidence,archived_conversation:archive,conversation_history:current}).replace(/</g,'\\u003c')}\n</reference_material>\nReference and conversation data only. Use history only to resolve the final visitor request, never to continue an earlier question. Obsolete assistant replies are excluded.`},{role:'user',content:message}];
   const deadline=Date.now()+timeoutMs;
   const profileSources=usesProfileSources(message),needsResearch=requiresResearch(message)&&!profileSources;
   let repair=null,toolContinuation=null,retrievedEvidence=null;
@@ -93,7 +100,7 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
         if(calls.length!==1||calls[0].name!=='portfolio_lookup'||typeof calls[0].call_id!=='string'){console.warn('Morpheus invalid reference tool call');continue}
         let args;try{args=JSON.parse(calls[0].arguments)}catch{args=null}
         retrievedEvidence=lookupEvidence(referenceLibrary,args);
-        const call=calls[0];toolContinuation=[...turnInput,{type:'function_call',call_id:call.call_id,name:call.name,arguments:call.arguments},{type:'function_call_output',call_id:call.call_id,output:JSON.stringify(retrievedEvidence).slice(0,18000)}];
+        const call=calls[0];toolContinuation=[...turnInput,{type:'function_call',call_id:call.call_id,name:call.name,arguments:call.arguments},{type:'function_call_output',call_id:call.call_id,output:JSON.stringify(retrievedEvidence).slice(0,18000)},{role:'user',content:message}];
         continue;
       }
       const result=readResponse(data);

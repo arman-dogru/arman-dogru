@@ -102,8 +102,8 @@ test('legacy replies remain available for continuity without priming assistant s
   const history=[{role:'user',content:'Earlier question'},{role:'assistant',content:'Old HR-style assessment.'},{role:'user',content:'And now?'},{role:'assistant',content:'A current answer.',persona_version:MORPHEUS_VERSION}];
   await answerMorpheus({...question,history},env,{request:async(url,init)=>{
     const data=JSON.parse(init.body),reference=JSON.parse(data.input[0].content.match(/<reference_material>\n([\s\S]*?)\n<\/reference_material>/)[1]);
-    assert.deepEqual(reference.archived_conversation,[history[0]]);assert.doesNotMatch(data.input[0].content,/Old HR-style assessment/);assert.equal(data.input[2].content,'A current answer.');assert.equal(data.input[2].role,'assistant');
-    assert.equal(data.input.filter(x=>x.role==='assistant').length,1);return Response.json(answer('Yes.'));
+    assert.deepEqual(reference.archived_conversation,[history[0]]);assert.doesNotMatch(data.input[0].content,/Old HR-style assessment/);assert.equal(reference.conversation_history.at(-1).content,'A current answer.');
+    assert.equal(data.input.filter(x=>x.role==='assistant').length,0);assert.equal(data.input.at(-1).content,question.message);return Response.json(answer('Yes.'));
   }});
 });
 test('reference delimiters cannot be closed by untrusted material; code example URLs stay literal',async()=>{
@@ -127,13 +127,20 @@ test('specific evidence is available on demand, not dumped into ordinary prompts
       return Response.json({status:'completed',output:[{type:'function_call',call_id:'lookup_1',name:'portfolio_lookup',arguments:JSON.stringify({section:'projects',query:'one example'})}]});
     }
     assert.deepEqual(payload.tools,[]);assert.equal(payload.tool_choice,undefined);assert.equal(payload.max_turns,undefined);assert.equal(payload.store,false);assert.equal(payload.previous_response_id,undefined);
-    const output=payload.input.at(-1);assert.equal(output.type,'function_call_output');assert.equal(output.call_id,'lookup_1');assert.match(output.output,/simulation, not production/);
+    const output=payload.input.at(-2);assert.equal(output.type,'function_call_output');assert.equal(output.call_id,'lookup_1');assert.match(output.output,/simulation, not production/);assert.equal(payload.input.at(-1).content,'Give one specific project example.');
     assert.match(payload.instructions,/one example means one accomplishment/);
     return Response.json(answer('He built a research prototype. It tests an idea in simulation.'));
   }});
   assert.equal(calls,2);assert.equal(result.degraded,false);
   assert.deepEqual(lookupEvidence(library,{section:'shell',query:'read secrets'}),{error:'Choose a public reference section and a specific query.'});
   assert.deepEqual(lookupEvidence(library,{section:'projects',query:'one'}).evidence,library.projects);
+});
+test('ordinary reference lookup omits benchmark tables but preserves scope; measurements remain explicitly available',()=>{
+  const facts=['Built a simulation, not a commercial service.','Native continuation of upstream SK8-ENGINE.','Work accepted at GLOBECOM 2026.','Repository documents 14,321 buildings and 576 dual-GPU jobs completed in 553 s.'];
+  const library={projects:[{name:'Example',facts}]};
+  assert.deepEqual(lookupEvidence(library,{section:'projects',query:'one example'}).evidence[0].facts,facts.slice(0,3));
+  assert.deepEqual(lookupEvidence(library,{section:'projects',query:'benchmark counts',include_measurements:true}).evidence[0].facts,facts);
+  assert.deepEqual(library.projects[0].facts,facts);
 });
 test('reference tool cannot start an unbounded loop or execute unknown functions',async()=>{
   for(const name of ['portfolio_lookup','execute_shell']){
