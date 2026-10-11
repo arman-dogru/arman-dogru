@@ -50,8 +50,8 @@ export function createAI({addLine,addBlock,escapeHtml,chatWindow,chatForm,chatIn
       if(!res.ok||data.degraded||typeof data.reply!=='string'||!data.reply.trim())throw new Error('unavailable');
       if(turn!==generation)return;
       pending?.remove();let reply=data.reply.trim();
-      const citations=(Array.isArray(data.citations)?data.citations:[]).map(c=>publicLink(c?.url)).filter((url,i,all)=>url&&!reply.includes(url)&&all.indexOf(url)===i).slice(0,4);
-      if(citations.length)reply+='\n\n'+citations.map((url,i)=>`[${i+1}](${url})`).join(' · ');
+      const citations=(Array.isArray(data.citations)?data.citations:[]).map(c=>({url:publicLink(c?.url),title:String(c?.title||'').replace(/[\[\]\\\n]/g,'').slice(0,90)})).filter((c,i,all)=>c.url&&!reply.includes(c.url)&&all.findIndex(x=>x.url===c.url)===i).slice(0,3);
+      if(citations.length)reply+='\n\n'+citations.map(c=>`[${c.title||new URL(c.url).hostname}](${c.url})`).join(' · ');
       renderMessage({role:'assistant',content:reply,persona_version:data.persona_version});onSources?.(data.sources||[]);
       if(fromTerminal)addBlock(`<b>MORPHEUS</b><div class="chat-body">${renderMarkdown(reply)}</div>`);
     }catch{

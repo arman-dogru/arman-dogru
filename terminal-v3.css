@@ -46,6 +46,7 @@
 .chat-body code{font:inherit;font-size:.95em;background:color-mix(in srgb,var(--purple) 9%,var(--panel2));padding:.12em .3em;border-radius:3px}
 .chat-body pre{max-width:100%;overflow:auto;padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:4px;line-height:1.6;white-space:pre;overflow-wrap:normal}
 .chat-body pre code{padding:0;background:none}.chat-body blockquote{margin:.7em 0;padding-left:1em;border-left:2px solid var(--purple);color:var(--muted)}
+.chat-math{font-size:1.12em}.chat-math.display{display:block;max-width:100%;overflow-x:auto;margin:.8em 0;padding:.35em 0}.chat-math math{color:inherit}.math-fallback{white-space:pre-wrap}
 .chat-form button:disabled{opacity:.5;cursor:wait}.chat-retry{margin-top:10px;padding:5px 12px;border:1px solid var(--line);background:var(--panel2);color:var(--cyan);font:inherit;cursor:pointer}
 .chat-retry:focus-visible,.chat-body a:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
 .chat-note{padding:7px 16px 8px;font-size:9px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

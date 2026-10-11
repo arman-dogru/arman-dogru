@@ -1,14 +1,28 @@
 # Morpheus
 
-The character leads. Evidence serves his judgment, not the other way around.
+Accuracy first. Relevance second. Character voice third.
 
 ## Edit the voice
 
 `grok-relay/morpheus-prompt.js` is the prompt. It defines the relationship to Arman,
-cadence, answer-first structure, strength-first framing and when to consult public
-company/job pages. There is no list of permitted questions. General questions,
-technical explanations and learning are allowed too. Conviction does not authorize
-invented credentials or claims of having visited a page that was not retrieved.
+cadence, answer-first structure, progressive disclosure and when to consult public
+company/job pages. There is no list of permitted questions or prepared answers.
+General questions, technical explanations and learning are allowed too. Morpheus
+is a perceptive mentor, not a salesman: belief in Arman's potential does not
+require an automatic yes, praise on unrelated topics, or invented achievements.
+The latest question controls the subject; earlier turns only resolve follow-ups.
+
+The v7 prompt replaces conflicting "be accurate / always favor him" pressure with
+a clear priority order, descriptive sections, positive style guidance and a brief
+silent relevance/claim-scope/editing check. These are adaptations of published
+guidance, not claims about proprietary system prompts:
+
+- [OpenAI: instruction roles, context boundaries and evaluation](https://developers.openai.com/api/docs/guides/prompt-engineering)
+- [Anthropic: clear instructions, roles, XML boundaries and positive formatting guidance](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices)
+- [Google: direct instructions, verbosity, prioritization and iterative testing](https://ai.google.dev/gemini-api/docs/prompting-strategies)
+
+These general techniques are tested on the existing grok-4.3 integration. No
+model migration, extra model/grader call or canned production Q&A was added.
 
 ## Request path
 
@@ -63,6 +77,12 @@ authenticated browsing, local files or private employer information.
   invented in the answer. Model-authored links absent from retrieved sources or
   the visitor/reference are suppressed. This does not guarantee every source
   stays live indefinitely; check source quality in real-browser evaluations.
+- Provider citation URLs receive bounded, cached public HEAD checks. Confirmed
+  404/410 responses and unsafe/local redirect destinations are discarded. A
+  blocked HEAD or timeout remains unconfirmed, not falsely called verified.
+  Unsupported/broken links trigger one source-preserving rewrite within the same
+  two-attempt budget; no second paid web-search loop or ugly placeholder URL.
+  This is not a public URL-fetch proxy. No credentials or cookies are forwarded.
 - Citation links accept HTTP(S) only, with no credential URLs. Only
   assistant output text is presented, never reasoning or tool output.
 
@@ -75,10 +95,17 @@ production secret out of the dashboard. Local leaderboard storage remains separa
 
 Run the `tests/chat-*.test.js`, `tests/morpheus-*.test.js` and leaderboard tests.
 `node scripts/evaluate-morpheus.mjs` is an opt-in live check against the deployed
-relay (seven model requests). It writes an ignored public-test report to
+relay (eleven model requests). It writes an ignored public-test report to
 `work/morpheus-live-eval.json`. Read the actual answers: automated checks cannot
 fully judge character voice, factual accuracy or quality of fit. Test questions
 are evaluation fixtures, not a production FAQ or list of allowed questions.
+
+Rendering is independent of prompting: `chat-markdown.js` escapes source HTML,
+renders useful Markdown and safe links, and uses pinned self-hosted KaTeX for
+native MathML. It supports inline/display TeX and dollar delimiters, leaving
+currency and code literal. Math trust is disabled, expansion/size are bounded,
+and unsupported expressions fall back to escaped code. No remote script or
+font dependency is required. Saved conversations are re-rendered, not erased.
 `npm run build:relay` bundles the active entrypoint to ignored `work/relay-deploy.js`.
 Deploy with authenticated Wrangler or the authorized Cloudflare code editor,
 preserving existing secrets, origins and the `LEADERBOARD` binding. Frontend files

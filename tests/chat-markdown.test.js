@@ -20,3 +20,22 @@ test('adjacent citations remain two links rather than one corrupted URL',()=>{
 test('identifiers, headings, quotations, ordered lists and hard breaks remain readable',()=>{
   assert.equal(renderMarkdown('## Choice\n\n> See the system.\n\n3. Look\n4. Build\n\nfoo_bar_baz  \nnext'),'<h2>Choice</h2><blockquote>See the system.</blockquote><ol start="3"><li>Look</li><li>Build</li></ol><p>foo_bar_baz<br>next</p>');
 });
+test('inline and display equations render as native accessible math, not raw escapes',()=>{
+  for(const text of [String.raw`The slope is \(2x\).`,String.raw`\[\frac{d}{dx}x^2=2x\]`,'$$\\frac{1}{2}$$','$x^2$']){
+    const html=renderMarkdown(text);assert.match(html,/<math /);assert.doesNotMatch(html,/>\\[([\]]|>\$\$/);
+  }
+  const html=renderMarkdown(String.raw`\[
+\frac{-b \pm \sqrt{b^2-4ac}}{2a}
+\]`);assert.match(html,/<mfrac>/);assert.match(html,/class="chat-math display"/);
+});
+test('math respects code, currency, unsupported syntax, resource bounds and trust boundaries',()=>{
+  assert.equal(renderMarkdown('`\\(x\\)` and $5 and $10.'),'<p><code>\\(x\\)</code> and $5 and $10.</p>');
+  assert.equal(renderMarkdown('```tex\n\\[x^2\\]\n```'),'<pre><code>\\[x^2\\]</code></pre>');
+  for(const text of [String.raw`\(\href{javascript:alert(1)}{x}\)`,String.raw`\(\includegraphics{https://evil.com/a}\)`,String.raw`\(\htmlStyle{color:red}{x}\)`,String.raw`\(\unknown{x}\)`,`\\(${'x'.repeat(2001)}\\)`]){
+    const html=renderMarkdown(text);assert.doesNotMatch(html,/<(?:a|img|script)\b|style="color:red/);assert.ok(html.length<15000);
+  }
+});
+test('bare sources and URLs containing balanced parentheses are clickable',()=>{
+  const html=renderMarkdown('See https://example.com/paper_(v2). [Paper](https://example.com/paper_(v2))');
+  assert.equal((html.match(/<a /g)||[]).length,2);assert.equal((html.match(/href="https:\/\/example.com\/paper_\(v2\)"/g)||[]).length,2);
+});
