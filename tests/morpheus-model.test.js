@@ -9,6 +9,10 @@ test('only final assistant output is shown, never reasoning or tool content',()=
   assert.equal(result.reply,'Yes.\n\nHe builds.');assert.equal(result.researched,false);
   for(const value of [null,{}, {output:{}},answer(''),answer('partial',{status:'incomplete'}),answer('bad',{error:{message:'internal'}})])assert.equal(readResponse(value).reply,'');
 });
+test('intermediate assistant preambles are not concatenated with the final answer',()=>{
+  const data=answer('Final answer.');data.output.unshift({type:'message',role:'assistant',content:[{type:'output_text',text:'I will search. An unverified early answer.'}]});
+  assert.equal(readResponse(data).reply,'Final answer.');
+});
 test('web research is available without external storage or executable tools',async()=>{
   let payload;const result=await answerMorpheus(question,env,{request:async(url,init)=>{assert.equal(url,'https://api.x.ai/v1/responses');payload=JSON.parse(init.body);return Response.json(answer('Yes.'))}});
   assert.equal(result.reply,'Yes.');assert.equal(payload.store,false);assert.equal(payload.model,'grok-4.3');assert.equal(payload.max_turns,4);assert.equal(payload.parallel_tool_calls,false);
@@ -68,7 +72,7 @@ test('legacy replies remain available for continuity without priming assistant s
   const history=[{role:'user',content:'Earlier question'},{role:'assistant',content:'Old HR-style assessment.'},{role:'user',content:'And now?'},{role:'assistant',content:'A current answer.',persona_version:MORPHEUS_VERSION}];
   await answerMorpheus({...question,history},env,{request:async(url,init)=>{
     const data=JSON.parse(init.body),reference=JSON.parse(data.input[0].content.slice(data.input[0].content.indexOf('{')));
-    assert.deepEqual(reference.archived_conversation,history.slice(0,2));assert.equal(data.input[2].content,'A current answer.');assert.equal(data.input[2].role,'assistant');
+    assert.deepEqual(reference.archived_conversation,[history[0]]);assert.doesNotMatch(data.input[0].content,/Old HR-style assessment/);assert.equal(data.input[2].content,'A current answer.');assert.equal(data.input[2].role,'assistant');
     assert.equal(data.input.filter(x=>x.role==='assistant').length,1);return Response.json(answer('Yes.'));
   }});
 });

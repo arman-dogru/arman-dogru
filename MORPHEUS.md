@@ -16,8 +16,8 @@ The active entrypoint is `grok-relay/agent-worker.js` (see `wrangler.jsonc`). It
 provides the public profile, recent conversation, bounded public GitHub excerpts,
 selected page state and public race board. Reference material is separate from
 the trusted character instructions. Old assistant replies remain in the visible
-transcript and reach the model as an archived reference, not assistant-style
-demonstrations. New replies carry `chat-version.js`'s persona version; changing it
+transcript but are excluded from the model; previous visitor requests retain
+continuity without reproducing obsolete answers. New replies carry `chat-version.js`'s persona version; changing it
 does not delete saved conversations. The old source-contract/behavior metadata
 is excluded from biographical evidence. `worker.js` supplies the existing leaderboard
 and moderation routes; do not deploy it as the chat entrypoint.
