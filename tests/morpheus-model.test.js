@@ -55,7 +55,7 @@ test('a source request forces a tool call and rejects unresearched generated URL
     calls.push(JSON.parse(init.body));
     return Response.json(calls.length===1?answer('https://example.test/invented'):answer('I could not check the posting.'));
   }});
-  assert.equal(calls[0].tool_choice,'required');assert.equal(calls[1].tool_choice,'none');
+  assert.equal(calls[0].tool_choice,'required');assert.equal(calls[1].tool_choice,undefined);assert.equal(calls[1].max_turns,undefined);
   assert.equal(result.researched,false);assert.equal(result.reply,'I could not check the posting.');
 });
 test('generated links are not promoted to provider sources',()=>{
@@ -126,7 +126,7 @@ test('specific evidence is available on demand, not dumped into ordinary prompts
       assert.deepEqual(payload.tools,[{type:'web_search'},PORTFOLIO_LOOKUP]);assert.doesNotMatch(JSON.stringify(payload.input),/Example research prototype/);
       return Response.json({status:'completed',output:[{type:'function_call',call_id:'lookup_1',name:'portfolio_lookup',arguments:JSON.stringify({section:'projects',query:'one example'})}]});
     }
-    assert.deepEqual(payload.tools,[]);assert.equal(payload.tool_choice,'none');assert.equal(payload.store,false);assert.equal(payload.previous_response_id,undefined);
+    assert.deepEqual(payload.tools,[]);assert.equal(payload.tool_choice,undefined);assert.equal(payload.max_turns,undefined);assert.equal(payload.store,false);assert.equal(payload.previous_response_id,undefined);
     const output=payload.input.at(-1);assert.equal(output.type,'function_call_output');assert.equal(output.call_id,'lookup_1');assert.match(output.output,/simulation, not production/);
     assert.match(payload.instructions,/one example means one accomplishment/);
     return Response.json(answer('He built a research prototype. It tests an idea in simulation.'));

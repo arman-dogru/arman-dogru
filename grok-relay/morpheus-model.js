@@ -78,7 +78,10 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
     const finalInstructions=toolContinuation?SYSTEM_PROMPT+'\nYou have retrieved the requested public reference. Answer the latest visitor question now. Select only what it needs: one example means one accomplishment, not a catalogue or its whole benchmark table. Keep the mentor voice and distinguish prototype results from production history.':SYSTEM_PROMPT+instructions;
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),Math.min(remaining,attempt===0?40000:12000));
     try{
-      const response=await request(API,{method:'POST',headers:{authorization:`Bearer ${env.XAI_API_KEY}`,'content-type':'application/json'},signal:controller.signal,body:JSON.stringify({model:env.XAI_MODEL||'grok-4.3',instructions:finalInstructions,input:turnInput,store:false,temperature:.55,max_output_tokens:1200,reasoning:{effort:'none'},tools,tool_choice:research&&needsResearch?'required':tools.length?'auto':'none',max_turns:4,parallel_tool_calls:false})});
+      // A tool-free recovery is a normal generation request. Do not send tool
+      // selection/agent-loop options when no tool exists (provider rejects it).
+      // Low reasoning gives instruction/fact checks room without changing model.
+      const response=await request(API,{method:'POST',headers:{authorization:`Bearer ${env.XAI_API_KEY}`,'content-type':'application/json'},signal:controller.signal,body:JSON.stringify({model:env.XAI_MODEL||'grok-4.3',instructions:finalInstructions,input:turnInput,store:false,temperature:.45,max_output_tokens:3000,reasoning:{effort:'low'},tools,...(tools.length?{tool_choice:research&&needsResearch?'required':'auto',max_turns:4,parallel_tool_calls:false}:{})})});
       if(!response.ok){
         // Never log provider bodies, prompts, credentials or visitor conversation.
         console.warn('Morpheus upstream status',response.status);
