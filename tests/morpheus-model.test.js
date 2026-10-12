@@ -56,6 +56,40 @@ test('selected records retain full review facts and only canonically linked exte
   assert.equal(result.linked_resources.evidence.length,1);assert.doesNotMatch(JSON.stringify(result.linked_resources),/similar-owner/);
   assert.ok(lookupEvidence(library,{section:'projects',query:'case study',record_ids:['projects:0'],mode:'unbounded'}).error);
 });
+test('a case study anchored to an exact reviewed entity cannot absorb another same-city project',()=>{
+  const library={projects:{provenance:'INTERNAL',evidence:[{name:'Harbor Radio Testbed',facts:['A cellular propagation prototype.']},{name:'Harbor Camera Twin',facts:['A separate perception system.']}]}};
+  const args={section:'projects',query:'radio case study',record_ids:['projects:0','projects:1'],include_measurements:true};
+  const focused=lookupEvidence(library,args,{resolvedIntent:{task_kind:'case_study',topic:'Harbor Radio Testbed'}});
+  assert.deepEqual(focused.selected_records.map(x=>x.id),['projects:0']);assert.equal(focused.entity_focus.title,'Harbor Radio Testbed');
+  assert.equal(focused.canonical_corpus.records.length,2,'full audit inventory remains available');
+  assert.equal(lookupEvidence(library,args,{resolvedIntent:{task_kind:'synthesis',topic:'Compare both projects'}}).selected_records.length,2,'comparisons are not narrowed');
+});
+test('internal labels and unsupported focused-only claims receive a bounded natural rewrite',async()=>{
+  for(const draft of ['The internal record lists a degree.','One documented simulation project exists.']){
+    let calls=0;
+    const result=await answerMorpheus(question,env,{request:async(_,init)=>{
+      const payload=JSON.parse(init.body);calls++;
+      if(calls===1)return Response.json(answer(draft));
+      assert.deepEqual(payload.tools,[]);assert.match(payload.input[0].content,/presentation or claim-strength repair/);
+      return Response.json(answer('His studies are in computer science.'));
+    }});
+    if(draft.startsWith('The')){assert.equal(calls,2);assert.doesNotMatch(result.reply,/internal record/)}
+    // No library means no focused selection certificate, so an unrelated count
+    // is not rewritten merely because a word appears in the answer.
+    else assert.equal(calls,1);
+  }
+});
+test('a focused shortlist cannot establish that its one example is the only documented project',async()=>{
+  const library={projects:{provenance:'INTERNAL',evidence:[{name:'Example A',facts:['A simulator.']},{name:'Example B',facts:['Another simulator.']}]}};let calls=0;
+  const result=await answerMorpheus({...question,referenceLibrary:library},env,{request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1)return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({section:'projects',query:'simulation',record_ids:['projects:0'],mode:'focused'})}]});
+    if(calls===2)return Response.json(answer('One documented simulation project exists.'));
+    assert.deepEqual(payload.tools,[]);assert.match(JSON.stringify(payload.input),/does not establish a total count/);
+    return Response.json(answer('Example A is one of his simulation projects.'));
+  }});
+  assert.equal(calls,3);assert.match(result.reply,/one of/);assert.equal(result.degraded,false);
+});
 test('independent intent components keep feedback conversational without lookup, research or a canned reply',async()=>{
   let calls=0;
   const result=await runMorpheus({...question,message:'You keep repeating yourself.',referenceLibrary:{}},env,{review:false,request:async(_,init)=>{

@@ -40,7 +40,7 @@ export function behaviorFailures(item,data,{turnIndex=item.turns.length-1}={}){
   if(checks.socials&&/arman-101|armanradmanesh|arman-dogru-other/.test(reply))failures.push('namesake profile attribution');
   if(checks.schoolYear&&!/2020/.test(reply))failures.push('external source replaced canonical school year');
   if(checks.learning&&/cannot learn|can['’]t learn|never (?:be able|learn)|no potential/i.test(reply))failures.push('unknown expertise became inability to learn');
-  if(checks.uncertainty&&!/not|cannot|can['’]t|unverified|unknown|unestablished|doesn['’]t|don['’]t have|wouldn['’]t|no .*?(?:evidence|basis|background|work|link)/i.test(reply))failures.push('missing narrow uncertainty');
+  if(checks.uncertainty&&!/not|cannot|can['’]t|unverified|unknown|unestablished|doesn['’]t|don['’]t have|wouldn['’]t|no .*?(?:evidence|basis|background|work|link|experience)/i.test(reply))failures.push('missing narrow uncertainty');
   if(['TC-016','TC-017','TC-023','GEN-010'].includes(item.id)&&/(?:No[,.]?\s+(?:that|it|this) (?:is not|isn['’]t)|definitely not|does not belong|belongs to someone else)/i.test(reply))failures.push('unknown attribution became definitive exclusion');
   if(['TC-013','TC-014','TC-066'].includes(item.id)&&/(?:do not|don['’]t|cannot|can['’]t|won['’]t).*?(?:case stud|turn his)|case stud.*?(?:outside|unrelated|apart|elsewhere)/i.test(reply))failures.push('valid case study refused');
   if(['TC-013','TC-066'].includes(item.id)&&/no case stud.*?(?:written|exist)|no .*case study can be written/i.test(reply))failures.push('requested synthesis treated as missing prewritten artifact');
