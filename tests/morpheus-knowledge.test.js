@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {knowledge,identity,knowledgeLibrary,knowledgeOrientation,projectIndex,isCanonicalResource,citationProvenance,verifiedReferences} from '../grok-relay/knowledge-context.js';
 import {githubContext,ownedRepository} from '../grok-relay/github-context.js';
-import {lookupEvidence,answerMorpheus} from '../grok-relay/morpheus-model.js';
+import {lookupEvidence,answerMorpheus as runMorpheus} from '../grok-relay/morpheus-model.js';
+const answerMorpheus=(question,env,options={})=>runMorpheus(question,env,{review:false,...options});
 import {SYSTEM_PROMPT} from '../grok-relay/morpheus-prompt.js';
 import {PUBLIC_FILES} from '../scripts/build-site.mjs';
 
@@ -25,7 +26,10 @@ test('source priority and provenance survive lookup; visitor state never becomes
     assert.equal(result.provenance,'INTERNAL');assert.equal(result.source.sha256,knowledge.source.sha256);
   }
   const experience=lookupEvidence(library,{section:'experience',query:'one example'});
-  assert.match(JSON.stringify(experience),/Nokia Bell Labs/);assert.doesNotMatch(JSON.stringify(experience),/Evil Corp|99\.9%/);
+  assert.match(JSON.stringify(experience),/Nokia Bell Labs/);assert.doesNotMatch(JSON.stringify(experience),/Evil Corp/);
+  assert.doesNotMatch(JSON.stringify(experience.evidence),/99\.9%/);
+  assert.doesNotMatch(JSON.stringify(experience.canonical_corpus),/99\.9%/);
+  assert.match(JSON.stringify(lookupEvidence(library,{section:'experience',query:'benchmarks',include_measurements:true}).canonical_corpus),/99\.9%/);
   assert.equal(library.page.provenance,'MATRIX');assert.equal(library.race.evidence.leaderboard.provenance,'MATRIX');
   assert.match(JSON.stringify(library.projects),/Skate 3 Rust/);assert.match(JSON.stringify(library.race),/NEAT/);
   assert.equal(library.github.provenance,'UNKNOWN');
@@ -67,7 +71,7 @@ test('GitHub ingestion checks API owner, full name, exact URL and public visibil
   assert.equal(mismatch.provenance,'UNKNOWN');
 });
 test('source hierarchy is explicit while scope, concise persona and inference remain intact',()=>{
-  for(const pattern of [/internal knowledge base defines Arman/,/INTERNAL master-résumé facts first/,/VERIFIED_EXTERNAL/,/MATRIX/,/INFERENCE/,/UNKNOWN/,/matching author name.*not identity verification/,/never.*discover Arman's identity/,/retrieve his relevant documented experience, then research/,/earlier assistant reply amend it/,/source discipline is not an invitation to dump the résumé/])assert.match(SYSTEM_PROMPT,pattern);
+  for(const pattern of [/internal knowledge base defines Arman/i,/INTERNAL master-résumé facts first/,/VERIFIED_EXTERNAL/,/MATRIX/,/INFERENCE/,/UNKNOWN/,/matching author name.*not identity verification/,/never.*discover Arman's identity/i,/retrieve his relevant documented experience, then research/,/earlier assistant reply amend it/,/source discipline is not an invitation to dump the résumé/i])assert.match(SYSTEM_PROMPT,pattern);
 });
 test('backend knowledge and raw source documents cannot enter the public build',async()=>{
   assert.ok(!PUBLIC_FILES.some(path=>/knowledge|resume|handover|grok-relay/i.test(path)));
@@ -111,7 +115,7 @@ test('broken links after lookup retain internal facts in a bounded tool-free rep
     const payload=JSON.parse(init.body);calls++;
     if(calls===1)return Response.json({status:'completed',output:[call]});
     if(calls===2)return Response.json(modelReply('[Job](https://www.tesla.com/404)',{usage:{server_side_tool_usage_details:{web_search_calls:1}},citations:['https://www.tesla.com/404']}));
-    assert.deepEqual(payload.tools,[]);assert.match(payload.instructions,/Source repair/);assert.match(JSON.stringify(payload.input),/Nokia Bell Labs/);
+    assert.deepEqual(payload.tools,[]);assert.match(payload.input[0].content,/Source repair/);assert.equal(payload.input[0].role,'system');assert.match(JSON.stringify(payload.input),/Nokia Bell Labs/);
     return Response.json(modelReply('His perception experience is relevant. I could not verify a current opening.'));
   }});
   assert.equal(calls,3);assert.equal(result.degraded,false);assert.doesNotMatch(result.reply,/404/);

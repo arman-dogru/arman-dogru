@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {searchKnowledge,surfacedEvidence} from '../grok-relay/knowledge-search.js';
+import {searchKnowledge,canonicalCorpus,surfacedEvidence,evidenceWithoutMeasurements} from '../grok-relay/knowledge-search.js';
 import {knowledgeLibrary,knowledgeOrientation} from '../grok-relay/knowledge-context.js';
 import {lookupEvidence} from '../grok-relay/morpheus-model.js';
 
@@ -58,4 +58,24 @@ test('complete records are indexed, expansions and results are bounded, visitor 
   const result=searchKnowledge(knowledgeLibrary({board:[{display_name:'Counterfeit Nobel Prize'}]}),{query:'Counterfeit Nobel Prize',related_queries:Array(10).fill('x'.repeat(1000)),limit:1000});
   assert.equal(result.related_queries.length,4);assert.equal(result.related_queries[0].length,200);assert.ok(result.matches.length<=12);
   assert.doesNotMatch(JSON.stringify(result),/display_name/);
+});
+test('semantic inspection receives the whole bounded internal corpus, not lexical matches as a verdict',()=>{
+  const library=knowledgeLibrary({page:'Invented Nobel Prize',board:[{display_name:'Fake biography'}]}),corpus=canonicalCorpus(library);
+  assert.equal(corpus.coverage.truncated,false);assert.ok(corpus.records.length>=40);
+  assert.ok(corpus.records.some(record=>record.section==='experience'));assert.ok(corpus.records.some(record=>record.section==='research'));
+  assert.doesNotMatch(JSON.stringify(corpus),/Invented Nobel|Fake biography/);
+  const lookup=lookupEvidence(library,{section:'search',query:'Unseen Company role fit'});
+  assert.deepEqual(lookup.canonical_corpus,evidenceWithoutMeasurements(corpus));
+  const large={projects:{provenance:'INTERNAL',evidence:Array.from({length:100},(_,i)=>({name:`Distinct ${i}`}))}};
+  assert.equal(canonicalCorpus(large).coverage.truncated,true);assert.equal(canonicalCorpus(large).records.length,64);
+});
+test('model-selected evidence uses validated record identifiers and keeps distinct source facets',()=>{
+  const source={title:'Reviewed'},internal=evidence=>({provenance:'INTERNAL',source,evidence});
+  const library={experience:internal([{organization:'Observatory',facts:['Adaptive-optics control.']}]),research:internal([{title:'Wavefront study',facts:['Atmospheric correction.']}]),projects:internal([{name:'Unrelated planner',facts:['Navigation.']}])};
+  const args={section:'search',purpose:'portfolio',subject:'optics',task:'Compare relevant efforts',record_ids:['experience:0','research:0'],intent:'enumerate',query:'new terminology'};
+  const result=lookupEvidence(library,args);
+  assert.equal(result.selected_records.length,2);assert.deepEqual(result.selected_records.map(item=>item.section),['experience','research']);
+  assert.equal(result.coverage.total_records,3);assert.equal(result.conversation_frame.task,args.task);
+  assert.equal(result.canonical_corpus.records.length,3,'reviewer can inspect omitted records');
+  assert.ok(lookupEvidence(library,{...args,record_ids:['invented:7']}).error);
 });

@@ -38,6 +38,14 @@ function records(library){
 export function knowledgeIndex(library){
   return records(library).slice(0,96).map(({id,section,title,evidence})=>({id,section,title,summary:String(evidence.facts?.[0]||'').slice(0,220)}));
 }
+// This portfolio is small enough to inspect its whole reviewed record. Lexical
+// ranking is a navigation aid, not a semantic gate: a company-fit question may
+// share no tokens with the relevant experience. Keep all facts and provenance;
+// brevity belongs in the answer, not in destructive evidence filtering.
+export function canonicalCorpus(library,{limit=64,surfaced_ids=[]}={}){
+  const documents=records(library),size=Math.max(1,Math.min(96,limit)),surfaced=new Set(surfaced_ids);
+  return{coverage:{total_records:documents.length,returned_records:Math.min(size,documents.length),truncated:documents.length>size},records:documents.slice(0,size).map(doc=>({...doc,previously_surfaced:surfaced.has(doc.id)}))};
+}
 // Recognition marks an example as discussed, not exhausted: a paper and an
 // implementation of the same effort may still provide different useful facets.
 export function surfacedEvidence(library,history=[]){

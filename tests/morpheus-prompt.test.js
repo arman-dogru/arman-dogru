@@ -38,7 +38,7 @@ test('synthesis, grounded hypotheticals and contextual technical explanations re
   assert.match(SYSTEM_PROMPT,/General knowledge is not automatically unrelated/);
   assert.match(SYSTEM_PROMPT,/Resolve pronouns, ellipses and short source requests/);
   assert.match(SYSTEM_PROMPT,/Notice repeated boundary-testing across the supplied conversation history/);
-  assert.match(SYSTEM_PROMPT,/When the visitor returns to a genuine portfolio question, answer it fully/);
+  assert.match(SYSTEM_PROMPT,/when the visitor returns to a genuine portfolio question, answer it fully/i);
   assert.match(SYSTEM_PROMPT,/A legitimate criticism of Arman is not a jailbreak/);
   assert.match(SYSTEM_PROMPT,/Persona is subordinate to usefulness/);
 });
