@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence,compactSourceNotes,repeatsRecentReply,applyEditorialEdits,addsUnrequestedMeasurements,focusedExclusivity,groundedLinks} from '../grok-relay/morpheus-model.js';
+import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence,compactSourceNotes,repeatsRecentReply,applyEditorialEdits,addsUnrequestedMeasurements,focusedExclusivity,unsupportedIncapacity,groundedLinks} from '../grok-relay/morpheus-model.js';
 import {MORPHEUS_VERSION} from '../chat-version.js';
 // Transport/recovery unit tests isolate the generation layer. Separate tests
 // below exercise the default editorial pass and its safety checks.
@@ -65,6 +65,40 @@ test('a focused selection cannot certify sole ownership counts or universal abse
   const exhaustive={canonical_corpus:{records:[{id:'a'},{id:'b'}]},coverage:{selection_mode:'exhaustive'}};
   assert.equal(focusedExclusivity('No other examples exist in the record.',exhaustive),true);
   assert.equal(focusedExclusivity('A second effort includes this capability.',exhaustive),false);
+});
+test('unknown specialty evidence cannot certify incapacity across domains or paraphrases',()=>{
+  const unsupported={lookups:[{evidence_assessment:{strength:'unsupported'}}]};
+  for(const text of ['Arman cannot help with oceanographic instrumentation.','He can’t learn industrial fermentation.','Arman is unable to contribute to cartography.'])assert.equal(unsupportedIncapacity(text,unsupported),true,text);
+  assert.equal(unsupportedIncapacity('I cannot establish his present domain expertise.',unsupported),false);
+  assert.equal(unsupportedIncapacity('He cannot sign off licensed structural calculations tomorrow.',unsupported),false);
+  assert.equal(unsupportedIncapacity('Arman cannot help with that task.',{evidence_assessment:{strength:'direct'}}),false);
+});
+test('an unsupported incapacity draft is rewritten from evidence, not replaced with a canned answer',async()=>{
+  const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman',facts:['Works on software systems.']}}};let calls=0;
+  const result=await runMorpheus({...question,message:'Could he contribute to marine research?',referenceLibrary:library},env,{interpret:false,review:false,request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1)return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({section:'profile',query:'marine research',record_ids:['profile:0'],evidence_strength:'unsupported',evidence_basis:'No documented marine research.'})}]});
+    if(calls===2)return Response.json(answer('Arman cannot contribute to marine research.'));
+    assert.match(JSON.stringify(payload.input),/unestablished, not impossible/);
+    return Response.json(answer('I would explore a software role, not assume he already has marine-domain expertise.'));
+  }});
+  assert.equal(calls,3);assert.equal(result.degraded,false);assert.match(result.reply,/I would explore/);
+});
+test('intent has no closed-world topic inventory and retrieval cannot downgrade a resolved portfolio task',async()=>{
+  const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman',facts:['Builds simulation software.']}},projects:{provenance:'INTERNAL',evidence:[{name:'Known specialist project',facts:['Contains a control pipeline.']}]}};let calls=0;
+  const result=await runMorpheus({...question,message:'And in a different engineering field?',referenceLibrary:library},env,{review:false,request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1){
+      assert.doesNotMatch(JSON.stringify(payload.input),/Known specialist project|Contains a control pipeline/);
+      return Response.json({status:'completed',output:[{type:'function_call',name:'resolve_intent',call_id:'intent',arguments:JSON.stringify({task_kind:'assessment',portfolio_component:true,standalone_task:false,conversation_component:false,purpose:'portfolio',subject:'Arman',topic:'another engineering field',task:'Assess transferable foundations in a different field',external_purpose:'none'})}]});
+    }
+    if(calls===2)return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({purpose:'unrelated',section:'dialogue',query:'unfamiliar field',record_ids:[],evidence_strength:'unsupported',evidence_basis:'No documented domain experience.'})}]});
+    const reference=JSON.parse(payload.input.find(item=>item.type==='function_call_output').output);
+    assert.equal(reference.provenance,'INTERNAL');assert.equal(reference.conversation_frame.purpose,'portfolio');
+    assert.match(JSON.stringify(reference.discovery_corpus),/Builds simulation software/);
+    return Response.json(answer('I see transferable simulation foundations, not established expertise in that specialty.'));
+  }});
+  assert.equal(calls,3);assert.equal(result.degraded,false);
 });
 test('protocol-less links are completed only for exact established resources, outside code',()=>{
   const allowed=new Set(['https://github.com/arman-dogru/example']);

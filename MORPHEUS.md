@@ -42,6 +42,8 @@ The editor and repair paths consume the selected evidence and wider reviewed fac
 
 The semantic planner likewise receives the complete bounded corpus without lexical discovery ranks. Incidental word matches are not useful evidence when the actual record already fits in context; removing that competing shortlist prevents it from anchoring the answer to the wrong field.
 
+Intent interpretation receives identity and ordered dialogue, not an inventory of known evidence topics. An unfamiliar specialty is not automatically an unrelated request. Once a portfolio task is resolved, evidence planning cannot downgrade it to dialogue merely because domain expertise is unknown. Unsupported categorical incapacity claims receive a bounded, evidence-based rewrite rather than a default answer.
+
 Task-specific answer contracts distinguish an interpretation of engineering style from observed personal habits, and a case study's established results from its inferred significance. Exact known URLs missing their scheme are completed for clickable presentation; unknown domains and paths are never guessed, and code remains literal.
 
 The independent intent pass also records whether quantitative detail was requested; a technical topic alone does not authorize a benchmark table. The factual editor may correct existing numbers, but cannot introduce a benchmark dump into an answer whose retrieval contract omitted quantitative detail. Requested measurements and detailed case studies retain that detail.
