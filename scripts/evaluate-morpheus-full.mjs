@@ -115,11 +115,12 @@ async function main(){
       history.push({role:'user',content:message},{role:'assistant',content:data.reply||'',persona_version:MORPHEUS_VERSION});
       if(stop)break;
     }
+    result.complete=result.turns.length===item.turns.length;
     report.results.push(result);await save();
-    console.log(`${item.id} ${result.failures.length?'REVIEW '+result.failures.join('; '):'CHECKS PASS'} | ${result.turns.at(-1)?.reply?.replace(/\n/g,' ').slice(0,260)}`);
+    console.log(`${item.id} ${!result.complete?'PARTIAL':result.failures.length?'REVIEW '+result.failures.join('; '):'CHECKS PASS'} | ${result.turns.at(-1)?.reply?.replace(/\n/g,' ').slice(0,260)}`);
   }
   await Promise.all(Array.from({length:concurrency},async()=>{while(cursor<selected.length&&!stop){const item=selected[cursor++];await runCase(item)}}));
-  report.finished=new Date().toISOString();report.completed_cases=report.results.length;report.automated_failures=report.results.filter(item=>item.failures.length).length;
+  report.finished=new Date().toISOString();report.attempted_cases=report.results.length;report.completed_cases=report.results.filter(item=>item.complete).length;report.automated_failures=report.results.filter(item=>item.failures.length).length;
   await save();console.log(JSON.stringify({report:relative(root,reportPath),completed:report.completed_cases,planned:report.planned_cases,flagged:report.automated_failures,review:report.review_status}));
   if(stop||report.completed_cases!==report.planned_cases||report.automated_failures)process.exitCode=1;
 }
