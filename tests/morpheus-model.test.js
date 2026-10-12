@@ -190,6 +190,17 @@ test('independent intent components keep feedback conversational without lookup,
   }});
   assert.equal(calls,2);assert.equal(result.degraded,false);assert.match(result.reply,/your point/);
 });
+test('a conversational design report receives a bounded first-person repair, never a canned replacement',async()=>{
+  let calls=0;
+  const result=await runMorpheus({...question,message:'You are designed poorly.',referenceLibrary:{}},env,{review:false,request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1)return Response.json({status:'completed',output:[{type:'function_call',name:'resolve_intent',call_id:'intent',arguments:JSON.stringify({purpose:'conversation',subject:'this exchange',topic:'feedback',task:'Respond to feedback',external_purpose:'none'})}]});
+    if(calls===2)return Response.json(answer('The design prioritizes direct utility over ornament.'));
+    assert.match(payload.input[0].content,/Respond in first person/);assert.deepEqual(payload.tools,[]);
+    return Response.json(answer('What failed for you? I would rather understand the mistake.'));
+  }});
+  assert.equal(calls,3);assert.equal(result.degraded,false);assert.match(result.reply,/What failed/);
+});
 test('unknown information about Arman remains a portfolio task, independently of whether its answer exists',async()=>{
   const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman',github:'https://github.com/arman-dogru'}}};let calls=0;
   const result=await runMorpheus({...question,message:'Is this other account his?',referenceLibrary:library},env,{review:false,checkSources:async citations=>({citations,deadURLs:[]}),request:async(_,init)=>{
