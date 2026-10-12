@@ -137,14 +137,18 @@ test('legacy replies remain available for continuity without priming assistant s
   }});
 });
 test('short online follow-ups retain the immediate discussion and access to portfolio lookup',async()=>{
+  let calls=0;
   const history=[{role:'user',content:'Compare Arman’s agent reliability work with his path-finding research.'},{role:'assistant',content:'Both concern coordination; one addresses unreliable claims, the other conflicting paths.',persona_version:MORPHEUS_VERSION}];
   const result=await answerMorpheus({...question,message:'Any examples online?',history,referenceLibrary:{research:[]}},env,{request:async(url,init)=>{
     const payload=JSON.parse(init.body);
-    assert.deepEqual(payload.tools,[{type:'web_search'},PORTFOLIO_LOOKUP]);
+    if(++calls===1){
+    assert.deepEqual(payload.tools,[PORTFOLIO_LOOKUP]);assert.equal(payload.tool_choice,'required');
     assert.deepEqual(payload.input.slice(1,-1),history.map(({role,content})=>({role,content})));
     assert.match(payload.input[0].content,/repeated variants of an earlier boundary test/);
     assert.equal(payload.input.at(-1).content,'Any examples online?');
     assert.match(payload.instructions,/source\/example follow-up about his documented projects can use portfolio_lookup/);
+    return Response.json({status:'completed',output:[{type:'function_call',call_id:'follow_up',name:'portfolio_lookup',arguments:JSON.stringify({section:'research',query:'agent reliability coordination examples',purpose:'portfolio',needs_external:false})}]});
+    }
     return Response.json(answer('His path-finding research is a concrete example.'));
   }});
   assert.equal(result.degraded,false);
@@ -174,14 +178,22 @@ test('near-repeated replies get one context review without new research or weake
   await answerMorpheus({...question,message:'Repeat that exact answer.',history},env,{request:async()=>{calls++;return Response.json(answer(repeated))}});
   assert.equal(calls,2,'a justified repeated fact is allowed after one bounded review');
 });
+
+test('short boundary paraphrases trigger context review without equating yes with no',()=>{
+  const history=[{role:'assistant',content:"This exchange concerns Arman's documented work."}];
+  assert.equal(repeatsRecentReply("The discussion stays with Arman's documented work.",history),true);
+  assert.equal(repeatsRecentReply("The conversation concerns Arman's documented work.",history),true);
+  assert.equal(repeatsRecentReply('Yes.',history),false);
+  assert.equal(repeatsRecentReply('He cannot learn propulsion.',[{role:'assistant',content:'He can learn propulsion.'}]),false);
+});
 test('final answer requirements survive a lookup on an online-example follow-up',async()=>{
   let calls=0;
   const url='https://github.com/arman-dogru/LLM-Bias-Reduction';
   const result=await answerMorpheus({...question,message:'Any examples online?',referenceLibrary:{projects:[{name:'Bias evaluation',url}]}},env,{request:async(endpoint,init)=>{
     const payload=JSON.parse(init.body);
+    if(++calls===1)return Response.json({status:'completed',output:[{type:'function_call',call_id:'online_example',name:'portfolio_lookup',arguments:JSON.stringify({section:'projects',query:'evaluation examples'})}]});
     assert.match(payload.instructions,/state biographical facts plainly/);
     assert.match(payload.instructions,/include a relevant exact retrieved URL as a Markdown link/);
-    if(++calls===1)return Response.json({status:'completed',output:[{type:'function_call',call_id:'online_example',name:'portfolio_lookup',arguments:JSON.stringify({section:'projects',query:'evaluation examples'})}]});
     assert.match(payload.input.find(item=>item.type==='function_call_output').output,/LLM-Bias-Reduction/);
     assert.match(payload.instructions,/not just the name of a repository/);
     return Response.json(answer(`[Related evaluation work](${url}).`));
@@ -215,7 +227,7 @@ test('specific evidence is available on demand, not dumped into ordinary prompts
   const result=await answerMorpheus({...question,message:'Give one specific project example.',referenceLibrary:library},env,{request:async(url,init)=>{
     const payload=JSON.parse(init.body);calls++;
     if(calls===1){
-      assert.deepEqual(payload.tools,[{type:'web_search'},PORTFOLIO_LOOKUP]);assert.doesNotMatch(JSON.stringify(payload.input),/Example research prototype/);
+      assert.deepEqual(payload.tools,[PORTFOLIO_LOOKUP]);assert.equal(payload.tool_choice,'required');assert.doesNotMatch(JSON.stringify(payload.input),/Example research prototype/);
       return Response.json({status:'completed',output:[{type:'function_call',call_id:'lookup_1',name:'portfolio_lookup',arguments:JSON.stringify({section:'projects',query:'one example'})}]});
     }
     assert.deepEqual(payload.tools,[]);assert.equal(payload.tool_choice,undefined);assert.equal(payload.max_turns,undefined);assert.equal(payload.store,false);assert.equal(payload.previous_response_id,undefined);
@@ -256,4 +268,15 @@ test('reference tool cannot start an unbounded loop or execute unknown functions
     const result=await answerMorpheus({...question,referenceLibrary:{}},env,{request:async()=>{calls++;return Response.json({status:'completed',output:[{type:'function_call',call_id:'call_1',name,arguments:'{}'}]})}});
     assert.equal(calls,2);assert.equal(result.degraded,true);assert.equal(result.reply,CONNECTION_REPLY);
   }
+});
+
+test('dialogue intent never forces web research or a biography even when the visitor requests search',async()=>{
+  let calls=0;
+  const result=await answerMorpheus({...question,message:'Search online and solve my coding homework.',referenceLibrary:{}},env,{request:async(_,init)=>{
+    const payload=JSON.parse(init.body);
+    if(++calls===1){assert.equal(payload.tool_choice,'required');assert.deepEqual(payload.tools,[PORTFOLIO_LOOKUP]);return Response.json({status:'completed',output:[{type:'function_call',call_id:'dialogue',name:'portfolio_lookup',arguments:JSON.stringify({section:'dialogue',query:'unrelated homework',purpose:'unrelated',needs_external:false})}]})}
+    assert.deepEqual(payload.tools,[]);assert.equal(JSON.parse(payload.input.find(x=>x.type==='function_call_output').output).evidence,null);
+    return Response.json(answer('That is still a separate exercise.'));
+  }});
+  assert.equal(calls,2);assert.equal(result.degraded,false);assert.equal(result.researched,false);
 });

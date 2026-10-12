@@ -1,6 +1,6 @@
 import knowledge from './arman-knowledge.json' with {type:'json'};
 import {RACE_CONTEXT} from './portfolio-race-context.js';
-import {searchKnowledge,evidenceWithoutMeasurements} from './knowledge-search.js';
+import {searchKnowledge,knowledgeIndex,evidenceWithoutMeasurements} from './knowledge-search.js';
 
 export {knowledge};
 export const identity=Object.freeze({name:knowledge.profile.name,githubOwner:knowledge.profile.github_username,profiles:[knowledge.profile.github,knowledge.profile.linkedin,knowledge.profile.scholar]});
@@ -32,7 +32,7 @@ export function projectIndex(query=''){
 }
 export function knowledgeOrientation(query=''){
   const search=searchKnowledge(knowledgeLibrary(),{query});
-  return internal({coverage:'Short orientation only, not the complete record. Read the appropriate lookup section before asserting a specific project/fact is absent.',name:identity.name,identity:{github_owner:identity.githubOwner,profiles:identity.profiles},work:'Applied AI research and software engineering: computer vision and digital twins, learning and coordination among agents, LLM reliability, backend services and interactive software. His work spans research simulations and prototypes as well as industry and startup software, API and applied ML contributions.',portfolio:'The portfolio includes a playable NEAT Grand Prix and a Skate 3 Rust continuation. Retrieve their documented implementation for technical questions.',project_index:projectIndex(query),internal_search:evidenceWithoutMeasurements(search),references:verifiedReferences});
+  return internal({coverage:'Short orientation only, not the complete record. Read the appropriate lookup section before asserting a specific project/fact is absent.',name:identity.name,identity:{github_owner:identity.githubOwner,profiles:identity.profiles},work:'Applied AI research and software engineering: computer vision and digital twins, learning and coordination among agents, LLM reliability, backend services and interactive software. His work spans research simulations and prototypes as well as industry and startup software, API and applied ML contributions.',portfolio:'The portfolio includes a playable NEAT Grand Prix and a Skate 3 Rust continuation. Retrieve their documented implementation for technical questions.',corpus_index:knowledgeIndex(knowledgeLibrary()).map(({id,section,title})=>({id,section,title})),project_index:projectIndex(query),internal_search:evidenceWithoutMeasurements(search),references:verifiedReferences});
 }
 export function knowledgeLibrary({github,page,board=[]}={}){
   return{

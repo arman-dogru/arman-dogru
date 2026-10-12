@@ -29,7 +29,9 @@ test('source priority and provenance survive lookup; visitor state never becomes
   assert.equal(library.page.provenance,'MATRIX');assert.equal(library.race.evidence.leaderboard.provenance,'MATRIX');
   assert.match(JSON.stringify(library.projects),/Skate 3 Rust/);assert.match(JSON.stringify(library.race),/NEAT/);
   assert.equal(library.github.provenance,'UNKNOWN');
-  assert.doesNotMatch(JSON.stringify(knowledgeOrientation()),/YOLO|256 agents|GPA|99\.9%|Semantic Edge/);
+  const {corpus_index,...orientation}=knowledgeOrientation().evidence;
+  assert.doesNotMatch(JSON.stringify(orientation),/YOLO|256 agents|GPA|99\.9%|Semantic Edge/);
+  assert.ok(corpus_index.length>=40);assert.ok(corpus_index.every(item=>Object.keys(item).sort().join(',')==='id,section,title'));
 });
 test('project discovery comes from the record, not model memory, without dumping facts or classifying scope',()=>{
   const selected=projectIndex('What is BAKLAVA, and where is the repository?');
@@ -76,14 +78,15 @@ test('backend knowledge and raw source documents cannot enter the public build',
 });
 
 const modelReply=(text,extra={})=>({status:'completed',output:[{type:'message',role:'assistant',content:[{type:'output_text',text}]}],...extra});
-const call={type:'function_call',call_id:'lookup',name:'portfolio_lookup',arguments:JSON.stringify({section:'experience',query:'Relevant computer vision experience'})};
+const call={type:'function_call',call_id:'lookup',name:'portfolio_lookup',arguments:JSON.stringify({section:'experience',query:'Relevant computer vision experience',purpose:'portfolio',needs_external:true})};
 const options={checkSources:async citations=>({citations,deadURLs:[]})};
 test('internal lookup can precede real Matrix research without losing authority, sources or the final question',async()=>{
   let calls=0;
   const result=await answerMorpheus({message:'Which current Tesla openings fit Arman?',evidence:knowledgeOrientation(),referenceLibrary:knowledgeLibrary()}, {XAI_API_KEY:'test-only'}, {...options,request:async(_,init)=>{
     const payload=JSON.parse(init.body);calls++;
-    if(calls===1){assert.deepEqual(payload.tools.map(x=>x.name||x.type),['web_search','portfolio_lookup']);return Response.json({status:'completed',output:[call]})}
+    if(calls===1){assert.deepEqual(payload.tools.map(x=>x.name||x.type),['portfolio_lookup']);assert.equal(payload.tool_choice,'required');return Response.json({status:'completed',output:[call]})}
     assert.deepEqual(payload.tools,[{type:'web_search'}]);
+    assert.equal(payload.tool_choice,'required');
     assert.equal(payload.input.at(-1).content,'Which current Tesla openings fit Arman?');
     const retrieved=JSON.parse(payload.input.find(x=>x.type==='function_call_output').output);
     assert.equal(retrieved.provenance,'INTERNAL');assert.match(JSON.stringify(retrieved),/Nokia Bell Labs/);

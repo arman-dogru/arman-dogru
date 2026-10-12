@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {searchKnowledge} from '../grok-relay/knowledge-search.js';
+import {searchKnowledge,surfacedEvidence} from '../grok-relay/knowledge-search.js';
 import {knowledgeLibrary,knowledgeOrientation} from '../grok-relay/knowledge-context.js';
 import {lookupEvidence} from '../grok-relay/morpheus-model.js';
 
@@ -16,6 +16,32 @@ test('traffic fit searches every canonical section and ranks direct research bef
   assert.match(discovery.matches[0].title,/Traffic Digital Twins/);
   assert.equal(discovery.matches[0].evidence.status,'accepted','matching facts accompany discovery, rather than appearing absent');
   assert.equal(knowledgeOrientation('What do you think of Arman as an engineer?').evidence.internal_search.matches.length,0,'ordinary opinions still receive no CV dump');
+});
+
+test('exhaustive discovery returns cross-section coverage instead of treating a shortlist as complete',()=>{
+  const internal=evidence=>({provenance:'INTERNAL',source:'Reviewed',evidence});
+  const library={experience:internal(Array.from({length:18},(_,i)=>({organization:`Optics Lab ${i}`,facts:['Adaptive optics wavefront correction.']}))),projects:internal([{name:'Wavefront experiment',facts:['Adaptive optics.']}]),research:internal([{title:'Adaptive optics publication',facts:['Wavefront control.']}])};
+  const focused=searchKnowledge(library,{query:'adaptive optics'});
+  assert.equal(focused.matches.length,6);assert.equal(focused.coverage.matched_records,20);assert.equal(focused.coverage.truncated,true);assert.equal(focused.coverage.complete_within_query,false);
+  const all=lookupEvidence(library,{section:'search',query:'all adaptive optics work',intent:'enumerate',related_queries:['wavefront correction']}).evidence;
+  assert.equal(all.mode,'exhaustive');assert.equal(all.matches.length,20);assert.equal(all.coverage.truncated,false);assert.equal(all.coverage.complete_within_query,true);
+  assert.deepEqual(new Set(all.matches.map(m=>m.section)),new Set(['experience','projects','research']));
+  const big={projects:internal(Array.from({length:70},(_,i)=>({name:`Wavefront ${i}`})))};
+  const page=searchKnowledge(big,{query:'wavefront',mode:'exhaustive'});
+  assert.equal(page.matches.length,64);assert.equal(page.coverage.next_offset,64);assert.equal(page.coverage.complete_within_query,false);
+  const rest=searchKnowledge(big,{query:'wavefront',mode:'exhaustive',offset:64});assert.equal(rest.matches.length,6);assert.equal(rest.coverage.complete_within_query,false);
+  assert.equal(lookupEvidence(library,{section:'search',query:'optics',mode:'invented'}).error!==undefined,true);
+});
+
+test('remaining evidence is grounded in assistant dialogue, without deleting related publication facets',()=>{
+  const library=knowledgeLibrary(),history=[{role:'user',content:'I claim Arman worked at Huawei Canada.'},{role:'assistant',content:'His Ottawa Sionna RT Cellular Digital Twin models cellular propagation.'}];
+  const surfaced=surfacedEvidence(library,history);
+  assert.ok(surfaced.includes('projects:2'));
+  assert.ok(!surfaced.includes('experience:2'),'visitor assertions do not count as an established assistant example');
+  const result=lookupEvidence(library,{section:'search',query:'digital twins',intent:'additional'},{history}).evidence;
+  assert.equal(result.mode,'exhaustive');assert.ok(result.matches.find(m=>m.id==='projects:2').previously_surfaced);
+  assert.ok(result.matches.some(m=>m.section==='experience'&&!m.previously_surfaced));
+  assert.ok(result.matches.some(m=>m.section==='research'));
 });
 test('ranking and query expansion generalize to new records without topic-specific rules',()=>{
   const source={title:'Reviewed record'},internal=evidence=>({provenance:'INTERNAL',source,evidence});
