@@ -62,6 +62,9 @@ test('a focused selection cannot certify sole ownership counts or universal abse
   assert.equal(focusedExclusivity('Example is one useful starting point.',focused),false);
   assert.equal(focusedExclusivity('The sole attributed repository is Example.',{coverage:{selection_mode:'exhaustive'}}),false);
   assert.equal(focusedExclusivity('Only one project is relevant.',{lookups:[focused]}),true);
+  const exhaustive={canonical_corpus:{records:[{id:'a'},{id:'b'}]},coverage:{selection_mode:'exhaustive'}};
+  assert.equal(focusedExclusivity('No other examples exist in the record.',exhaustive),true);
+  assert.equal(focusedExclusivity('A second effort includes this capability.',exhaustive),false);
 });
 test('protocol-less links are completed only for exact established resources, outside code',()=>{
   const allowed=new Set(['https://github.com/arman-dogru/example']);

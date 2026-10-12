@@ -48,6 +48,8 @@ The independent intent pass also records whether quantitative detail was request
 
 Outside an isolated project case study, the writer receives bounded cross-section discovery facts as well as the primary selection. A shortlist cannot certify its own completeness; title summaries can omit secondary capabilities, even in a selective plural request. Unrequested measurements remain omitted and the response still selects only relevant evidence. The editor explicitly audits outcome/quality extrapolations, inferred habits and incomplete plural examples.
 
+Broad “no other examples” claims receive one bounded, fact-bearing verification rewrite even after an exhaustive selection. That mode alone is not proof of semantic absence. The check includes capabilities embedded in larger systems; it does not route specific topics to specific projects or supply an answer template.
+
 A company-fit question compares demonstrated skills with external requirements; it does not ask whether the company already appears in his employment history. Learning potential is distinct from established domain expertise and unknown time to proficiency.
 
 Scope follows the requested substance. A standalone exercise in Arman's name remains unrelated; synthesis, technical explanations of his actual work, career assessments and grounded hypothetical designs remain useful. Criticism, clarification and social reactions are conversation, not attacks. A genuine topic change resets the immediate frame.
