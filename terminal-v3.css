@@ -1,5 +1,7 @@
 @import url('./terminal-v2.css');
 
+.journey-osm-tiles{filter:invert(1) hue-rotate(180deg) saturate(.65) brightness(.8)}
+
 /* v3: keep the terminal frame, give the primary content the room it deserves. */
 .workspace{grid-template-columns:minmax(340px,31vw) minmax(0,1fr);grid-template-rows:minmax(390px,2.05fr) minmax(210px,.95fr)}
 .main-pane{grid-column:2;grid-row:1/3}

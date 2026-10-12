@@ -7,7 +7,9 @@ export function createJourneyMap({ container, journey, log, sleep }) {
     if(map)return;
     if(!window.L){container.innerHTML='<div class="map-fail">Map runtime unavailable.</div>';return;}
     map=L.map(container,{zoomControl:false,scrollWheelZoom:true,worldCopyJump:true,attributionControl:true,preferCanvas:true});
-    const osm=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap contributors &copy; CARTO'});
+    // Standard browser tile requests retain normal Referer and cache behavior.
+    // Dark styling applies to this layer only, not satellite imagery or markers.
+    const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxNativeZoom:19,maxZoom:20,className:'journey-osm-tiles',attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'});
     const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
     osm.addTo(map);L.control.layers({'OSM // DARK':osm,'SATELLITE':sat},null,{position:'topright'}).addTo(map);L.control.zoom({position:'bottomright'}).addTo(map);
     route=L.polyline(journey.map(e=>[e.lat,e.lon]),{color:'#89dceb',weight:2,opacity:.58,dashArray:'7 9'}).addTo(map);
