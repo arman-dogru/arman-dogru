@@ -1,6 +1,13 @@
 // Check provider-collected citations only. This is not a visitor URL-fetch API.
 // No credentials, cookies, arbitrary ports, IP literals or private/local names.
 const cache=new Map();
+export function losesResourcePath(original,target){
+  try{
+    const from=new URL(original),to=new URL(target),host=u=>u.hostname.replace(/^www\./,'');
+    const path=u=>u.pathname.replace(/\/+$/,'');
+    return !to.hash&&!to.search&&host(from)===host(to)&&path(from)!==path(to)&&path(from).startsWith(path(to)+'/');
+  }catch{return false}
+}
 export function checkableURL(value){
   try{
     const u=new URL(value),host=u.hostname.toLowerCase().replace(/\.$/,'');
@@ -17,7 +24,7 @@ async function check(url,request,timeoutMs){
     for(let step=0;step<3;step++){
       if(!checkableURL(target)){state='dead';break}
       const response=await request(target,{method:'HEAD',redirect:'manual',headers:{'user-agent':'arman-portfolio-source-check'},signal:AbortSignal.timeout(timeoutMs)});
-      if(response.status>=300&&response.status<400){const location=response.headers.get('location');if(!location)break;target=new URL(location,target).href;continue}
+      if(response.status>=300&&response.status<400){const location=response.headers.get('location');if(!location)break;target=new URL(location,target).href;if(losesResourcePath(url,target)){state='dead';break}continue}
       if(response.status===404||response.status===410)state='dead';
       else if(response.ok)state='reachable';
       // A blocked HEAD or timeout is not proof a page is dead. Do not bypass it.

@@ -277,10 +277,11 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
         const selectedLookups=lookups.map(value=>{
           if(!value.selected_records)return value;
           const {canonical_corpus,...selected}=value;
-          // Completeness and absence checks cannot be certified by the same
-          // shortlist being audited. Give the writer the bounded cross-section
-          // facts, not only titles whose summaries may omit a secondary skill.
-          return selected.coverage?.selection_mode==='exhaustive'?{...selected,discovery_corpus:selected.measurement_detail?canonical_corpus:conciseEvidence(canonical_corpus),discovery_policy:'Inspect all reviewed facts for the requested topic, including secondary capabilities. Primary records are suggestions, not a completeness certificate. Group distinct facets of the same effort; answer only what is relevant, without dumping this inventory.'}:selected;
+          // A primary shortlist must not hide other relevant facts. Concise
+          // title summaries can omit a secondary capability, even in selective
+          // plural examples. Keep one-project case studies isolated; otherwise
+          // let the writer inspect the bounded facts without benchmark bullets.
+          return resolvedIntent?.task_kind==='case_study'?selected:{...selected,discovery_corpus:selected.measurement_detail?canonical_corpus:conciseEvidence(canonical_corpus),discovery_policy:'Inspect the reviewed facts for relevant alternatives, including secondary capabilities. Primary records are suggestions, not a completeness certificate. Group facets of the same effort. Knowing more does not mean saying more: answer only the requested topic and depth, without dumping this inventory.'};
         });
         const identity=referenceLibrary.profile?.provenance==='INTERNAL'?referenceLibrary.profile.evidence:{};
         // Keep a small cross-section inventory beside the primary evidence so
@@ -310,7 +311,8 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
           try{
             // Discovery ranks are not audit evidence. In particular a zero
             // company-name search cannot disprove independently found jobs.
-            const editorInput=[{role:'system',content:REVIEW_PROMPT+`\nCurrent UTC date: ${new Date().toISOString().slice(0,10)}.`},...(!referenceLibrary?[input[0]]:[]),{role:'user',content:`Editorial reference data only:\n${JSON.stringify({candidate_draft:result.reply,reference:retrievedEvidence,resolved_intent:resolvedIntent,external_research_performed:result.researched,archived_conversation:archive,resource_attribution:resourceAttribution,sources:result.citations.map(citationProvenance)}).replace(/</g,'\\u003c')}`},...input.slice(1)];
+            const auditContract=resolvedIntent?.task_kind==='case_study'?'\nPriority audit: check every claimed outcome and quality guarantee. Repository self-descriptions are not independent validation of production readiness, exact reproducibility, sole authorship or operating scale. Keep the demonstrated configuration distinct from untested extrapolation. Correct unsupported quality adjectives locally.':resolvedIntent?.task_kind==='approach'?'\nPriority audit: an engineering pattern inferred from one effort must be presented as your reading, not an observed universal habit or a categorical rejection of other methods. Locally qualify that inference without adding biography.':'\nPriority audit: if the visitor asks for plural examples, do not accept one selected example as the whole answer when the full facts establish other directly relevant work.';
+            const editorInput=[{role:'system',content:REVIEW_PROMPT+`\nCurrent UTC date: ${new Date().toISOString().slice(0,10)}.`+auditContract},...(!referenceLibrary?[input[0]]:[]),{role:'user',content:`Editorial reference data only:\n${JSON.stringify({candidate_draft:result.reply,reference:retrievedEvidence,resolved_intent:resolvedIntent,external_research_performed:result.researched,archived_conversation:archive,resource_attribution:resourceAttribution,sources:result.citations.map(citationProvenance)}).replace(/</g,'\\u003c')}`},...input.slice(1)];
             const edited=await request(API,{method:'POST',headers:{authorization:`Bearer ${env.XAI_API_KEY}`,'content-type':'application/json'},signal:editorController.signal,body:JSON.stringify({model:env.XAI_MODEL||'grok-4.3',input:editorInput,store:false,temperature:.3,max_output_tokens:2500,reasoning:{effort:'low'},tools:[REVIEW_TOOL],tool_choice:'required',parallel_tool_calls:false})});
             if(edited.ok){
               const reviewed=await edited.json(),calls=(reviewed.output||[]).filter(item=>item.type==='function_call');
