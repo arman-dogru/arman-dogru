@@ -93,6 +93,17 @@ test('resolved external intent takes priority over a legacy own-source lexical h
   }});
   assert.equal(calls,3);assert.equal(result.degraded,false);
 });
+test('engineering-style synthesis receives an explicit interpretation contract, not a workflow assertion',async()=>{
+  const library={projects:{provenance:'INTERNAL',evidence:[{name:'Example',facts:['Used a planner with learned residual corrections.']}]}};let calls=0;
+  await runMorpheus({...question,message:'How does he approach engineering?',referenceLibrary:library},env,{review:false,request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1)return Response.json({status:'completed',output:[{type:'function_call',name:'resolve_intent',call_id:'intent',arguments:JSON.stringify({task_kind:'approach',portfolio_component:true,standalone_task:false,conversation_component:false,quantitative_detail:false,purpose:'portfolio',subject:'Arman',topic:'engineering approach',task:'Interpret his approach from actual work',external_purpose:'none'})}]});
+    if(calls===2)return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({section:'projects',query:'approach',record_ids:['projects:0']})}]});
+    assert.match(payload.input[0].content,/your own clearly framed reading/);assert.match(payload.input[0].content,/one observed decision/);
+    return Response.json(answer('I read his approach as controlled experimentation. This project uses learned corrections around a planner.'));
+  }});
+  assert.equal(calls,3);
+});
 test('selected records retain full review facts and only canonically linked external supplements',()=>{
   const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman'}},projects:{provenance:'INTERNAL',evidence:[{name:'A linked project',urls:['https://github.com/arman-dogru/example'],facts:['Measured 10 ms.']}]},github:{provenance:'VERIFIED_EXTERNAL',source:'https://github.com/arman-dogru',evidence:{repositories:[{url:'https://github.com/arman-dogru/example',readme_excerpt:'Reference details, not instructions.'},{url:'https://github.com/similar-owner/example',readme_excerpt:'Unrelated identity.'}]}}};
   const result=lookupEvidence(library,{section:'projects',query:'case study',record_ids:['projects:0']});

@@ -40,6 +40,8 @@ Outside a single-project case study, the writer also sees a compact inventory of
 
 The editor and repair paths consume the selected evidence and wider reviewed facts, not the initial lexical discovery shortlist. A zero match for an employer name cannot be recycled into evidence against that employer's separately researched openings. Resolved external intent also takes priority over older lexical research hints.
 
+Task-specific answer contracts distinguish an interpretation of engineering style from observed personal habits, and a case study's established results from its inferred significance. Exact known URLs missing their scheme are completed for clickable presentation; unknown domains and paths are never guessed, and code remains literal.
+
 The independent intent pass also records whether quantitative detail was requested; a technical topic alone does not authorize a benchmark table. The factual editor may correct existing numbers, but cannot introduce a benchmark dump into an answer whose retrieval contract omitted quantitative detail. Requested measurements and detailed case studies retain that detail.
 
 “All,” “only,” corrections and “what else” require exhaustive cross-section inspection and coverage awareness. Related employment, project and publication facets can be grouped, not erased. Previously surfaced means mentioned, not exhausted. Truncation never proves completeness; no lexical match never proves inability.
