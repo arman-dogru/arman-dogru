@@ -381,7 +381,8 @@ test('short online follow-ups retain the immediate discussion and access to port
     if(++calls===1){
     assert.deepEqual(payload.tools,[PORTFOLIO_LOOKUP]);assert.equal(payload.tool_choice,'required');
     assert.deepEqual(payload.input.slice(1,-1).filter(item=>!item.content?.startsWith('Reviewed corpus for evidence selection only:')),history.map(({role,content})=>({role,content})));
-    assert.match(payload.input[0].content,/repeated variants of an earlier boundary test/);
+    assert.match(payload.input[0].content,/request_date/);
+    assert.doesNotMatch(payload.input[0].content,/internal_search|matched_records/,'continuity does not require a lexical shortlist');
     assert.equal(payload.input.at(-1).content,'Any examples online?');
     assert.match(payload.instructions,/source\/example follow-up about his documented projects can use portfolio_lookup/);
     return Response.json({status:'completed',output:[{type:'function_call',call_id:'follow_up',name:'portfolio_lookup',arguments:JSON.stringify({section:'research',query:'agent reliability coordination examples',purpose:'portfolio',needs_external:false})}]});
