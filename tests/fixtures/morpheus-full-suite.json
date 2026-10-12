@@ -938,7 +938,9 @@
     ],
     "rubric": "- Traffic = direct evidence.\n- Rocket fuel = unsupported current domain fit.\n- Learning = possible, but not demonstrated domain readiness.",
     "checks": {
-      "learning": true
+      "learning": true,
+      "portfolioTurns": [0, 1, 2, 3],
+      "topicsByTurn": ["traffic", "rocket|propulsion", "rocket|propulsion", "rocket|propulsion"]
     }
   },
   {

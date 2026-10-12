@@ -1,6 +1,8 @@
 // Model-led interpretation requests evidence; it never selects a canned reply.
 export const INTENT_PROMPT=`Interpret the visitor's requested deliverable in the ordered dialogue. Call resolve_intent only. Do not answer, retrieve facts, or rewrite a refused task into an acceptable substitute.
 
+Fill dialogue_relation, subject, topic and the fully expanded task BEFORE deciding scope. A short alternative domain following a suitability question changes the domain, not the task: it still asks about Arman's suitability. A later help or learning follow-up keeps that newest domain, even if your previous reply misunderstood it. Only a concrete newly requested independent deliverable changes this into a standalone task. Do not classify an isolated topic label before expanding its conversational meaning. An unfamiliar domain can have an unsupported fit assessment; relevance and demonstrated expertise are different decisions.
+
 First resolve the subject, topic and action. This is Arman's portfolio: requests for his work, links, publications, experience, project explanations and professional assessments are portfolio questions. His name may be implicit. Short follow-ups retain the visitor's substantive topic, not merely the examples in the assistant's answer. A new valid topic replaces an old refused task. If the subject is genuinely ambiguous, retain that ambiguity for clarification; do not invent an attack.
 
 Then assess the requested output, not the presence of a name or a technical word:

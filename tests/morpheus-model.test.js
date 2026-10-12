@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence,compactSourceNotes,repeatsRecentReply,applyEditorialEdits,addsUnrequestedMeasurements,focusedExclusivity,unsupportedIncapacity,groundedLinks} from '../grok-relay/morpheus-model.js';
+import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,INTENT_TOOL,PORTFOLIO_LOOKUP,lookupEvidence,compactSourceNotes,repeatsRecentReply,applyEditorialEdits,addsUnrequestedMeasurements,focusedExclusivity,unsupportedIncapacity,groundedLinks} from '../grok-relay/morpheus-model.js';
 import {MORPHEUS_VERSION} from '../chat-version.js';
 // Transport/recovery unit tests isolate the generation layer. Separate tests
 // below exercise the default editorial pass and its safety checks.
@@ -85,6 +85,9 @@ test('an unsupported incapacity draft is rewritten from evidence, not replaced w
   assert.equal(calls,3);assert.equal(result.degraded,false);assert.match(result.reply,/I would explore/);
 });
 test('intent has no closed-world topic inventory and retrieval cannot downgrade a resolved portfolio task',async()=>{
+  const fields=Object.keys(INTENT_TOOL.parameters.properties);
+  assert.ok(fields.indexOf('task')<fields.indexOf('portfolio_component'),'resolve the requested action before classifying its scope');
+  assert.ok(fields.indexOf('dialogue_relation')<fields.indexOf('task_kind'));
   const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman',facts:['Builds simulation software.']}},projects:{provenance:'INTERNAL',evidence:[{name:'Known specialist project',facts:['Contains a control pipeline.']}]}};let calls=0;
   const result=await runMorpheus({...question,message:'And in a different engineering field?',referenceLibrary:library},env,{review:false,request:async(_,init)=>{
     const payload=JSON.parse(init.body);calls++;

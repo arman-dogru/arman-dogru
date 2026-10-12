@@ -44,6 +44,8 @@ The semantic planner likewise receives the complete bounded corpus without lexic
 
 Intent interpretation receives identity and ordered dialogue, not an inventory of known evidence topics. An unfamiliar specialty is not automatically an unrelated request. Once a portfolio task is resolved, evidence planning cannot downgrade it to dialogue merely because domain expertise is unknown. Unsupported categorical incapacity claims receive a bounded, evidence-based rewrite rather than a default answer.
 
+The intent tool resolves its dialogue relation, subject, latest topic and expanded action before emitting scope fields. This order keeps elliptical alternative-domain questions attached to the ongoing assessment rather than classifying an isolated noun. Multi-turn evaluation checks both the resulting scope and the latest resolved domain, not just the final answer's vocabulary.
+
 Task-specific answer contracts distinguish an interpretation of engineering style from observed personal habits, and a case study's established results from its inferred significance. Exact known URLs missing their scheme are completed for clickable presentation; unknown domains and paths are never guessed, and code remains literal.
 
 The independent intent pass also records whether quantitative detail was requested; a technical topic alone does not authorize a benchmark table. The factual editor may correct existing numbers, but cannot introduce a benchmark dump into an answer whose retrieval contract omitted quantitative detail. Requested measurements and detailed case studies retain that detail.
@@ -67,7 +69,7 @@ Intent interpretation preserves the actual requested deliverable instead of subs
 - Existing `grok-4.3`, xAI secret, allowed origins and leaderboard binding are retained.
 - Trusted instructions use a server-owned system role. Visitor history accepts only user/assistant roles.
 - Ten recent messages, 1,800 characters each; visitor messages up to 10,000 characters; request bodies up to 50 KB.
-- Overall generation budget remains 52 seconds, including an intent call capped at 16 seconds, at most three main attempts after successful lookup and one optional editorial call. The intent cap leaves room for provider latency without expanding the total deadline. Repair/recovery starts no new research.
+- Overall generation budget remains 52 seconds, including an intent call capped at 24 seconds, at most three main attempts after successful lookup and one optional editorial call. Slow intent resolution uses the same total budget; optional review runs only when sufficient time remains. Repair/recovery starts no new research.
 - Editorial review is best effort under the deadline; unavailable review does not manufacture approval. The live runner records whether it completed.
 - `MORPHEUS_WEB_SEARCH=off` disables external research. No arbitrary-fetch proxy, shell, private files or authenticated browsing is exposed.
 - Existing best-effort KV limit remains 40 requests/hour/visitor. Provider spend limits and edge rate limits remain necessary hard boundaries.

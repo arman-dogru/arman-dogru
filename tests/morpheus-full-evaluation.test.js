@@ -44,3 +44,10 @@ test('provider-limit diagnostics preserve categories without retaining error bod
   assert.equal(upstreamFailure(429,'Concurrent request limit').category,'concurrency-limit');
   assert.equal(upstreamFailure(429,'Tokens per minute exceeded').category,'token-rate-limit');
 });
+test('multi-turn rubric catches lost scope and topic even when the wording seems plausible',()=>{
+  const item=cases.find(item=>item.id==='TC-075'),data={reply:'I cannot establish current expertise in that field.',degraded:false};
+  const trace=intent=>[{name:'resolve_intent',arguments:JSON.stringify(intent)}];
+  assert.ok(behaviorFailures(item,data,{turnIndex:1,trace:trace({portfolio_component:false,topic:'rocket fuel'})}).includes('portfolio follow-up misclassified as unrelated'));
+  assert.ok(behaviorFailures(item,data,{turnIndex:2,trace:trace({portfolio_component:true,topic:'traffic digital twins'})}).includes('resolved intent lost the latest domain'));
+  assert.deepEqual(behaviorFailures(item,data,{turnIndex:2,trace:trace({portfolio_component:true,topic:'rocket fuel engineering'})}),[]);
+});

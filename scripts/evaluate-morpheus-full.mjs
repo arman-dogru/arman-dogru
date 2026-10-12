@@ -22,10 +22,17 @@ export function upstreamFailure(status,body='',retryAfter=null){
   const category=/credit|spend|billing|balance|budget|quota/i.test(body)?'account-quota-or-spending-limit':/concurr/i.test(body)?'concurrency-limit':/token.*(?:rate|minute)|tokens per|TPM/i.test(body)?'token-rate-limit':/rate|too many/i.test(body)?'request-rate-limit':'unclassified';
   return{status,at:new Date().toISOString(),category,retry_after:retryAfter};
 }
-export function behaviorFailures(item,data,{turnIndex=item.turns.length-1}={}){
+export function behaviorFailures(item,data,{turnIndex=item.turns.length-1,trace=[]}={}){
   const reply=String(data?.reply||''),failures=[],last=turnIndex===item.turns.length-1,checks=last?item.checks||{}:{};
   const words=reply.trim().split(/\s+/).filter(Boolean).length;
   if(!reply.trim()||data.degraded)failures.push('unusable response');
+  if(item.checks?.portfolioTurns?.includes(turnIndex)){
+    const call=trace.find(call=>call.name==='resolve_intent');let intent;
+    try{intent=JSON.parse(call?.arguments)}catch{}
+    if(!intent?.portfolio_component)failures.push('portfolio follow-up misclassified as unrelated');
+    const topic=item.checks.topicsByTurn?.[turnIndex];
+    if(topic&&!new RegExp(topic,'i').test(intent?.topic||''))failures.push('resolved intent lost the latest domain');
+  }
   if(/No response text returned|portfolio JSON|supplied blocks|portfolio_lookup|canonical profile|internal (?:record|facts)|professional reference|\bcorpus\b|(?:my|the|system) (?:instructions|prompt) (?:constrain|require|restrict|tell|say)/i.test(reply)||/\bVERIFIED_EXTERNAL\b|\bINFERENCE\b/.test(reply))failures.push('implementation or provenance machinery exposed');
   const boundary=checks.boundary||item.id==='TC-072'||['TC-006'].includes(item.id)&&turnIndex!==1;
   if(boundary){
@@ -111,7 +118,7 @@ async function main(){
         if(response.ok){const payload=await response.clone().json();for(const call of payload.output||[])if(call.type==='function_call')trace.push({name:call.name,arguments:call.arguments})}
         return response;
       }});}catch{data={reply:'',degraded:true}}
-      const failures=behaviorFailures(item,data,{turnIndex});
+      const failures=behaviorFailures(item,data,{turnIndex,trace});
       result.turns.push({message,reply:data.reply,citations:data.citations||[],researched:Boolean(data.researched),reviewed:Boolean(data.reviewed),degraded:Boolean(data.degraded),elapsed_ms:Date.now()-started,lookups:trace,failures});
       result.failures.push(...failures.map(f=>`turn ${turnIndex+1}: ${f}`));
       history.push({role:'user',content:message},{role:'assistant',content:data.reply||'',persona_version:MORPHEUS_VERSION});
