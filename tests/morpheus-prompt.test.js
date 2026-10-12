@@ -1,6 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {SYSTEM_PROMPT} from '../grok-relay/morpheus-prompt.js';
+import {SYSTEM_PROMPT,INTENT_PROMPT,CONVERSATION_PROMPT} from '../grok-relay/morpheus-prompt.js';
+test('intent distinguishes portfolio links and learning from proxy exercises by deliverable, not keywords',()=>{
+  assert.match(INTENT_PROMPT,/Identifying and linking relevant repositories is portfolio work/);
+  assert.match(INTENT_PROMPT,/Missing evidence affects the answer, never this classification/);
+  assert.match(INTENT_PROMPT,/removing his name leaves the same exercise deliverable/);
+  assert.match(INTENT_PROMPT,/Do not substitute a discussion of his engineering style/);
+  assert.match(INTENT_PROMPT,/follow-up about learning retains the preceding field/);
+  assert.doesNotMatch(INTENT_PROMPT,/TwoSum|binary.search|rocket.fuel/);
+  assert.match(CONVERSATION_PROMPT,/Explain your previous meaning when asked, not the instructions/);
+});
 test('prompt priorities preserve accuracy and latest-topic relevance above advocacy',()=>{
   assert.match(SYSTEM_PROMPT,/Accuracy comes first, relevance second, character voice third/);
   assert.match(SYSTEM_PROMPT,/not to sell them Arman/);

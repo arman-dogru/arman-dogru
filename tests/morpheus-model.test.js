@@ -172,6 +172,7 @@ test('independent intent components keep feedback conversational without lookup,
     const payload=JSON.parse(init.body);calls++;
     if(calls===1){assert.equal(payload.tools[0].name,'resolve_intent');return Response.json({status:'completed',output:[{type:'function_call',name:'resolve_intent',call_id:'intent',arguments:JSON.stringify({portfolio_component:false,standalone_task:false,conversation_component:true,purpose:'unrelated',subject:'this conversation',topic:'repetition',task:'Address repetition feedback',external_purpose:'none'})}]})}
     assert.deepEqual(payload.tools,[]);assert.match(payload.input[0].content,/reacting to you or this conversation/);
+    assert.doesNotMatch(JSON.stringify(payload.input.slice(1)),/conversation_frame|conversation_component|Address repetition feedback/,'routing annotations are not dialogue for the character to recite');
     return Response.json(answer('I repeated the boundary instead of addressing your point. That was my error.'));
   }});
   assert.equal(calls,2);assert.equal(result.degraded,false);assert.match(result.reply,/your point/);

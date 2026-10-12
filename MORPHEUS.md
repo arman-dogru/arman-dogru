@@ -50,6 +50,8 @@ A company-fit question compares demonstrated skills with external requirements; 
 
 Scope follows the requested substance. A standalone exercise in Arman's name remains unrelated; synthesis, technical explanations of his actual work, career assessments and grounded hypothetical designs remain useful. Criticism, clarification and social reactions are conversation, not attacks. A genuine topic change resets the immediate frame.
 
+Intent interpretation preserves the actual requested deliverable instead of substituting a portfolio discussion for a generic exercise. Project links, unknown attribution and learning-potential questions are explicitly legitimate. Conversation writers receive the dialogue without internal routing annotations, so feedback calls for a real response rather than a report about the exchange. Record categories do not establish independent authorship; the same named effort across employment, projects and publications is grouped rather than counted as separate systems.
+
 ## Safety and limits
 
 - Existing `grok-4.3`, xAI secret, allowed origins and leaderboard binding are retained.

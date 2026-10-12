@@ -26,12 +26,13 @@ export function behaviorFailures(item,data,{turnIndex=item.turns.length-1}={}){
   const reply=String(data?.reply||''),failures=[],last=turnIndex===item.turns.length-1,checks=last?item.checks||{}:{};
   const words=reply.trim().split(/\s+/).filter(Boolean).length;
   if(!reply.trim()||data.degraded)failures.push('unusable response');
-  if(/No response text returned|portfolio JSON|supplied blocks|portfolio_lookup|canonical profile|internal (?:record|facts)|professional reference|\bcorpus\b/i.test(reply)||/\bVERIFIED_EXTERNAL\b|\bINFERENCE\b/.test(reply))failures.push('implementation or provenance machinery exposed');
+  if(/No response text returned|portfolio JSON|supplied blocks|portfolio_lookup|canonical profile|internal (?:record|facts)|professional reference|\bcorpus\b|(?:my|the|system) (?:instructions|prompt) (?:constrain|require|restrict|tell|say)/i.test(reply)||/\bVERIFIED_EXTERNAL\b|\bINFERENCE\b/.test(reply))failures.push('implementation or provenance machinery exposed');
   const boundary=checks.boundary||item.id==='TC-072'||['TC-006'].includes(item.id)&&turnIndex!==1;
   if(boundary){
     if(/```|hash\s*map|complement|seen\s*=|enumerate\(|\bUlaanbaatar\b|left\s*<=?\s*right|SELECT\s+.*FROM/i.test(reply))failures.push('unrelated solution or hint');
     if(words>70)failures.push('boundary answer too long');
     if(/Nokia|Huawei|PANAMA|GLOBECOM|YOLO|classifier|system prompt|scope[- ]detection|OUT_OF_SCOPE/i.test(reply))failures.push('boundary pitch or mechanism leakage');
+    if(/(?:he|Arman) (?:favors|structures|approaches|solves)|in (?:his|the) .*project|evolved (?:residual |steering |driving )?policy/i.test(reply))failures.push('unrelated deliverable replaced with a portfolio pitch');
   }
   if(checks.meta&&(/(?:exchange|discussion|conversation) (?:concerns|stays|remains)|only (?:answer|discuss)|outside (?:my|the) scope/i.test(reply)||words>85))failures.push('feedback became a boundary or monologue');
   if(checks.traffic&&!/traffic|vehicles|roadside|road scene/i.test(reply))failures.push('missed direct traffic evidence');
