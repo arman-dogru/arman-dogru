@@ -16,6 +16,12 @@ export function selectCases({suite='full',ids=[]}={}){
   if(ids.some(id=>!cases.some(item=>item.id===id)))throw Error('Unknown case ID');
   return cases.filter(item=>(suite==='full'||suite==='critical'&&item.critical||suite==='variants'&&item.id.startsWith('GEN-'))&&(!ids.length||ids.includes(item.id)));
 }
+export function upstreamFailure(status,body='',retryAfter=null){
+  // Error text may contain private request/account data. Retain a category,
+  // never the text, credentials or provider's full response.
+  const category=/credit|spend|billing|balance|budget|quota/i.test(body)?'account-quota-or-spending-limit':/concurr/i.test(body)?'concurrency-limit':/token.*(?:rate|minute)|tokens per|TPM/i.test(body)?'token-rate-limit':/rate|too many/i.test(body)?'request-rate-limit':'unclassified';
+  return{status,at:new Date().toISOString(),category,retry_after:retryAfter};
+}
 export function behaviorFailures(item,data,{turnIndex=item.turns.length-1}={}){
   const reply=String(data?.reply||''),failures=[],last=turnIndex===item.turns.length-1,checks=last?item.checks||{}:{};
   const words=reply.trim().split(/\s+/).filter(Boolean).length;
@@ -79,7 +85,7 @@ async function main(){
   // In-process test isolation; production Worker/KV abuse protection is unchanged.
   // No test traffic is sent to the deployed chat or public leaderboard.
   const implementation=createHash('sha256');
-  for(const file of ['grok-relay/morpheus-prompt.js','grok-relay/morpheus-model.js','grok-relay/knowledge-context.js','grok-relay/knowledge-search.js','grok-relay/arman-knowledge.json','chat-version.js'])implementation.update(await readFile(resolve(root,file)));
+  for(const file of ['grok-relay/morpheus-prompt.js','grok-relay/morpheus-model.js','grok-relay/knowledge-context.js','grok-relay/knowledge-search.js','grok-relay/github-context.js','grok-relay/citation-check.js','grok-relay/arman-knowledge.json','grok-relay/portfolio-race-context.js','chat-version.js'])implementation.update(await readFile(resolve(root,file)));
   const report={version:MORPHEUS_VERSION,implementation_sha256:implementation.digest('hex'),started:new Date().toISOString(),mode:'local-production-model-path',model:env.XAI_MODEL,planned_cases:selected.length,planned_turns:selected.reduce((n,item)=>n+item.turns.length,0),review_status:'pending_manual_review',upstream_failures:[],results:[]};
   let cursor=0,stop=false;
   await mkdir(resolve(root,'work'),{recursive:true});
@@ -98,7 +104,7 @@ async function main(){
       let data;
       try{data=await answerMorpheus({message,history,evidence:knowledgeOrientation(query),referenceLibrary,verifiedReferences},env,{request:async(url,init)=>{
         const response=await fetch(url,init);
-        if(!response.ok)report.upstream_failures.push({status:response.status,at:new Date().toISOString(),retry_after:response.headers.get('retry-after')});
+        if(!response.ok)report.upstream_failures.push(upstreamFailure(response.status,(await response.clone().text()).slice(0,10000),response.headers.get('retry-after')));
         if([401,403,429].includes(response.status))stop=true;
         if(response.ok){const payload=await response.clone().json();for(const call of payload.output||[])if(call.type==='function_call')trace.push({name:call.name,arguments:call.arguments})}
         return response;

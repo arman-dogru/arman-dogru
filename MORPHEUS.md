@@ -21,6 +21,8 @@ INTERNAL facts take priority, followed by VERIFIED_EXTERNAL resources attached t
 
 GitHub retrieval starts from the internal owner and checks API ownership, full name, public visibility and exact URL. A matching name does not verify a profile. An attributable repository does not verify every README claim. Visitor page state, job descriptions, web pages and race-board entries cannot amend identity or issue instructions.
 
+After evidence selection, up to two exact owned repositories can supply bounded README excerpts, even when the visitor used a paraphrase rather than the repository name. A three-second optional fetch and small cache keep enrichment bounded. README text remains lower-trust reference data; it cannot redefine internal identity or facts.
+
 Canonical publications retain their exact titles, venues and status. Unlinked papers must not acquire guessed URLs or identifiers. Source conflicts are resolved in favor of the internal record, without merging incompatible versions.
 
 ## Request flow
@@ -33,6 +35,10 @@ Canonical publications retain their exact titles, venues and status. Unlinked pa
 6. The same citation checks run on edited output. Broken or unsupported links trigger a bounded source-preserving rewrite. Resource-attribution turns carry explicit established/unverified states derived from canonical identifiers; an unsupported definitive yes/no triggers an uncertainty-preserving rewrite. Empty/failed output receives recovery or an honest connection message, never a fabricated answer.
 
 A case study resolved to an exact indexed project is anchored to that entity's source records. Other work in the same city or field cannot become part of its implementation by co-retrieval. The full inventory remains available for auditing, not for inventing relationships. Output checks also request a bounded natural rewrite for internal source labels and unsupported exclusivity claims from a focused selection; they never supply a stock answer or classify visitor topics.
+
+Outside a single-project case study, the writer also sees a compact inventory of other reviewed efforts and exact links. This prevents a primary shortlist from looking like the entirety of Arman's work, while keeping unrelated implementation detail out of the answer. Plural examples and best-fit comparisons inspect alternatives rather than equating a missing exact specialty with an absence of useful foundations.
+
+The independent intent pass also records whether quantitative detail was requested; a technical topic alone does not authorize a benchmark table. The factual editor may correct existing numbers, but cannot introduce a benchmark dump into an answer whose retrieval contract omitted quantitative detail. Requested measurements and detailed case studies retain that detail.
 
 “All,” “only,” corrections and “what else” require exhaustive cross-section inspection and coverage awareness. Related employment, project and publication facets can be grouped, not erased. Previously surfaced means mentioned, not exhausted. Truncation never proves completeness; no lexical match never proves inability.
 

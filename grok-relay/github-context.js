@@ -1,6 +1,7 @@
 import {identity,knowledge} from './knowledge-context.js';
 
 let cache={value:null,at:0};
+const readmeCache=new Map();
 const headers={'user-agent':'arman-portfolio-agent','accept':'application/vnd.github+json'};
 const limitedFetch=(request,url,init={})=>request(url,{...init,signal:AbortSignal.timeout(5000)});
 const STOP=new Set('the and for with from that this are was were have has had into your you our their they role job team work working about looking experience required preferred responsibilities qualifications years using who what why how good great engineer engineering research researcher candidate position'.split(' '));
@@ -40,4 +41,26 @@ export async function githubContext(message,{request=fetch}={}){
   // Bound the structured response without slicing serialized JSON mid-field.
   while(JSON.stringify(repos).length>13000&&repos.length>2)repos.pop();
   return{provenance:'VERIFIED_EXTERNAL',source:knowledge.profile.github,attribution:{github_owner:identity.githubOwner,method:'GitHub API owner.login, full_name and html_url matched the internal identifier; this verifies account attribution, not every README claim.'},evidence:{counts:base.counts,repositories:repos}};
+}
+
+// After semantic evidence selection, fetch the actual linked project rather
+// than relying on words in the visitor's phrasing to rank its README. No URL
+// supplied by a visitor is fetched here; ownership and exact path must match.
+export async function repositoryReadmes(reference,{request=fetch,limit=2}={}){
+  if(reference?.provenance!=='VERIFIED_EXTERNAL'||!Array.isArray(reference.evidence))return reference;
+  const eligible=reference.evidence.filter(repo=>repo&&repo.owner===identity.githubOwner&&!repo.fork&&typeof repo.name==='string'&&repo.name.length<=100&&/^[\w.-]+$/.test(repo.name)&&repo.url===`${knowledge.profile.github}/${repo.name}`).slice(0,Math.max(0,Math.min(2,limit)));
+  const evidence=await Promise.all(eligible.map(async repo=>{
+    if(repo.readme_excerpt)return repo;
+    const cached=request===fetch?readmeCache.get(repo.url):null;
+    if(cached&&Date.now()-cached.at<180000)return{...repo,readme_excerpt:cached.text};
+    try{
+      const response=await request(`https://api.github.com/repos/${encodeURIComponent(identity.githubOwner)}/${encodeURIComponent(repo.name)}/readme`,{headers:{...headers,accept:'application/vnd.github.raw+json'},signal:AbortSignal.timeout(3000)});
+      if(response.ok){
+        const text=(await response.text()).slice(0,3500);
+        if(text){if(request===fetch){if(readmeCache.size>=12)readmeCache.delete(readmeCache.keys().next().value);readmeCache.set(repo.url,{text,at:Date.now()})}return{...repo,readme_excerpt:text}}
+      }
+    }catch{}
+    return repo;
+  }));
+  return{...reference,evidence};
 }

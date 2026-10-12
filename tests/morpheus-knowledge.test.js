@@ -2,7 +2,20 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {knowledge,identity,knowledgeLibrary,knowledgeOrientation,projectIndex,isCanonicalResource,citationProvenance,verifiedReferences} from '../grok-relay/knowledge-context.js';
-import {githubContext,ownedRepository} from '../grok-relay/github-context.js';
+import {githubContext,ownedRepository,repositoryReadmes} from '../grok-relay/github-context.js';
+
+test('semantic project selection retrieves only exact owned README resources, with bounded optional enrichment',async()=>{
+  const repo=name=>({name,owner:'arman-dogru',url:`https://github.com/arman-dogru/${name}`,fork:false});
+  const reference={provenance:'VERIFIED_EXTERNAL',evidence:[repo('example-a'),{...repo('lookalike'),owner:'other-owner'},repo('example-b'),repo('example-c')]};
+  const urls=[];
+  const result=await repositoryReadmes(reference,{request:async(url,init)=>{urls.push(url);assert.equal(init.headers.accept,'application/vnd.github.raw+json');return new Response('Public implementation details. '.repeat(200))}});
+  assert.deepEqual(urls,['https://api.github.com/repos/arman-dogru/example-a/readme','https://api.github.com/repos/arman-dogru/example-b/readme']);
+  assert.equal(result.evidence.length,2);assert.equal(result.evidence[0].readme_excerpt.length,3500);
+  const untrusted={...reference,provenance:'MATRIX'};
+  assert.equal(await repositoryReadmes(untrusted,{request:()=>{throw Error('must not fetch')}}),untrusted);
+  const unavailable=await repositoryReadmes(reference,{limit:1,request:async()=>new Response('unavailable',{status:503})});
+  assert.equal(unavailable.evidence.length,1);assert.equal(unavailable.evidence[0].readme_excerpt,undefined);
+});
 import {lookupEvidence,answerMorpheus as runMorpheus} from '../grok-relay/morpheus-model.js';
 const answerMorpheus=(question,env,options={})=>runMorpheus(question,env,{interpret:false,review:false,...options});
 import {SYSTEM_PROMPT} from '../grok-relay/morpheus-prompt.js';

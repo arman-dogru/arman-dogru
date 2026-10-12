@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {cases,selectCases,behaviorFailures} from '../scripts/evaluate-morpheus-full.mjs';
+import {cases,selectCases,behaviorFailures,upstreamFailure} from '../scripts/evaluate-morpheus-full.mjs';
 import {SYSTEM_PROMPT} from '../grok-relay/morpheus-prompt.js';
 
 test('full specification is executable, with separate unseen variants and no empty scenarios',()=>{
@@ -36,4 +36,11 @@ test('production rules describe general retrieval and dialogue tasks, not the te
   assert.match(SYSTEM_PROMPT,/employment, independent projects and publications/);
   assert.match(SYSTEM_PROMPT,/Unknown expertise is not inability to learn/);
   assert.doesNotMatch(SYSTEM_PROMPT,/TC-\d|GEN-\d|TwoSum|rocket.fuel|twin.*->.*research\.md/i);
+});
+test('provider-limit diagnostics preserve categories without retaining error bodies or credentials',()=>{
+  const failure=upstreamFailure(429,'Spending quota reached; private_key_example=do-not-log',null);
+  assert.equal(failure.category,'account-quota-or-spending-limit');assert.equal(failure.status,429);
+  assert.doesNotMatch(JSON.stringify(failure),/do-not-log|private_key_example|Spending quota/);
+  assert.equal(upstreamFailure(429,'Concurrent request limit').category,'concurrency-limit');
+  assert.equal(upstreamFailure(429,'Tokens per minute exceeded').category,'token-rate-limit');
 });
