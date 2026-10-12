@@ -274,7 +274,14 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
         // The answer writer receives selected primary records, not the planner's
         // full corpus or keyword shortlist. The independent reviewer retains
         // the complete inventory to catch omissions and unsupported blending.
-        const selectedLookups=lookups.map(value=>{if(!value.selected_records)return value;const {canonical_corpus,...selected}=value;return selected});
+        const selectedLookups=lookups.map(value=>{
+          if(!value.selected_records)return value;
+          const {canonical_corpus,...selected}=value;
+          // Completeness and absence checks cannot be certified by the same
+          // shortlist being audited. Give the writer the bounded cross-section
+          // facts, not only titles whose summaries may omit a secondary skill.
+          return selected.coverage?.selection_mode==='exhaustive'?{...selected,discovery_corpus:selected.measurement_detail?canonical_corpus:conciseEvidence(canonical_corpus),discovery_policy:'Inspect all reviewed facts for the requested topic, including secondary capabilities. Primary records are suggestions, not a completeness certificate. Group distinct facets of the same effort; answer only what is relevant, without dumping this inventory.'}:selected;
+        });
         const identity=referenceLibrary.profile?.provenance==='INTERNAL'?referenceLibrary.profile.evidence:{};
         // Keep a small cross-section inventory beside the primary evidence so
         // selection cannot masquerade as the entirety of his work. A single

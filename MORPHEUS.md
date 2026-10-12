@@ -46,6 +46,8 @@ The independent intent pass also records whether quantitative detail was request
 
 “All,” “only,” corrections and “what else” require exhaustive cross-section inspection and coverage awareness. Related employment, project and publication facets can be grouped, not erased. Previously surfaced means mentioned, not exhausted. Truncation never proves completeness; no lexical match never proves inability.
 
+For exhaustive retrieval, the writer receives the bounded cross-section discovery facts as well as the primary selection. A shortlist cannot certify its own completeness; title summaries can omit secondary capabilities. Unrequested measurements remain omitted and the response still selects only relevant evidence.
+
 A company-fit question compares demonstrated skills with external requirements; it does not ask whether the company already appears in his employment history. Learning potential is distinct from established domain expertise and unknown time to proficiency.
 
 Scope follows the requested substance. A standalone exercise in Arman's name remains unrelated; synthesis, technical explanations of his actual work, career assessments and grounded hypothetical designs remain useful. Criticism, clarification and social reactions are conversation, not attacks. A genuine topic change resets the immediate frame.

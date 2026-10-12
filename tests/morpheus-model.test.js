@@ -113,6 +113,19 @@ test('selected records retain full review facts and only canonically linked exte
   assert.equal(result.linked_resources.evidence.length,1);assert.doesNotMatch(JSON.stringify(result.linked_resources),/similar-owner/);
   assert.ok(lookupEvidence(library,{section:'projects',query:'case study',record_ids:['projects:0'],mode:'unbounded'}).error);
 });
+test('exhaustive follow-ups give the writer full cross-section discovery facts, not a shortlist certificate',async()=>{
+  const library={projects:{provenance:'INTERNAL',evidence:[{name:'Primary',facts:['A data tool.']},{name:'Different domain title',facts:['Includes spoken-input transcription and synthesis.','Measured 8 ms.']}]}};let calls=0;
+  await answerMorpheus({...question,referenceLibrary:library},env,{request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1)return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({section:'projects',query:'audio examples',record_ids:['projects:0'],mode:'exhaustive',intent:'additional'})}]});
+    const reference=JSON.parse(payload.input.find(item=>item.type==='function_call_output').output);
+    assert.equal(reference.selected_records.length,1);assert.equal(reference.discovery_corpus.records.length,2);
+    assert.match(JSON.stringify(reference.discovery_corpus),/spoken-input transcription/);
+    assert.doesNotMatch(JSON.stringify(reference.discovery_corpus),/8 ms/);
+    return Response.json(answer('There is another effort involving spoken input.'));
+  }});
+  assert.equal(calls,2);
+});
 test('a case study anchored to an exact reviewed entity cannot absorb another same-city project',()=>{
   const library={projects:{provenance:'INTERNAL',evidence:[{name:'Harbor Radio Testbed',facts:['A cellular propagation prototype.']},{name:'Harbor Camera Twin',facts:['A separate perception system.']}]}};
   const args={section:'projects',query:'radio case study',record_ids:['projects:0','projects:1'],include_measurements:true};
