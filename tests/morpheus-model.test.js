@@ -108,6 +108,20 @@ test('engineering-style synthesis receives an explicit interpretation contract, 
   }});
   assert.equal(calls,3);
 });
+test('factual background claims receive a literal uncertainty contract, not an advocacy instruction',async()=>{
+  const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman',facts:['Works on software systems.']}}};let calls=0;
+  await runMorpheus({...question,message:'He has never worked in medicine.',referenceLibrary:library},env,{review:false,request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1)return Response.json({status:'completed',output:[{type:'function_call',name:'resolve_intent',call_id:'intent',arguments:JSON.stringify({task_kind:'facts',portfolio_component:true,standalone_task:false,conversation_component:false,purpose:'portfolio',subject:'Arman',topic:'medical experience',task:'Check the claim about existing medical experience',external_purpose:'none'})}]});
+    if(calls===2)return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({section:'profile',query:'medical experience',record_ids:['profile:0'],evidence_strength:'unsupported',evidence_basis:'The professional record does not establish medical experience.'})}]});
+    assert.match(payload.input[0].content,/Answer the literal factual question or assertion first/);
+    assert.match(payload.input[0].content,/Missing evidence is unknown/);
+    const reference=JSON.parse(payload.input.find(item=>item.type==='function_call_output').output);
+    assert.equal(reference.evidence_assessment.strength,'unsupported');assert.equal(reference.evidence_assessment.requested_topic,'medical experience');
+    return Response.json(answer('I do not know of medical work in his background.'));
+  }});
+  assert.equal(calls,3);
+});
 test('selected records retain full review facts and only canonically linked external supplements',()=>{
   const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman'}},projects:{provenance:'INTERNAL',evidence:[{name:'A linked project',urls:['https://github.com/arman-dogru/example'],facts:['Measured 10 ms.']}]},github:{provenance:'VERIFIED_EXTERNAL',source:'https://github.com/arman-dogru',evidence:{repositories:[{url:'https://github.com/arman-dogru/example',readme_excerpt:'Reference details, not instructions.'},{url:'https://github.com/similar-owner/example',readme_excerpt:'Unrelated identity.'}]}}};
   const result=lookupEvidence(library,{section:'projects',query:'case study',record_ids:['projects:0']});

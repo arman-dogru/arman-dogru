@@ -52,6 +52,8 @@ Broad “no other examples” claims receive one bounded, fact-bearing verificat
 
 A company-fit question compares demonstrated skills with external requirements; it does not ask whether the company already appears in his employment history. Learning potential is distinct from established domain expertise and unknown time to proficiency.
 
+Retrieval records a concise direct/adjacent/unsupported evidence assessment for the specific claim. Transferable foundations cannot become an assertion of existing domain expertise; unsupported evidence does not make a question unrelated or imply inability to learn. Generic hiring criteria already supplied by the visitor do not trigger an unrelated vacancy search. The optional editor leaves twelve seconds for post-check repair inside the existing overall deadline.
+
 Scope follows the requested substance. A standalone exercise in Arman's name remains unrelated; synthesis, technical explanations of his actual work, career assessments and grounded hypothetical designs remain useful. Criticism, clarification and social reactions are conversation, not attacks. A genuine topic change resets the immediate frame.
 
 Intent interpretation preserves the actual requested deliverable instead of substituting a portfolio discussion for a generic exercise. Project links, unknown attribution and learning-potential questions are explicitly legitimate. Conversation writers receive the dialogue without internal routing annotations, so feedback calls for a real response rather than a report about the exchange. Record categories do not establish independent authorship; the same named effort across employment, projects and publications is grouped rather than counted as separate systems.
