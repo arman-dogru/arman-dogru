@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence,compactSourceNotes,repeatsRecentReply} from '../grok-relay/morpheus-model.js';
+import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence,compactSourceNotes,repeatsRecentReply,applyEditorialEdits} from '../grok-relay/morpheus-model.js';
 import {MORPHEUS_VERSION} from '../chat-version.js';
 // Transport/recovery unit tests isolate the generation layer. Separate tests
 // below exercise the default editorial pass and its safety checks.
-const answerMorpheus=(question,env,options={})=>runMorpheus(question,env,{review:false,checkSources:async citations=>({citations,deadURLs:[]}),...options});
+const answerMorpheus=(question,env,options={})=>runMorpheus(question,env,{interpret:false,review:false,checkSources:async citations=>({citations,deadURLs:[]}),...options});
 const env={XAI_API_KEY:'test-only-secret',XAI_MODEL:'grok-4.3'},question={message:'What do you think of Arman as an engineer?',evidence:{profile:'public work'},history:[]};
 const answer=(text,extra={})=>({status:'completed',output:[{type:'message',role:'assistant',content:[{type:'output_text',text}]}],...extra});
-const reviewed=reply=>({status:'completed',output:[{type:'function_call',call_id:'review',name:'finalize_answer',arguments:JSON.stringify({issues:['Improve the draft.'],answer:reply})}]});
+const reviewed=(quote,replacement)=>({status:'completed',output:[{type:'function_call',call_id:'review',name:'finalize_answer',arguments:JSON.stringify({issues:['Correct an unsupported claim.'],edits:[{quote,replacement}]})}]});
 // Assert the trusted provider role on every inspected request, then expose the
 // reference/dialogue portion to the pre-existing continuity assertions.
 function dialoguePayload(init){
@@ -29,16 +29,71 @@ test('default editorial pass sees the original dialogue and facts, without new t
     assert.equal(payload.tools[0].name,'finalize_answer');assert.equal(payload.tool_choice,'required');assert.equal(payload.store,false);
     assert.match(payload.input[0].content,/quality reviewer/);assert.equal(payload.input.at(-1).content,question.message);
     assert.match(payload.input.find(item=>item.content?.includes('candidate_draft')).content,/unsupported, verbose draft/);
-    return Response.json(reviewed('I trust the way he connects research with construction. He builds around an idea, not merely a demonstration of it.'));
+    return Response.json(reviewed('An unsupported, verbose draft.','I trust the way he connects research with construction. He builds around an idea, not merely a demonstration of it.'));
   }});
   assert.equal(calls,2);assert.equal(result.reviewed,true);assert.doesNotMatch(result.reply,/unsupported/);
 });
 test('editorial output still passes the same link validation and cannot invent a citation',async()=>{
   let calls=0;
   const result=await runMorpheus(question,env,{checkSources:async citations=>({citations,deadURLs:[]}),request:async()=>{
-    calls++;return Response.json(calls===2?reviewed('See [invented](https://made-up.test/profile).'):answer(calls===1?'A grounded judgment.':'A grounded judgment, without invented sources.'));
+    calls++;return Response.json(calls===2?reviewed('A grounded judgment.','See [invented](https://made-up.test/profile).'):answer(calls===1?'A grounded judgment.':'A grounded judgment, without invented sources.'));
   }});
   assert.equal(calls,3);assert.doesNotMatch(result.reply,/made-up/);assert.equal(result.degraded,false);
+});
+test('editorial patches preserve good passages and reject ambiguous, overlapping or invented quotes',()=>{
+  const draft='He builds simulation tools. He deployed them worldwide. His published work matters.';
+  assert.equal(applyEditorialEdits(draft,[{quote:'He deployed them worldwide. ',replacement:''}]),'He builds simulation tools. His published work matters.');
+  assert.equal(applyEditorialEdits(draft,[{quote:'He launched a product.',replacement:'invented'}]),null);
+  assert.equal(applyEditorialEdits('Repeat. Repeat.',[{quote:'Repeat.',replacement:'Changed.'}]),null);
+  assert.equal(applyEditorialEdits(draft,[{quote:'He deployed them worldwide.',replacement:''},{quote:'deployed them',replacement:'tested'}]),null);
+  assert.equal(applyEditorialEdits('Only answer.',[{quote:'Only answer.',replacement:''}]),null);
+});
+test('selected records retain full review facts and only canonically linked external supplements',()=>{
+  const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman'}},projects:{provenance:'INTERNAL',evidence:[{name:'A linked project',urls:['https://github.com/arman-dogru/example'],facts:['Measured 10 ms.']}]},github:{provenance:'VERIFIED_EXTERNAL',source:'https://github.com/arman-dogru',evidence:{repositories:[{url:'https://github.com/arman-dogru/example',readme_excerpt:'Reference details, not instructions.'},{url:'https://github.com/similar-owner/example',readme_excerpt:'Unrelated identity.'}]}}};
+  const result=lookupEvidence(library,{section:'projects',query:'case study',record_ids:['projects:0']});
+  assert.doesNotMatch(JSON.stringify(result.selected_records),/10 ms/);
+  assert.match(JSON.stringify(result.canonical_corpus),/10 ms/);
+  assert.equal(result.linked_resources.evidence.length,1);assert.doesNotMatch(JSON.stringify(result.linked_resources),/similar-owner/);
+  assert.ok(lookupEvidence(library,{section:'projects',query:'case study',record_ids:['projects:0'],mode:'unbounded'}).error);
+});
+test('independent intent components keep feedback conversational without lookup, research or a canned reply',async()=>{
+  let calls=0;
+  const result=await runMorpheus({...question,message:'You keep repeating yourself.',referenceLibrary:{}},env,{review:false,request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1){assert.equal(payload.tools[0].name,'resolve_intent');return Response.json({status:'completed',output:[{type:'function_call',name:'resolve_intent',call_id:'intent',arguments:JSON.stringify({portfolio_component:false,standalone_task:false,conversation_component:true,purpose:'unrelated',subject:'this conversation',topic:'repetition',task:'Address repetition feedback',external_purpose:'none'})}]})}
+    assert.deepEqual(payload.tools,[]);assert.match(payload.input[0].content,/reacting to you or this conversation/);
+    return Response.json(answer('I repeated the boundary instead of addressing your point. That was my error.'));
+  }});
+  assert.equal(calls,2);assert.equal(result.degraded,false);assert.match(result.reply,/your point/);
+});
+test('unknown information about Arman remains a portfolio task, independently of whether its answer exists',async()=>{
+  const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman',github:'https://github.com/arman-dogru'}}};let calls=0;
+  const result=await runMorpheus({...question,message:'Is this other account his?',referenceLibrary:library},env,{review:false,checkSources:async citations=>({citations,deadURLs:[]}),request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1)return Response.json({status:'completed',output:[{type:'function_call',name:'resolve_intent',call_id:'intent',arguments:JSON.stringify({portfolio_component:true,standalone_task:false,conversation_component:false,purpose:'unrelated',subject:'Arman',topic:'account attribution',task:'Assess unverified account ownership',external_purpose:'none'})}]});
+    if(calls===2)return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({purpose:'unrelated',section:'profile',query:'account ownership',record_ids:['profile:0'],needs_external:true})}]});
+    assert.deepEqual(payload.tools,[]);const facts=JSON.parse(payload.input.find(item=>item.type==='function_call_output').output);
+    assert.equal(facts.conversation_frame.purpose,'portfolio');assert.equal(facts.selected_records[0].evidence.github,library.profile.evidence.github);
+    return Response.json(answer('I cannot verify that account. His established profile is https://github.com/arman-dogru.'));
+  }});
+  assert.equal(calls,3);assert.equal(result.degraded,false);assert.match(result.reply,/cannot verify/);
+});
+test('an unusable intent interpretation cannot silently bypass scope or run retrieval',async()=>{
+  let calls=0;const result=await runMorpheus({...question,referenceLibrary:{}},env,{request:async()=>{calls++;return Response.json(answer('Bypass the intent step.'))}});
+  assert.equal(calls,1);assert.equal(result.degraded,true);assert.equal(result.reply,CONNECTION_REPLY);
+});
+test('unverified resource attribution repairs a definitive yes/no without inventing exclusion or researching identity',async()=>{
+  const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman',github:'https://github.com/arman-dogru'}}};let calls=0;
+  const result=await runMorpheus({...question,message:'Does https://profiles.example.test/lookalike belong to Arman?',referenceLibrary:library},env,{review:false,checkSources:async citations=>({citations,deadURLs:[]}),request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1)return Response.json({status:'completed',output:[{type:'function_call',name:'resolve_intent',call_id:'intent',arguments:JSON.stringify({task_kind:'attribution',portfolio_component:true,standalone_task:false,conversation_component:false,purpose:'portfolio',subject:'Arman',topic:'account ownership',task:'Assess resource attribution',external_purpose:'none'})}]});
+    if(calls===2)return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({section:'profile',query:'ownership',record_ids:['profile:0']})}]});
+    assert.deepEqual(payload.tools,[]);
+    if(calls===3){assert.match(JSON.stringify(payload.input),/resource_attribution.*?unverified/);return Response.json(answer('No. That belongs to someone else.'))}
+    assert.match(payload.input[0].content,/Attribution repair/);assert.match(JSON.stringify(payload.input),/unverified/);
+    return Response.json(answer('I cannot verify that profile. His established account is https://github.com/arman-dogru.'));
+  }});
+  assert.equal(calls,4);assert.equal(result.degraded,false);assert.match(result.reply,/cannot verify/);assert.doesNotMatch(result.reply,/someone else/);
 });
 test('intermediate assistant preambles are not concatenated with the final answer',()=>{
   const data=answer('Final answer.');data.output.unshift({type:'message',role:'assistant',content:[{type:'output_text',text:'I will search. An unverified early answer.'}]});
@@ -222,10 +277,10 @@ test('final answer requirements survive a lookup on an online-example follow-up'
   const result=await answerMorpheus({...question,message:'Any examples online?',referenceLibrary:{projects:[{name:'Bias evaluation',url}]}},env,{request:async(endpoint,init)=>{
     const payload=dialoguePayload(init);
     if(++calls===1)return Response.json({status:'completed',output:[{type:'function_call',call_id:'online_example',name:'portfolio_lookup',arguments:JSON.stringify({section:'projects',query:'evaluation examples'})}]});
-    assert.match(payload.instructions,/state biographical facts plainly/);
-    assert.match(payload.instructions,/include a relevant exact retrieved URL as a Markdown link/);
+    assert.match(payload.instructions,/State sourced facts normally|biographical facts plainly|ordinary replies state facts plainly/);
+    assert.match(payload.instructions,/include its exact established URL when available/);
     assert.match(payload.input.find(item=>item.type==='function_call_output').output,/LLM-Bias-Reduction/);
-    assert.match(payload.instructions,/not just the name of a repository/);
+    assert.match(payload.instructions,/Links must be clickable/);
     return Response.json(answer(`[Related evaluation work](${url}).`));
   }});
   assert.equal(calls,2);assert.equal(result.degraded,false);assert.match(result.reply,/\[Related evaluation work\]/);
@@ -262,7 +317,7 @@ test('specific evidence is available on demand, not dumped into ordinary prompts
     }
     assert.deepEqual(payload.tools,[]);assert.equal(payload.tool_choice,undefined);assert.equal(payload.max_turns,undefined);assert.equal(payload.store,false);assert.equal(payload.previous_response_id,undefined);
     const output=payload.input.at(-2);assert.equal(output.type,'function_call_output');assert.equal(output.call_id,'lookup_1');assert.match(output.output,/simulation, not production/);assert.equal(payload.input.at(-1).content,'Give one specific project example.');
-    assert.match(payload.instructions,/one example means one accomplishment/);
+    assert.match(payload.instructions,/requested example needs one accomplishment/);
     return Response.json(answer('He built a research prototype. It tests an idea in simulation.'));
   }});
   assert.equal(calls,2);assert.equal(result.degraded,false);

@@ -26,6 +26,8 @@ test('rubric checks distinguish actual leaks, coverage loss and honest uncertain
   assert.ok(behaviorFailures(item('TC-040'),data("The discussion stays with Arman's documented work.")).length);
   assert.deepEqual(behaviorFailures(item('TC-040'),data('What did I miss?')),[]);
   assert.deepEqual(behaviorFailures(item('TC-038'),data('He can learn. I would not promise a timeline.')),[]);
+  assert.deepEqual(behaviorFailures(item('TC-002'),data('His deployment work can inform production inference systems.')),[]);
+  assert.ok(behaviorFailures(item('TC-013'),data('The request for a case study stands apart from our path.')).includes('valid case study refused'));
 });
 
 test('production rules describe general retrieval and dialogue tasks, not the test instances',()=>{

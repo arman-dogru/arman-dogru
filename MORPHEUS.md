@@ -26,11 +26,11 @@ Canonical publications retain their exact titles, venues and status. Unlinked pa
 ## Request flow
 
 1. A short orientation and ordered recent dialogue establish the subject and current task.
-2. A required read-only `portfolio_lookup` resolves intent. Social feedback and unrelated substantive tasks use `dialogue`, which returns no résumé and no canned answer.
-3. Planning inspects the bounded reviewed record inventory across experience, research, projects, skills, education and portfolio supplements, then selects validated record identifiers for the task. The answer writer sees those selected primary records; the reviewer retains the wider inventory to catch omissions. Lexical rankings are navigation aids, not semantic verdicts. Ordinary lookups omit unrequested quantitative fact bullets; `include_measurements` retains them.
+2. A small independent `resolve_intent` pass classifies the requested deliverable before retrieval. Separate semantic components distinguish information about Arman, a standalone task in his name, and conversation feedback. Unknown facts remain valid portfolio questions; missing answers do not make them unrelated. Feedback and unrelated tasks receive dedicated character instructions, with no résumé retrieval or canned reply.
+3. Planning inspects the bounded reviewed record inventory across experience, research, projects, skills, education and portfolio supplements, then selects validated record identifiers for the task. The answer writer sees those selected primary records and available public GitHub excerpts linked to them; the reviewer retains the wider, unabridged inventory to catch omissions. Lexical rankings are navigation aids, not semantic verdicts. Ordinary lookups omit unrequested quantitative fact bullets; detailed case studies and requested results can retain them.
 4. The model answers the actual intent. Current opportunities, company requirements or relevant technical context can use public web research after consulting the internal record. Identity lookup cannot discover a new Arman.
-5. One tool-free-in-the-external-world editorial pass records concrete defects and submits a corrected answer through `finalize_answer`. It checks grounding, context, completeness, proportion and voice. It cannot search, execute code or mutate state. This is an additional quality check, not a guarantee of correctness.
-6. The same citation checks run on edited output. Broken or unsupported links trigger a bounded source-preserving rewrite. Empty/failed output receives recovery or an honest connection message, never a fabricated answer.
+5. For portfolio answers, one tool-free-in-the-external-world editorial pass records concrete defects and submits small exact-quote edits through `finalize_answer`. Nonexistent, ambiguous and overlapping quotes are rejected; satisfactory passages remain unchanged. The reviewer checks Arman facts against the full record without treating absence from his résumé as evidence against a separately researched job. It cannot search, execute code or mutate state. Conversation and boundary replies bypass this factual editor. This is an additional quality check, not a guarantee of correctness.
+6. The same citation checks run on edited output. Broken or unsupported links trigger a bounded source-preserving rewrite. Resource-attribution turns carry explicit established/unverified states derived from canonical identifiers; an unsupported definitive yes/no triggers an uncertainty-preserving rewrite. Empty/failed output receives recovery or an honest connection message, never a fabricated answer.
 
 “All,” “only,” corrections and “what else” require exhaustive cross-section inspection and coverage awareness. Related employment, project and publication facets can be grouped, not erased. Previously surfaced means mentioned, not exhausted. Truncation never proves completeness; no lexical match never proves inability.
 
@@ -43,7 +43,7 @@ Scope follows the requested substance. A standalone exercise in Arman's name rem
 - Existing `grok-4.3`, xAI secret, allowed origins and leaderboard binding are retained.
 - Trusted instructions use a server-owned system role. Visitor history accepts only user/assistant roles.
 - Ten recent messages, 1,800 characters each; visitor messages up to 10,000 characters; request bodies up to 50 KB.
-- Overall generation budget remains 52 seconds. A successful lookup permits at most three main attempts, plus one editorial call inside that same deadline. Repair/recovery starts no new research.
+- Overall generation budget remains 52 seconds, including a bounded intent call, at most three main attempts after successful lookup and one optional editorial call. Repair/recovery starts no new research.
 - Editorial review is best effort under the deadline; unavailable review does not manufacture approval. The live runner records whether it completed.
 - `MORPHEUS_WEB_SEARCH=off` disables external research. No arbitrary-fetch proxy, shell, private files or authenticated browsing is exposed.
 - Existing best-effort KV limit remains 40 requests/hour/visitor. Provider spend limits and edge rate limits remain necessary hard boundaries.
@@ -61,7 +61,7 @@ Run `npm test`, `node scripts/build-site.mjs` and `npm run build:relay`.
 The full local model evaluation is opt-in:
 
 ```sh
-node scripts/evaluate-morpheus-full.mjs --live --suite=full --concurrency=3 --report=work/morpheus-full-eval.json
+node scripts/evaluate-morpheus-full.mjs --live --suite=full --concurrency=2 --report=work/morpheus-full-eval.json
 ```
 
 It runs 94 specification scenarios and 12 unseen variants through the production model path, isolated from the public chat and leaderboard. Reports contain actual answers, source metadata, tool arguments, timings, implementation fingerprint and rubric flags, never keys. Raw résumé files and private contacts are not sent. Reports stay under ignored `work/`.

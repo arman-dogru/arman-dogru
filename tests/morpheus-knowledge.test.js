@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {knowledge,identity,knowledgeLibrary,knowledgeOrientation,projectIndex,isCanonicalResource,citationProvenance,verifiedReferences} from '../grok-relay/knowledge-context.js';
 import {githubContext,ownedRepository} from '../grok-relay/github-context.js';
 import {lookupEvidence,answerMorpheus as runMorpheus} from '../grok-relay/morpheus-model.js';
-const answerMorpheus=(question,env,options={})=>runMorpheus(question,env,{review:false,...options});
+const answerMorpheus=(question,env,options={})=>runMorpheus(question,env,{interpret:false,review:false,...options});
 import {SYSTEM_PROMPT} from '../grok-relay/morpheus-prompt.js';
 import {PUBLIC_FILES} from '../scripts/build-site.mjs';
 
