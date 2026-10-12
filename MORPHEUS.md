@@ -38,6 +38,8 @@ A case study resolved to an exact indexed project is anchored to that entity's s
 
 Outside a single-project case study, the writer also sees a compact inventory of other reviewed efforts and exact links. This prevents a primary shortlist from looking like the entirety of Arman's work, while keeping unrelated implementation detail out of the answer. Plural examples and best-fit comparisons inspect alternatives rather than equating a missing exact specialty with an absence of useful foundations.
 
+The editor and repair paths consume the selected evidence and wider reviewed facts, not the initial lexical discovery shortlist. A zero match for an employer name cannot be recycled into evidence against that employer's separately researched openings. Resolved external intent also takes priority over older lexical research hints.
+
 The independent intent pass also records whether quantitative detail was requested; a technical topic alone does not authorize a benchmark table. The factual editor may correct existing numbers, but cannot introduce a benchmark dump into an answer whose retrieval contract omitted quantitative detail. Requested measurements and detailed case studies retain that detail.
 
 “All,” “only,” corrections and “what else” require exhaustive cross-section inspection and coverage awareness. Related employment, project and publication facets can be grouped, not erased. Previously surfaced means mentioned, not exhausted. Truncation never proves completeness; no lexical match never proves inability.

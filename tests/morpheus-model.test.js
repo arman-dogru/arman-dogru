@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence,compactSourceNotes,repeatsRecentReply,applyEditorialEdits,addsUnrequestedMeasurements,focusedExclusivity} from '../grok-relay/morpheus-model.js';
+import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence,compactSourceNotes,repeatsRecentReply,applyEditorialEdits,addsUnrequestedMeasurements,focusedExclusivity,groundedLinks} from '../grok-relay/morpheus-model.js';
 import {MORPHEUS_VERSION} from '../chat-version.js';
 // Transport/recovery unit tests isolate the generation layer. Separate tests
 // below exercise the default editorial pass and its safety checks.
@@ -61,6 +61,37 @@ test('a focused selection cannot certify sole ownership counts or universal abse
   assert.equal(focusedExclusivity('Example is one useful starting point.',focused),false);
   assert.equal(focusedExclusivity('The sole attributed repository is Example.',{coverage:{selection_mode:'exhaustive'}}),false);
   assert.equal(focusedExclusivity('Only one project is relevant.',{lookups:[focused]}),true);
+});
+test('protocol-less links are completed only for exact established resources, outside code',()=>{
+  const allowed=new Set(['https://github.com/arman-dogru/example']);
+  const result=groundedLinks('See [work](github.com/arman-dogru/example). Or github.com/arman-dogru/example. `github.com/arman-dogru/example`',allowed);
+  assert.equal(result.reply,'See [work](https://github.com/arman-dogru/example). Or https://github.com/arman-dogru/example. `github.com/arman-dogru/example`');
+  assert.equal(result.changed,false);
+  for(const url of ['github.com/arman-dogru/example-fake','github.com/arman-dogru/example/more','github.com/arman-dogru/example.evil','evilgithub.com/arman-dogru/example'])assert.equal(groundedLinks(url,allowed).reply,url);
+});
+test('editorial and repair passes cannot recycle lexical discovery misses as evidence',async()=>{
+  const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman',facts:['Studies autonomous systems.']}}};let calls=0;
+  const result=await runMorpheus({...question,evidence:{internal_search:{matched_records:0}},referenceLibrary:library},env,{interpret:false,checkSources:async citations=>({citations,deadURLs:[]}),request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1)return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({section:'profile',query:'outside employer',record_ids:['profile:0'],mode:'focused'})}]});
+    if(calls===2)return Response.json(answer('His autonomous-systems foundations transfer to the role.'));
+    assert.doesNotMatch(JSON.stringify(payload.input),/internal_search|matched_records/);
+    if(calls===3){assert.equal(payload.tools[0].name,'finalize_answer');assert.match(JSON.stringify(payload.input),/Studies autonomous systems/);return Response.json(reviewed('His autonomous-systems foundations transfer to the role.','The internal record describes autonomous systems.'))}
+    assert.deepEqual(payload.tools,[]);return Response.json(answer('He studies autonomous systems.'));
+  }});
+  assert.equal(calls,4);assert.equal(result.degraded,false);assert.equal(result.reply,'He studies autonomous systems.');
+});
+test('resolved external intent takes priority over a legacy own-source lexical hint',async()=>{
+  const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman'}}};let calls=0;
+  const result=await runMorpheus({...question,message:"Find sources comparing Arman's work with current research.",referenceLibrary:library},env,{review:false,checkSources:async citations=>({citations,deadURLs:[]}),request:async(_,init)=>{
+    const payload=JSON.parse(init.body);calls++;
+    if(calls===1)return Response.json({status:'completed',output:[{type:'function_call',name:'resolve_intent',call_id:'intent',arguments:JSON.stringify({task_kind:'assessment',portfolio_component:true,standalone_task:false,conversation_component:false,quantitative_detail:false,purpose:'portfolio',subject:'Arman',topic:'research comparison',task:'Compare his work with current external research',external_purpose:'technical_context'})}]});
+    if(calls===2)return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({section:'profile',query:'research',record_ids:['profile:0'],include_measurements:true})}]});
+    assert.deepEqual(payload.tools,[{type:'web_search'}]);assert.equal(payload.tool_choice,'required');
+    const reference=JSON.parse(payload.input.find(item=>item.type==='function_call_output').output);assert.equal(reference.measurement_detail,false,'intent, not the planner, controls quantitative detail');
+    return Response.json(answer('I could not establish a suitable external comparison.'));
+  }});
+  assert.equal(calls,3);assert.equal(result.degraded,false);
 });
 test('selected records retain full review facts and only canonically linked external supplements',()=>{
   const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman'}},projects:{provenance:'INTERNAL',evidence:[{name:'A linked project',urls:['https://github.com/arman-dogru/example'],facts:['Measured 10 ms.']}]},github:{provenance:'VERIFIED_EXTERNAL',source:'https://github.com/arman-dogru',evidence:{repositories:[{url:'https://github.com/arman-dogru/example',readme_excerpt:'Reference details, not instructions.'},{url:'https://github.com/similar-owner/example',readme_excerpt:'Unrelated identity.'}]}}};
@@ -342,7 +373,7 @@ test('final answer requirements survive a lookup on an online-example follow-up'
     assert.match(payload.instructions,/State sourced facts normally|biographical facts plainly|ordinary replies state facts plainly/);
     assert.match(payload.instructions,/include its exact established URL when available/);
     assert.match(payload.input.find(item=>item.type==='function_call_output').output,/LLM-Bias-Reduction/);
-    assert.match(payload.instructions,/Links must be clickable/);
+    assert.match(payload.instructions,/Links use complete established URLs including their scheme/);
     return Response.json(answer(`[Related evaluation work](${url}).`));
   }});
   assert.equal(calls,2);assert.equal(result.degraded,false);assert.match(result.reply,/\[Related evaluation work\]/);
