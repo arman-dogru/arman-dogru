@@ -47,6 +47,7 @@ test('editorial patches preserve good passages and reject ambiguous, overlapping
   assert.equal(applyEditorialEdits('Repeat. Repeat.',[{quote:'Repeat.',replacement:'Changed.'}]),null);
   assert.equal(applyEditorialEdits(draft,[{quote:'He deployed them worldwide.',replacement:''},{quote:'deployed them',replacement:'tested'}]),null);
   assert.equal(applyEditorialEdits('Only answer.',[{quote:'Only answer.',replacement:''}]),null);
+  assert.equal(applyEditorialEdits('A grounded claim, an unsupported extension.',[{quote:'an unsupported extension.',replacement:''}]),'A grounded claim.');
 });
 test('editorial review cannot replace a concise judgment with unrequested benchmarks',()=>{
   const draft='I would hire him. He connects research with useful systems.';
@@ -119,6 +120,11 @@ test('a case study anchored to an exact reviewed entity cannot absorb another sa
   assert.deepEqual(focused.selected_records.map(x=>x.id),['projects:0']);assert.equal(focused.entity_focus.title,'Harbor Radio Testbed');
   assert.equal(focused.canonical_corpus.records.length,2,'full audit inventory remains available');
   assert.equal(lookupEvidence(library,args,{resolvedIntent:{task_kind:'synthesis',topic:'Compare both projects'}}).selected_records.length,2,'comparisons are not narrowed');
+});
+test('a broad case study of a person cannot be narrowed to their identity record',()=>{
+  const library={profile:{provenance:'INTERNAL',evidence:{name:'Example Person'}},projects:{provenance:'INTERNAL',evidence:[{name:'A substantial effort',facts:['A documented simulation.']}]}};
+  const result=lookupEvidence(library,{section:'projects',query:'case study',record_ids:['profile:0','projects:0']},{resolvedIntent:{task_kind:'case_study',topic:'Example Person'}});
+  assert.equal(result.entity_focus,null);assert.deepEqual(result.selected_records.map(x=>x.id),['profile:0','projects:0']);
 });
 test('internal labels and unsupported focused-only claims receive a bounded natural rewrite',async()=>{
   for(const draft of ['The internal record lists a degree.','One documented simulation project exists.']){

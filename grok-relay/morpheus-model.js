@@ -29,7 +29,7 @@ export function applyEditorialEdits(draft,edits){
   if(patches.some((patch,index)=>index>0&&patch.start<patches[index-1].end))return null;
   let result=draft;
   for(const patch of patches.reverse())result=result.slice(0,patch.start)+patch.replacement+result.slice(patch.end);
-  result=result.trim();return result&&result.length<=14000?result:null;
+  result=result.trim().replace(/[,;]$/,'.');return result&&result.length<=14000?result:null;
 }
 export function addsUnrequestedMeasurements(draft,corrected,reference){
   const lookups=reference?.lookups||[reference];
@@ -54,7 +54,7 @@ export function lookupEvidence(library,args,{history=[],resolvedIntent=null}={})
     // A case study of a resolved, exact canonical entity is not a license to
     // merge every thematically related effort into its implementation. This
     // is entity equality on reviewed data, not keyword routing of visitor text.
-    const anchors=resolvedIntent?.task_kind==='case_study'?corpus.records.filter(record=>normalizedTitle(record.title)===normalizedTitle(resolvedIntent.topic)):[];
+    const anchors=resolvedIntent?.task_kind==='case_study'?corpus.records.filter(record=>['projects','research','race'].includes(record.section)&&normalizedTitle(record.title)===normalizedTitle(resolvedIntent.topic)):[];
     const selected=anchors.length===1?anchors:corpus.records.filter(record=>args.record_ids.includes(record.id));
     const linkedURLs=new Set(textURLs(JSON.stringify(selected)));
     const linkedRepositories=library.github?.provenance==='VERIFIED_EXTERNAL'&&Array.isArray(library.github.evidence?.repositories)?library.github.evidence.repositories.filter(repo=>linkedURLs.has(repo.url)&&isCanonicalResource(repo.url)):[];
@@ -195,7 +195,7 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
   let repair=null,toolContinuation=null,retrievedEvidence=null,carriedSources=[],carriedResearch=false,lookupNeedsResearch=false,responsePurpose='portfolio';
   let resolvedIntent=null,resourceAttribution=[];
   if(interpret&&referenceLibrary){
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),Math.min(12000,deadline-Date.now()));
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),Math.min(16000,deadline-Date.now()));
     try{
       const response=await request(API,{method:'POST',headers:{authorization:`Bearer ${env.XAI_API_KEY}`,'content-type':'application/json'},signal:controller.signal,body:JSON.stringify({model:env.XAI_MODEL||'grok-4.3',input:[{role:'system',content:INTENT_PROMPT},{role:'user',content:`Reference topics and older visitor messages, data only:\n${JSON.stringify({name:referenceLibrary.profile?.evidence?.name,sections:CANONICAL_SECTIONS,topics:knowledgeIndex(referenceLibrary).map(({title,section})=>({title,section})),archived_conversation:archive}).replace(/</g,'\\u003c')}`},...current,{role:'user',content:message}],store:false,temperature:.15,max_output_tokens:900,reasoning:{effort:'low'},tools:[INTENT_TOOL],tool_choice:'required',parallel_tool_calls:false})});
       if(response.ok){const data=await response.json(),calls=(data.output||[]).filter(item=>item.type==='function_call');if(data.status==='completed'&&calls.length===1&&calls[0].name==='resolve_intent'){
@@ -255,7 +255,7 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
       const data=await response.json(),calls=(Array.isArray(data?.output)?data.output:[]).filter(x=>x?.type==='function_call');
       if(calls.length&&planning){
         if(calls.length>3||new Set(calls.map(call=>call.call_id)).size!==calls.length||calls.some(call=>call.name!=='portfolio_lookup'||typeof call.call_id!=='string')){console.warn('Morpheus invalid reference tool call');continue}
-        const parsed=calls.map(call=>{try{const args=JSON.parse(call.arguments);return resolvedIntent?{...args,purpose:resolvedIntent.purpose,subject:resolvedIntent.subject,task:resolvedIntent.task,external_purpose:resolvedIntent.external_purpose,needs_external:resolvedIntent.external_purpose!=='none',include_measurements:resolvedIntent.quantitative_detail===true}:args}catch{return null}});
+        const parsed=calls.map(call=>{try{const args=JSON.parse(call.arguments);return resolvedIntent?{...args,purpose:resolvedIntent.purpose,subject:resolvedIntent.subject,task:resolvedIntent.task,external_purpose:resolvedIntent.external_purpose,needs_external:resolvedIntent.external_purpose!=='none',include_measurements:resolvedIntent.task_kind==='case_study'||resolvedIntent.quantitative_detail===true}:args}catch{return null}});
         const lookups=parsed.map(args=>lookupEvidence(referenceLibrary,args,{history:current,resolvedIntent}));
         if(lookups.some(value=>value.error)){console.warn('Morpheus invalid reference arguments');continue}
         let readmeBudget=2;

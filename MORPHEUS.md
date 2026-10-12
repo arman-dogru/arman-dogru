@@ -55,7 +55,7 @@ Scope follows the requested substance. A standalone exercise in Arman's name rem
 - Existing `grok-4.3`, xAI secret, allowed origins and leaderboard binding are retained.
 - Trusted instructions use a server-owned system role. Visitor history accepts only user/assistant roles.
 - Ten recent messages, 1,800 characters each; visitor messages up to 10,000 characters; request bodies up to 50 KB.
-- Overall generation budget remains 52 seconds, including a bounded intent call, at most three main attempts after successful lookup and one optional editorial call. Repair/recovery starts no new research.
+- Overall generation budget remains 52 seconds, including an intent call capped at 16 seconds, at most three main attempts after successful lookup and one optional editorial call. The intent cap leaves room for provider latency without expanding the total deadline. Repair/recovery starts no new research.
 - Editorial review is best effort under the deadline; unavailable review does not manufacture approval. The live runner records whether it completed.
 - `MORPHEUS_WEB_SEARCH=off` disables external research. No arbitrary-fetch proxy, shell, private files or authenticated browsing is exposed.
 - Existing best-effort KV limit remains 40 requests/hour/visitor. Provider spend limits and edge rate limits remain necessary hard boundaries.
