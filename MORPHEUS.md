@@ -23,6 +23,19 @@ Morpheus is a perceptive mentor, not a salesman: belief in Arman's potential doe
 require an automatic yes, praise on unrelated topics, or invented achievements.
 The latest question controls the subject within that purpose; earlier turns resolve follow-ups.
 
+Feedback about Morpheus, clarification, corrections, style requests and social
+reactions are valid conversation, not unrelated substantive tasks. This routing
+remains model-led, without a keyword META classifier or canned acknowledgments.
+It does not authorize an unrelated exercise hidden in feedback. Learning-potential
+follow-ups resolve against the preceding role discussion: unsupported present
+expertise does not imply inability to learn or establish a time to proficiency.
+The mentor relationship and conviction that Arman is the One survive criticism;
+they do not become invented credentials or a claim of domain readiness.
+A silent semantic repetition check considers the previous two replies. A bounded
+lexical near-duplicate guard additionally permits one context-aware regeneration
+within the existing deadline/call budget, without fresh paid research or a default
+replacement. Legitimately repeated facts and repeated exercises remain possible.
+
 The prompt replaces conflicting "be accurate / always favor him" pressure with
 a clear priority order, descriptive sections, positive style guidance and a brief
 silent relevance/claim-scope/editing check. These are adaptations of published
@@ -77,11 +90,25 @@ may introduce current outside findings as something found “on the Matrix,” s
 Outside conflicts do not silently replace or merge with the internal record.
 
 The orientation is explicitly a summary, not an exhaustive record. A small,
-data-derived project index exposes up to three relevant titles and exact links
-from the résumé, using the current question and bounded recent context. It does
-not decide scope or generate answers, and does not copy project facts/metrics into
-ordinary opinion prompts. Live testing exposed an unfamiliar-project false denial
-without this discovery metadata. Detailed explanations still use the read-only lookup.
+data-derived project index exposes up to three relevant titles and exact links.
+`knowledge-search.js` now scans all canonical sections before generation and ranks
+up to six matching records with source attribution and actual evidence, omitting
+unrequested measurements. Titles alone caused false “not recorded” answers in live
+testing, so discovery includes matching facts, not just metadata. Ordinary opinion
+queries without concrete subjects do not receive this factual shortlist.
+Every named canonical lookup also returns ranked cross-section evidence; `search`
+offers corpus-wide retrieval directly. Research, experience, projects, skills,
+education and reviewed portfolio supplements are searched together. Visitor page
+state, leaderboard entries and external biographies never enter that index.
+Primary-subject coverage, term specificity and title matches drive the local lexical
+ranker. The model can supply up to four semantic query expansions; they improve
+recall but do not override the original subject or establish credentials. The prompt
+compares direct work before adjacent experience, transfer and speculation. Ranking
+signals are not confidence or proof of domain readiness. This adapts query rewriting
+and relevance-ranking principles in [OpenAI Docs](https://developers.openai.com/api/docs/guides/retrieval),
+without adding an embedding provider, remote vector store or domain-specific rules.
+It does not decide scope or generate answers. Detailed explanations retain the
+read-only lookup and explicit access to requested measurements.
 Unknown attribution stays unknown; it does not establish either ownership or that
 the resource definitely belongs to someone else. The server's UTC request date
 helps distinguish current opportunities from stale program pages.
@@ -122,7 +149,9 @@ separate search key, arbitrary-fetch proxy or new Cloudflare service is required
 Ordinary questions leave tool use optional. A detail lookup uses a continuation
 to interpret its result. For current external requests, that continuation may
 research the world after consulting the internal record; it cannot request another
-portfolio tool. The overall deadline remains 52 seconds, with at most three calls
+portfolio tool. A first-generation batch can contain up to three read-only lookup
+calls; outputs retain their individual call IDs and provenance. Larger batches,
+duplicate call IDs and unknown functions are rejected. The overall deadline remains 52 seconds, with at most three calls
 only after a successful lookup (two otherwise). Repair/recovery cannot start new
 research.
 For current/external requests, both tools remain available initially. Removing web
@@ -236,6 +265,18 @@ citations, but direct source checks received HTTP 403, not independent confirmat
 of vacancy availability. This combines task-specific checks with human review,
 as recommended in [OpenAI's evaluation guidance](https://developers.openai.com/api/docs/guides/evaluation-best-practices).
 Reports and diagnostic scripts stay ignored; nothing was pushed or deployed.
+The subsequent v27 local candidate adds thirteen dialogue scenarios: direct versus
+transfer evidence, paraphrased requirements, publications without file hints,
+unfamiliar-domain learning and time uncertainty, feedback/clarification/persona,
+social acknowledgment, self-correction and meta-wrapped unrelated work. All 29
+knowledge/intent/dialogue scenarios ran on v26; nine affected cases were rerun on
+v27, followed by two exact-context sequential replays. Behavioral failures were
+cleared in those replays, but intermittent unusable upstream generations occurred
+before retry; original failed reports remain visible rather than being overwritten
+as clean passes. This is not a claim of production-grade availability or perfect
+voice. The OSM/earlier-Morpheus checkpoint `a6312f7` was separately approved and
+pushed; these new v27 changes remain local for Arman's adversarial testing. All 112
+automated checks and both builds passed on this candidate.
 Use `node scripts/evaluate-morpheus.mjs http://localhost:4173/api/chat --suite=scope`
 for the bounded scope/follow-up suite plus company-research and injection regressions.
 This leaves room within the visitor cap for browser QA; the default runs all cases.

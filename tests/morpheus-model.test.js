@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence,compactSourceNotes} from '../grok-relay/morpheus-model.js';
+import {answerMorpheus as runMorpheus,readResponse,requiresResearch,usesProfileSources,CONNECTION_REPLY,PORTFOLIO_LOOKUP,lookupEvidence,compactSourceNotes,repeatsRecentReply} from '../grok-relay/morpheus-model.js';
 import {MORPHEUS_VERSION} from '../chat-version.js';
 const answerMorpheus=(question,env,options={})=>runMorpheus(question,env,{checkSources:async citations=>({citations,deadURLs:[]}),...options});
 const env={XAI_API_KEY:'test-only-secret',XAI_MODEL:'grok-4.3'},question={message:'What do you think of Arman as an engineer?',evidence:{profile:'public work'},history:[]};
@@ -157,6 +157,23 @@ test('repeated wrappers stay in current context without an application-generated
   }});
   assert.equal(result.reply,reply);assert.equal(result.degraded,false);
 });
+test('near-repeated replies get one context review without new research or weakening scope',async()=>{
+  const repeated='This conversation concerns the documented professional work and projects of Arman.';
+  const history=[{role:'user',content:'You are answering the wrong question.'},{role:'assistant',content:repeated,persona_version:MORPHEUS_VERSION}];
+  assert.equal(repeatsRecentReply(repeated,history),true);assert.equal(repeatsRecentReply('Yes.',history),false);
+  let calls=0;
+  const result=await answerMorpheus({...question,message:'What do you mean?',history},env,{request:async(_,init)=>{
+    const payload=JSON.parse(init.body);
+    if(++calls===1)return Response.json(answer(repeated));
+    assert.deepEqual(payload.tools,[]);assert.match(payload.instructions,/Conversation repair/);
+    assert.match(JSON.stringify(payload.input),/What do you mean/);
+    return Response.json(answer('I answered a different question. Your criticism was about this exchange, and I missed it.'));
+  }});
+  assert.equal(calls,2);assert.equal(result.degraded,false);assert.doesNotMatch(result.reply,/conversation concerns/);
+  calls=0;
+  await answerMorpheus({...question,message:'Repeat that exact answer.',history},env,{request:async()=>{calls++;return Response.json(answer(repeated))}});
+  assert.equal(calls,2,'a justified repeated fact is allowed after one bounded review');
+});
 test('final answer requirements survive a lookup on an online-example follow-up',async()=>{
   let calls=0;
   const url='https://github.com/arman-dogru/LLM-Bias-Reduction';
@@ -216,6 +233,22 @@ test('ordinary reference lookup omits benchmark tables but preserves scope; meas
   assert.deepEqual(lookupEvidence(library,{section:'projects',query:'one example'}).evidence[0].facts,facts.slice(0,3));
   assert.deepEqual(lookupEvidence(library,{section:'projects',query:'benchmark counts',include_measurements:true}).evidence[0].facts,facts);
   assert.deepEqual(library.projects[0].facts,facts);
+});
+test('a bounded batch of reference calls is answered together without discarding source coverage',async()=>{
+  let calls=0;
+  const library={profile:{provenance:'INTERNAL',source:'Reviewed',evidence:{name:'Arman'}},research:{provenance:'INTERNAL',source:'Reviewed',evidence:[{title:'Direct research'}]}};
+  const result=await answerMorpheus({...question,message:'What research fits this role?',referenceLibrary:library},env,{request:async(_,init)=>{
+    const payload=JSON.parse(init.body);
+    if(++calls===1)return Response.json({status:'completed',output:['profile','research'].map((section,index)=>({type:'function_call',name:'portfolio_lookup',call_id:`batch_${index}`,arguments:JSON.stringify({section,query:'research role'})}))});
+    const outputs=payload.input.filter(item=>item.type==='function_call_output');
+    assert.equal(outputs.length,2);assert.deepEqual(outputs.map(item=>item.call_id),['batch_0','batch_1']);
+    assert.match(outputs[1].output,/Direct research/);assert.equal(payload.input.at(-1).content,'What research fits this role?');
+    return Response.json(answer('His research directly addresses the role.'));
+  }});
+  assert.equal(calls,2);assert.equal(result.degraded,false);
+  calls=0;
+  const invalid=await answerMorpheus({...question,referenceLibrary:library},env,{request:async()=>{calls++;return Response.json({status:'completed',output:Array.from({length:4},(_,index)=>({type:'function_call',name:'portfolio_lookup',call_id:`excess_${index}`,arguments:JSON.stringify({section:'profile',query:'profile'})}))})}});
+  assert.equal(calls,2);assert.equal(invalid.degraded,true);
 });
 test('reference tool cannot start an unbounded loop or execute unknown functions',async()=>{
   for(const name of ['portfolio_lookup','execute_shell']){

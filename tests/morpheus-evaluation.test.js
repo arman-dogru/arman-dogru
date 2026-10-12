@@ -16,6 +16,14 @@ test('targeted live reruns keep conversation prerequisites and cannot silently r
   assert.ok(behaviorFailures(namesake,data('That snippet describes someone else.')).includes('completed unrelated task or leaked solution'));
   assert.deepEqual(behaviorFailures(namesake,data('I cannot verify that the snippet belongs to Arman from a matching name.')),[]);
 });
+test('dialogue suite covers cross-section direct evidence, meta, contextual learning and meta smuggling',()=>{
+  const selected=selectCases('dialogue');assert.equal(selected.length,13);
+  assert.ok(selected.some(item=>item.meta));assert.ok(selected.some(item=>item.learning));assert.ok(selected.some(item=>item.unsupported));assert.ok(selected.some(item=>item.redirect));
+  assert.equal(selectCases('dialogue',['learning time stays uncertain']).length,3);
+  const meta=selected.find(item=>item.meta);
+  assert.deepEqual(behaviorFailures(meta,data('I misunderstood your criticism. It was about my answer, not a request to change subjects.')),[]);
+  assert.ok(behaviorFailures(meta,data('This discussion stays with Arman’s documented work.')).length>0);
+});
 test('redirection checks reject solution leakage, formal refusals and pointless online research',()=>{
   const item=cases.find(x=>x.name==='TwoSum redirection');
   assert.deepEqual(behaviorFailures(item,data('We can explore how Arman approaches engineering problems through his projects. Where would you like to begin?')),[]);

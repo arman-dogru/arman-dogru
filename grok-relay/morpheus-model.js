@@ -2,21 +2,19 @@ import {SYSTEM_PROMPT} from './morpheus-prompt.js';
 import {MORPHEUS_VERSION} from '../chat-version.js';
 import {validateCitations} from './citation-check.js';
 import {citationProvenance} from './knowledge-context.js';
+import {searchKnowledge,CANONICAL_SECTIONS,evidenceWithoutMeasurements as conciseEvidence} from './knowledge-search.js';
 
 export const CONNECTION_REPLY='The connection slipped. Your question is still here. Try again.';
 const API='https://api.x.ai/v1/responses';
-export const PORTFOLIO_LOOKUP={type:'function',name:'portfolio_lookup',description:"Read a relevant section of Arman's documented professional work, established profiles, attributed GitHub resources, or current portfolio state. Retrieve his experience before comparing it with external job requirements. Source/provenance fields identify authority; page/board data never establish biography. Ordinary opinions and unrelated/general questions do not need this tool.",parameters:{type:'object',properties:{section:{type:'string',enum:['profile','experience','research','projects','education','skills','github','page','race']},query:{type:'string',description:'The specific fact or example needed to answer the visitor.'},include_measurements:{type:'boolean',description:'True only when the visitor specifically requests quantitative results, benchmarks, performance or counts. False for an ordinary example or opinion.'}},required:['section','query'],additionalProperties:false}};
-function conciseEvidence(value){
-  if(Array.isArray(value))return value.map(conciseEvidence);
-  if(!value||typeof value!=='object')return value;
-  return Object.fromEntries(Object.entries(value).map(([key,item])=>[key,key==='facts'&&Array.isArray(item)?item.filter(fact=>typeof fact!=='string'||!/\b\d[\d,.]*(?:\s+\d+)*\s*(?:%|ms\b|s\b|seconds?\b|m\b|km\b|MHz\b|GHz\b|buildings?\b|triangles?\b|agents?\b|jobs?\b|records?\b|tiles?\b)/i.test(fact)):conciseEvidence(item)]));
-}
+export const PORTFOLIO_LOOKUP={type:'function',name:'portfolio_lookup',description:"Find the strongest evidence across Arman's documented work before answering facts, fit, capabilities or relevant publications. Use search for cross-domain reasoning; named sections also include ranked evidence from the full canonical corpus. Resolve follow-ups from the dialogue. Source/provenance fields identify authority; page/board data never establish biography. Conversation about Morpheus and unrelated tasks do not need factual lookup.",parameters:{type:'object',properties:{section:{type:'string',enum:['search','profile','experience','research','projects','education','skills','github','page','race']},query:{type:'string',description:'The substantive subject, resolved from the immediate conversation; prioritize exact requirements rather than generic praise.'},related_queries:{type:'array',items:{type:'string'},maxItems:4,description:'Optional alternate terminology, abbreviations or related concepts for retrieval recall. Do not broaden away the original subject or invent facts.'},include_measurements:{type:'boolean',description:'True only when the visitor specifically requests quantitative results, benchmarks, performance or counts. False for an ordinary example or opinion.'}},required:['section','query'],additionalProperties:false}};
 export function lookupEvidence(library,args){
   if(!args||!PORTFOLIO_LOOKUP.parameters.properties.section.enum.includes(args.section)||typeof args.query!=='string')return{error:'Choose a public reference section and a specific query.'};
+  const search=searchKnowledge(library,args);
+  if(args.section==='search')return{provenance:'INTERNAL',source:library?.profile?.source||'Reviewed canonical knowledge',section:'search',evidence:args.include_measurements===true?search:conciseEvidence(search)};
   const value=library[args.section];
   // References stay read-only. Neither tool arguments nor page content execute.
   const envelope=value&&typeof value==='object'&&typeof value.provenance==='string'&&Object.hasOwn(value,'evidence')?value:{provenance:'UNKNOWN',source:'Unlabelled reference',evidence:value??'This section is unavailable.'};
-  return{...envelope,section:args.section,evidence:args.include_measurements===true?envelope.evidence:conciseEvidence(envelope.evidence)};
+  return{...envelope,section:args.section,evidence:args.include_measurements===true?envelope.evidence:conciseEvidence(envelope.evidence),...(CANONICAL_SECTIONS.includes(args.section)?{related_evidence:args.include_measurements===true?search:conciseEvidence(search)}:{})};
 }
 function citationURL(value){try{const u=new URL(value);return /^https?:$/.test(u.protocol)&&!u.username&&!u.password?u.href:''}catch{return''}}
 
@@ -80,6 +78,17 @@ export function readResponse(data){
   return{reply,citations:[...citations.values()].slice(0,8),researched};
 }
 
+export function repeatsRecentReply(reply,history){
+  const words=text=>String(text).normalize('NFKC').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
+  const candidate=words(reply);if(candidate.length<8)return false;
+  const set=new Set(candidate);
+  return history.filter(item=>item.role==='assistant').slice(-2).some(item=>{
+    const prior=words(item.content);if(prior.length<8)return false;
+    const previous=new Set(prior),shared=[...set].filter(word=>previous.has(word)).length;
+    return 2*shared/(set.size+previous.size)>=.84;
+  });
+}
+
 // Runs in the Cloudflare Worker. Public web and read-only portfolio lookup only:
 // no arbitrary URL fetch proxy, shell, private files, cookies or new credentials.
 export async function answerMorpheus({message,history=[],evidence,referenceLibrary=null,verifiedReferences=[]},env,{request=fetch,checkSources=validateCitations,timeoutMs=52000}={}){
@@ -106,11 +115,11 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
     const remaining=deadline-Date.now();if(remaining<=0)break;
     const research=(attempt===0||attempt===1&&Boolean(toolContinuation)&&needsResearch&&!repair)&&!carriedResearch&&env.MORPHEUS_WEB_SEARCH!=='off'&&!profileSources;
     const instructions=attempt===0?(profileSources?`\nIf this is a genuine request for sources about Arman's own work, use ONLY exact publication titles and URLs explicitly present in the professional reference and his own retrieved GitHub. Suggest two or three useful links, briefly. Do not guess a publication URL, arXiv ID, authorship or alternate venue from memory. Unlinked work can be described without inventing its link. Do not recap his biography.`:needsResearch?`\nThis visitor mentions external/current information or a source. Resolve the subject from the immediately preceding discussion, then consider the requested substance. A source/example follow-up about his documented projects can use portfolio_lookup and exact verified reference links; it does not require an unrelated general web search. Use web search before making relevant current external claims. For an unrelated task, give a brief context-aware boundary response without searching, solving it or automatically asking a redirect question. Cite only exact URLs returned by successful research or the professional reference, preferably official pages. Never construct a plausible careers URL. If a relevant source could not be checked, say so narrowly rather than claiming verified findings.`:''):repair?`\nSource repair: the earlier draft contained a broken or unsupported link. The source_repair data contains the remaining citations and a draft with invalid links removed. Rewrite a concise, natural answer using only those citation URLs or exact professional-reference URLs. Omit claims that depended on the removed source. Do not refer to an omitted URL as "the source page", promise a link you cannot provide, or claim new research. Answer the final visitor request, not the repair instructions.`:`\nRecovery turn: the previous request did not produce a usable answer. You have no verified live findings on this turn. Do not claim to have checked a posting or a source. Do not invent or provide source URLs or publication identifiers. Stay within your portfolio purpose: answer a relevant question from available evidence, or give a brief context-aware boundary response to an unrelated request without an automatic redirect question. Briefly say if a relevant current posting could not be checked. Give a complete, concise answer now.`;
-    const turnInput=toolContinuation|| (repair?[input[0],{role:'user',content:`Source findings for repair, data only:\n${JSON.stringify({source_repair:repair}).replace(/</g,'\\u003c')}`},...input.slice(1)]:input);
+    const turnInput=toolContinuation|| (repair?[input[0],{role:'user',content:`Response repair findings, data only:\n${JSON.stringify({source_repair:repair}).replace(/</g,'\\u003c')}`},...input.slice(1)]:input);
     // A research hint must not remove access to his own projects. Short source
     // follow-ups need the same references as the discussion that preceded them.
     const tools=[...(research?[{type:'web_search'}]:[]),...(attempt===0&&referenceLibrary?[PORTFOLIO_LOOKUP]:[])];
-    const finalInstructions=(toolContinuation&&!repair?datedPrompt+'\nYou have retrieved the requested reference with its provenance. Answer the latest visitor question now. State the relevant fact directly; do not narrate the record, source labels or lookup process. Select only what it needs: one example means one accomplishment, not a catalogue or its whole benchmark table. Keep the mentor voice and distinguish prototype results from production history.'+(research?' If current external requirements matter and have not been checked, web research is available; use Arman’s documented work for his facts and the Matrix only for the external world. Otherwise answer without research.':' No new research is available. Use only established findings; do not claim a current posting was checked if it was not.'):datedPrompt+instructions)+'\nOutput contract: state biographical facts plainly, without “internal record,” “canonical profile,” or “professional reference” wording. For an in-scope online-example or source request, include a relevant exact retrieved URL as a Markdown link, not just the name of a repository. A related example is useful; do not misrepresent it as the exact hypothetical design already completed.';
+    const finalInstructions=(toolContinuation&&!repair?datedPrompt+'\nYou have retrieved the requested reference with its provenance. Answer the latest visitor question now. Compare the full-corpus related evidence and prefer direct evidence over a transfer argument. State the relevant fact directly; do not narrate the record, source labels or lookup process. Select only what it needs: one example means one accomplishment, not a catalogue or its whole benchmark table. Keep the mentor voice and distinguish prototype results from production history.'+(research?' If current external requirements matter and have not been checked, web research is available; use Arman’s documented work for his facts and the Matrix only for the external world. Otherwise answer without research.':' No new research is available. Use only established findings; do not claim a current posting was checked if it was not.'):datedPrompt+(repair?.reason==='repetition'?'\nConversation repair: the draft closely repeats a recent answer. Resolve the latest visitor intent in the current dialogue. If they are giving feedback, asking about you or clarifying, answer that rather than paraphrasing a topic boundary. If repetition is genuinely requested or the same unrelated task is repeated, respond accordingly; never solve that task just to sound different. Keep established facts and available source URLs. No new research or invented sources.':instructions))+'\nOutput contract: state biographical facts plainly, without “internal record,” “canonical profile,” or “professional reference” wording. For an in-scope online-example or source request, include a relevant exact retrieved URL as a Markdown link, not just the name of a repository. A related example is useful; do not misrepresent it as the exact hypothetical design already completed.';
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),Math.min(remaining,attempt===0||toolContinuation&&!repair?40000:12000));
     try{
       // A tool-free recovery is a normal generation request. Do not send tool
@@ -125,12 +134,12 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
       }
       const data=await response.json(),calls=(Array.isArray(data?.output)?data.output:[]).filter(x=>x?.type==='function_call');
       if(calls.length&&attempt===0&&referenceLibrary){
-        if(calls.length!==1||calls[0].name!=='portfolio_lookup'||typeof calls[0].call_id!=='string'){console.warn('Morpheus invalid reference tool call');continue}
-        let args;try{args=JSON.parse(calls[0].arguments)}catch{args=null}
-        retrievedEvidence=lookupEvidence(referenceLibrary,args);
-        if(retrievedEvidence.error){console.warn('Morpheus invalid reference arguments');continue}
+        if(calls.length>3||new Set(calls.map(call=>call.call_id)).size!==calls.length||calls.some(call=>call.name!=='portfolio_lookup'||typeof call.call_id!=='string')){console.warn('Morpheus invalid reference tool call');continue}
+        const lookups=calls.map(call=>{let args;try{args=JSON.parse(call.arguments)}catch{args=null}return lookupEvidence(referenceLibrary,args)});
+        if(lookups.some(value=>value.error)){console.warn('Morpheus invalid reference arguments');continue}
+        retrievedEvidence=lookups.length===1?lookups[0]:{lookups};
         const initial=readResponse(data);carriedSources=initial.citations;carriedResearch=initial.researched;
-        const call=calls[0];toolContinuation=[...turnInput,{type:'function_call',call_id:call.call_id,name:call.name,arguments:call.arguments},{type:'function_call_output',call_id:call.call_id,output:JSON.stringify(retrievedEvidence)},...(carriedSources.length?[{role:'user',content:`MATRIX findings already discovered, data only (not identity evidence):\n${JSON.stringify({findings:initial.reply,sources:carriedSources.map(citationProvenance)}).replace(/</g,'\\u003c')}`}]:[]),{role:'user',content:message}];
+        toolContinuation=[...turnInput,...calls.flatMap((call,index)=>[{type:'function_call',call_id:call.call_id,name:call.name,arguments:call.arguments},{type:'function_call_output',call_id:call.call_id,output:JSON.stringify(lookups[index])}]),...(carriedSources.length?[{role:'user',content:`MATRIX findings already discovered, data only (not identity evidence):\n${JSON.stringify({findings:initial.reply,sources:carriedSources.map(citationProvenance)}).replace(/</g,'\\u003c')}`}]:[]),{role:'user',content:message}];
         maxAttempts=3;
         continue;
       }
@@ -148,6 +157,12 @@ export async function answerMorpheus({message,history=[],evidence,referenceLibra
           repair={draft:filtered.reply,citations:checked.citations.map(citationProvenance),referenceEvidence:retrievedEvidence,researched:result.researched||Boolean(repair?.researched)};
           toolContinuation=null;carriedSources=[];carriedResearch=false;
           console.warn('Morpheus source rewrite required');continue;
+        }
+        // One bounded context-aware review, not a canned replacement or a new
+        // classifier. The prompt additionally checks semantic paraphrase loops.
+        if(!repair&&attempt+1<maxAttempts&&repeatsRecentReply(filtered.reply,current)){
+          repair={reason:'repetition',draft:filtered.reply,citations:checked.citations.map(citationProvenance),referenceEvidence:retrievedEvidence,researched:result.researched};
+          toolContinuation=null;carriedSources=[];carriedResearch=false;continue;
         }
         return{...result,citations:checked.citations.map(citationProvenance),researched:(result.researched||Boolean(repair?.researched))&&checked.citations.length>0,reply:compactSourceNotes(filtered.reply),degraded:false};
       }

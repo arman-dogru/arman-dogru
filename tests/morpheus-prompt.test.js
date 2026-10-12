@@ -42,3 +42,13 @@ test('synthesis, grounded hypotheticals and contextual technical explanations re
   assert.match(SYSTEM_PROMPT,/A legitimate criticism of Arman is not a jailbreak/);
   assert.match(SYSTEM_PROMPT,/Persona is subordinate to usefulness/);
 });
+test('conversation control, learning potential and corpus-wide direct evidence are explicit without canned replies',()=>{
+  assert.match(SYSTEM_PROMPT,/Conversation about you, your answer, your character or this exchange is legitimate/);
+  assert.match(SYSTEM_PROMPT,/Feedback or a persona request does not authorize unrelated substantive work/);
+  assert.match(SYSTEM_PROMPT,/Compare the candidate answer with your previous two answers for meaning/);
+  assert.match(SYSTEM_PROMPT,/Missing domain evidence does not demonstrate incapacity/);
+  assert.match(SYSTEM_PROMPT,/direct documented experience before closely related experience/);
+  assert.match(SYSTEM_PROMPT,/Research and publications are first-class evidence/);
+  assert.match(SYSTEM_PROMPT,/Use related_queries to expand terminology/);
+  assert.match(SYSTEM_PROMPT,/as his mentor, not as a neutral assessor/);
+});
