@@ -23,12 +23,12 @@ export const JOURNEY = [
 ];
 
 export const PROJECTS = [
-  {alias:'sionna',name:'Ottawa Sionna RT Cellular Digital Twin',tag:'DIGITAL TWIN / RF',stack:'Python · Sionna RT · CUDA · FastAPI · React',url:'https://github.com/arman-dogru/Sionna_Canada_Testbed',desc:'Outdoor cellular propagation twin using public Ottawa geometry, terrain, spectrum-site data, GPU ray tracing, APIs, and a browser engineering UI.'},
-  {alias:'skate',name:'Skate 3 Rust — macOS Apple Silicon',tag:'SYSTEMS / GRAPHICS',stack:'Rust · Bevy · SDL3 · Metal',url:'https://github.com/arman-dogru/skate3-rust-MacOS',desc:'ARM64 macOS port/continuation of the open-source Skate 3 Rust Engine with native CI and Metal rendering.'},
-  {alias:'gsanet',name:'GSANet-DCNN',tag:'COMPUTER VISION',stack:'PyTorch · RAFT · Slot Attention · Transformers',url:'https://github.com/arman-dogru/GSANet-DCNN',desc:'Guided slot-attention architecture for unsupervised video object segmentation across spatial, temporal, and optical-flow features.'},
-  {alias:'mendel',name:'Developer Performance Tracker',tag:'AGENTIC AI / DEVTOOLS',stack:'React · Node.js · MongoDB · GitHub APIs · LLMs',url:'https://github.com/arman-dogru/ai-powered-developer-productivity-dashboard',desc:'LLM-assisted GitHub analytics, automated PR review, developer analysis, and productivity dashboards.'},
-  {alias:'pixel',name:'One-Pixel Adversarial Attack',tag:'ROBUSTNESS / ML',stack:'TensorFlow · Keras · Differential Evolution',url:'https://github.com/arman-dogru/one-pixel-attack-2025',desc:'Black-box adversarial attacks against image classifiers using differential evolution.'},
-  {alias:'bias',name:'LLM Bias Reduction',tag:'LLM SAFETY / FAIRNESS',stack:'Python · LLMs · Fair-SMOTE · SVM',url:'https://github.com/arman-dogru/LLM-Bias-Reduction',desc:'Fairness evaluation and bias-reduction experiments across LLM and traditional classifiers.'}
+  {alias:'sionna',name:'Ottawa Sionna RT Cellular Digital Twin',tag:'DIGITAL TWIN / RF',stack:'Python · Sionna RT · CUDA · FastAPI · React',url:'https://github.com/arman-dogru/Sionna_Canada_Testbed',desc:'Tracing cellular signals through Ottawa with NVIDIA Sionna RT.'},
+  {alias:'skate',name:'Skate 3 Rust — macOS Apple Silicon',tag:'SYSTEMS / GRAPHICS',stack:'Rust · Bevy · SDL3 · Metal',url:'https://github.com/arman-dogru/skate3-rust-MacOS',desc:'Bringing the open-source Skate 3 Rust Engine to native ARM64 macOS.'},
+  {alias:'gsanet',name:'GSANet-DCNN',tag:'COMPUTER VISION',stack:'PyTorch · RAFT · Slot Attention · Transformers',url:'https://github.com/arman-dogru/GSANet-DCNN',desc:'Separating objects in video with guided slot attention.'},
+  {alias:'mendel',name:'Developer Performance Tracker',tag:'AGENTIC AI / DEVTOOLS',stack:'React · Node.js · MongoDB · GitHub APIs · LLMs',url:'https://github.com/arman-dogru/ai-powered-developer-productivity-dashboard',desc:'GitHub analytics and pull-request review with LLMs.'},
+  {alias:'pixel',name:'One-Pixel Adversarial Attack',tag:'ROBUSTNESS / ML',stack:'TensorFlow · Keras · Differential Evolution',url:'https://github.com/arman-dogru/one-pixel-attack-2025',desc:'Seeing how much a single pixel can change an image classifier’s answer.'},
+  {alias:'bias',name:'LLM Bias Reduction',tag:'LLM SAFETY / FAIRNESS',stack:'Python · LLMs · Fair-SMOTE · SVM',url:'https://github.com/arman-dogru/LLM-Bias-Reduction',desc:'Exploring fairness and bias reduction in LLMs and classifiers.'}
 ];
 
 export const RESEARCH = [
