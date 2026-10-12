@@ -77,7 +77,7 @@ test('editorial and repair passes cannot recycle lexical discovery misses as evi
   const library={profile:{provenance:'INTERNAL',evidence:{name:'Arman',facts:['Studies autonomous systems.']}}};let calls=0;
   const result=await runMorpheus({...question,evidence:{internal_search:{matched_records:0}},referenceLibrary:library},env,{interpret:false,checkSources:async citations=>({citations,deadURLs:[]}),request:async(_,init)=>{
     const payload=JSON.parse(init.body);calls++;
-    if(calls===1)return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({section:'profile',query:'outside employer',record_ids:['profile:0'],mode:'focused'})}]});
+    if(calls===1){assert.doesNotMatch(JSON.stringify(payload.input),/internal_search|matched_records/);return Response.json({status:'completed',output:[{type:'function_call',name:'portfolio_lookup',call_id:'facts',arguments:JSON.stringify({section:'profile',query:'outside employer',record_ids:['profile:0'],mode:'focused'})}]})}
     if(calls===2)return Response.json(answer('His autonomous-systems foundations transfer to the role.'));
     assert.doesNotMatch(JSON.stringify(payload.input),/internal_search|matched_records/);
     if(calls===3){assert.equal(payload.tools[0].name,'finalize_answer');assert.match(JSON.stringify(payload.input),/Studies autonomous systems/);return Response.json(reviewed('His autonomous-systems foundations transfer to the role.','The internal record describes autonomous systems.'))}
