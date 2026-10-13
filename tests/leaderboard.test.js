@@ -44,3 +44,48 @@ test('legacy local results migrate and malformed offline results are not falsely
   const client=createLeaderboard({storage,request:async()=>{throw new Error('offline')}});assert.equal(client.pending,1);assert.equal(client.rows()[0].display_name,result.display_name);
   assert.equal((await client.save({...result,elapsed_ms:0})).ok,false);
 });
+test('a recoverable reset clears legacy and entry scores without deleting unrelated data',async()=>{
+  const env=environment(),old={...result,score:700000,created_at:'2025-01-01T00:00:00.000Z'};
+  await env.LEADERBOARD.put('race:istanbul:v4',JSON.stringify([old]));
+  await env.LEADERBOARD.put('race:istanbul:v4:entry:old',JSON.stringify(old));
+  await env.LEADERBOARD.put('chat-rate:untouched','7');
+  await env.LEADERBOARD.put('race:istanbul:v4:reset-at','2026-01-01T00:00:00.000Z');
+  const response=await worker.fetch(new Request('http://localhost:4173/leaderboard'),env,{}),data=await response.json();
+  assert.deepEqual(data.entries,[]);assert.equal(data.reset_at,'2026-01-01T00:00:00.000Z');
+  const svg=await worker.fetch(new Request('http://localhost:4173/leaderboard.svg'),env,{});
+  assert.doesNotMatch(await svg.text(),/Test Driver/);
+  assert.equal(await env.LEADERBOARD.get('chat-rate:untouched'),'7');
+  await env.LEADERBOARD.put('race:istanbul:v4:reset-at','');
+  assert.equal((await(await worker.fetch(new Request('http://localhost:4173/leaderboard'),env,{})).json()).entries.length,1,'reset is reversible');
+});
+test('confirmed browser rows and old pending rows cannot resurrect a cleared board',async()=>{
+  const storage=memory(),old={...result,score:700000,created_at:'2025-01-01T00:00:00.000Z'};
+  storage.setItem('arman.raceResults.v5',JSON.stringify([old,{...old,display_name:'Pending Driver',pending:true},{...result,display_name:'Legacy Driver',score:700000}]));
+  storage.setItem('arman.raceBest.istanbul-park-v4','700000');
+  let stale=false;
+  const client=createLeaderboard({storage,endpoint:()=>'/leaderboard',request:async()=>Response.json(stale?{entries:[old],configured:true}:{entries:[],reset_at:'2026-01-01T00:00:00.000Z',configured:true})});
+  assert.deepEqual(await client.load(),[]);assert.equal(client.pending,0);
+  stale=true;assert.deepEqual(await client.load(),[],'a stale edge response cannot undo an observed reset');
+  assert.equal(storage.getItem('arman.raceBest.istanbul-park-v4'),'700000');
+});
+test('new confirmed scores survive a stale board read but do not bypass a later reset',async()=>{
+  const env=environment(),storage=memory();let stale=false;
+  const client=createLeaderboard({storage,endpoint:()=>'/leaderboard',request:async(url,init={})=>stale?Response.json({entries:[],configured:true}):worker.fetch(new Request('http://localhost:4173'+url,init),env,{})});
+  const saved=await client.save(result);assert.equal(saved.pending,false);
+  assert.ok(JSON.parse(storage.getItem('arman.raceResults.v5'))[0].created_at,'retain the server receipt timestamp');
+  stale=true;assert.equal((await client.load())[0].display_name,result.display_name);
+  stale=false;await env.LEADERBOARD.put('race:istanbul:v4:reset-at',new Date(Date.now()+1000).toISOString());
+  assert.deepEqual(await client.load(),[]);
+});
+test('new submissions are accepted after a reset and return the reset with their receipt',async()=>{
+  const env=environment();await env.LEADERBOARD.put('race:istanbul:v4:reset-at','2026-01-01T00:00:00.000Z');
+  const client=createLeaderboard({storage:memory(),endpoint:()=>'/leaderboard',request:(url,init={})=>worker.fetch(new Request('http://localhost:4173'+url,init),env,{})});
+  assert.equal((await client.save(result)).pending,false);assert.equal((await client.load()).length,1);
+});
+test('an incomplete or mismatched server receipt is not reported as globally saved',async()=>{
+  for(const entry of [undefined,{...result,score:1,created_at:new Date().toISOString()}]){
+    const client=createLeaderboard({storage:memory(),endpoint:()=>'/leaderboard',request:async()=>Response.json({ok:true,entries:[],entry})});
+    const saved=await client.save(result);assert.equal(saved.pending,true);assert.equal(client.status,'offline');
+    assert.match(saved.error,/did not confirm/);
+  }
+});
